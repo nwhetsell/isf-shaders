@@ -126,8 +126,7 @@
 
         }
     ]
-}
-*/
+}*/
 
 // The default light parameters are:
 //   lightRadius = length(vec3(1, 1, 2)) = sqrt(1 + 1 + 2 * 2) = sqrt(6) ≈ 2.4494897428
