@@ -170,8 +170,7 @@
 
         }
     ]
-}
-*/
+}*/
 
 // These are also interesting defaults on the ISF website:
 //   simulationSpeed: 0.19
