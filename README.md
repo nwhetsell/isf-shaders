@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="456" alt="Screenshot" src="https://github.com/user-attachments/assets/a5221dcd-044a-49b3-b1a3-f7fa70272bb0" />
+</p>
+
 This is an [ISF shader](https://isf.video) for single-pass computational fluid
 dynamics, converted from
 [this ShaderToy shader](https://www.shadertoy.com/view/MsGSRd) by
