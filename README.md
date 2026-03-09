@@ -3,10 +3,10 @@
 </p>
 
 This is an [ISF shader](https://isf.video) for a fake fluid dynamical system
-that creates viscous-fingering–like flow patterns and suturing along boundaries.
-This particular shader is converted from
-[this ShaderToy shader](https://www.shadertoy.com/view/XddSRX). The above
-screenshot is from [Videosync](https://videosync.showsync.com).
+that creates viscous-fingering–like flow patterns and suturing along boundaries,
+converted from
+[this ShaderToy shader](https://www.shadertoy.com/view/XddSRX). The screenshot
+is from [Videosync](https://videosync.showsync.com).
 
 This is a multi-pass shader that is intended to be used with floating-point
 buffers. Not all ISF hosts support floating-point buffers.
