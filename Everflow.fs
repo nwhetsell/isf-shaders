@@ -181,10 +181,11 @@ void main()
         for (int i = -2; i <= 2; i++)
         for (int j = -2; j <= 2; j++) {
             vec2 translatedPosition = position + vec2(i,j);
+            vec2 wrappedPosition = mod(translatedPosition, RENDERSIZE);
 
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
-                texelFetch(bufferB, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
+                texelFetch(bufferB, ivec2(wrappedPosition), 0),
                 translatedPosition
             );
 
@@ -255,9 +256,10 @@ void main()
             for (int i = -2; i <= 2; i++)
             for (int j = -2; j <= 2; j++) {
                 vec2 translatedPosition = position + vec2(i,j);
+                vec2 wrappedPosition = mod(translatedPosition, RENDERSIZE);
                 particle P0 = getParticle(
-                    texelFetch(bufferA_positionAndMass, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
-                    texelFetch(bufferA_velocity, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                    texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
+                    texelFetch(bufferA_velocity, ivec2(wrappedPosition), 0),
                     translatedPosition
                 );
                 vec2 dx = P0.X - P.X;
@@ -303,9 +305,10 @@ void main()
     }
     else if (PASSINDEX == 3) // ShaderToy Buffer C
     {
+        vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(position, RENDERSIZE)), 0),
-            texelFetch(bufferA_velocity, ivec2(mod(position, RENDERSIZE)), 0),
+            texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
+            texelFetch(bufferA_velocity, ivec2(wrappedPosition), 0),
             position
         );
 
@@ -314,9 +317,10 @@ void main()
         for (int i = -2; i <= 2; i++)
         for (int j = -2; j <= 2; j++) {
             vec2 translatedPosition = position + vec2(i,j);
+            vec2 wrappedPosition = mod(translatedPosition, RENDERSIZE);
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
-                texelFetch(bufferA_velocity, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
+                texelFetch(bufferA_velocity, ivec2(wrappedPosition), 0),
                 translatedPosition
             );
 
@@ -329,9 +333,10 @@ void main()
     }
     else // ShaderToy Image
     {
+        vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(position, RENDERSIZE)), 0),
-            texelFetch(bufferB, ivec2(mod(position, RENDERSIZE)), 0),
+            texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
+            texelFetch(bufferB, ivec2(wrappedPosition), 0),
             position
         );
 
