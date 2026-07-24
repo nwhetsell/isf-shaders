@@ -160,7 +160,7 @@ vec3 distribution(vec2 x, vec2 p, float K)
 
 vec4 V(vec2 p)
 {
-    return texture(bufferC, p/RENDERSIZE);
+    return IMG_NORM_PIXEL(bufferC, p/RENDERSIZE);
 }
 
 
@@ -184,8 +184,8 @@ void main()
             vec2 wrappedPosition = mod(translatedPosition, RENDERSIZE);
 
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
-                texelFetch(bufferB, ivec2(wrappedPosition), 0),
+                IMG_PIXEL(bufferA_positionAndMass, wrappedPosition),
+                IMG_PIXEL(bufferB, wrappedPosition),
                 translatedPosition
             );
 
@@ -241,12 +241,12 @@ void main()
     }
     else if (PASSINDEX == 2) // ShaderToy Buffer B
     {
+        vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(position, RENDERSIZE)), 0),
-            texelFetch(bufferA_velocity, ivec2(mod(position, RENDERSIZE)), 0),
+            IMG_PIXEL(bufferA_positionAndMass, wrappedPosition),
+            IMG_PIXEL(bufferA_velocity, wrappedPosition),
             position
         );
-
 
         if(P.M.x != 0.) //not vacuum
         {
@@ -258,8 +258,8 @@ void main()
                 vec2 translatedPosition = position + vec2(i,j);
                 vec2 wrappedPosition = mod(translatedPosition, RENDERSIZE);
                 particle P0 = getParticle(
-                    texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
-                    texelFetch(bufferA_velocity, ivec2(wrappedPosition), 0),
+                    IMG_PIXEL(bufferA_positionAndMass, wrappedPosition),
+                    IMG_PIXEL(bufferA_velocity, wrappedPosition),
                     translatedPosition
                 );
                 vec2 dx = P0.X - P.X;
@@ -307,8 +307,8 @@ void main()
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
-            texelFetch(bufferA_velocity, ivec2(wrappedPosition), 0),
+            IMG_PIXEL(bufferA_positionAndMass, wrappedPosition),
+            IMG_PIXEL(bufferA_velocity, wrappedPosition),
             position
         );
 
@@ -319,8 +319,8 @@ void main()
             vec2 translatedPosition = position + vec2(i,j);
             vec2 wrappedPosition = mod(translatedPosition, RENDERSIZE);
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
-                texelFetch(bufferA_velocity, ivec2(wrappedPosition), 0),
+                IMG_PIXEL(bufferA_positionAndMass, wrappedPosition),
+                IMG_PIXEL(bufferA_velocity, wrappedPosition),
                 translatedPosition
             );
 
@@ -335,8 +335,8 @@ void main()
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(wrappedPosition), 0),
-            texelFetch(bufferB, ivec2(wrappedPosition), 0),
+            IMG_PIXEL(bufferA_positionAndMass, wrappedPosition),
+            IMG_PIXEL(bufferB, wrappedPosition),
             position
         );
 
@@ -359,6 +359,9 @@ void main()
         vec3 col0 = vec3(1., 0.5, 0.);
         vec3 col1 = vec3(0.1, 0.4, 1.);
         // Output to screen
+#ifndef VIDEOSYNC
+#define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
+#endif
         float c = tanh(3.*(rho.w - 1.))*0.5 + 0.5;
         gl_FragColor.xyz = mix(col0, col1, c)*(1.5*b + specularb*3.)*a;
         gl_FragColor.xyz = tanh(gl_FragColor.xyz*gl_FragColor.xyz);
