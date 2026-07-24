@@ -184,93 +184,6 @@ vec3 distribution(vec2 x, vec2 p, float K)
     return vec3(center, m);
 }
 
-//diffusion and advection basically
-void Reintegration(sampler2D ch, inout particle P, vec2 pos)
-{
-    //basically integral over all updated neighbor distributions
-    //that fall inside of this pixel
-    //this makes the tracking conservative
-    range(i, -2, 2) range(j, -2, 2)
-    {
-        vec2 tpos = pos + vec2(i,j);
-        vec4 data = texelFetch(ch, ivec2(mod(tpos, R)), 0);
-
-        particle P0 = getParticle(data, tpos);
-
-        P0.X += P0.V*dt; //integrate position
-
-        float difR = 0.9 + 0.21*smoothstep(fluid_rho*0., fluid_rho*0.333, P0.M.x);
-        vec3 D = distribution(P0.X, pos, difR);
-        //the deposited mass into this cell
-        float m = P0.M.x*D.z;
-
-        //add weighted by mass
-        P.X += D.xy*m;
-        P.V += P0.V*m;
-        P.M.y += P0.M.y*m;
-
-        //add mass
-        P.M.x += m;
-    }
-
-    //normalization
-    if(P.M.x != 0.)
-    {
-        P.X /= P.M.x;
-        P.V /= P.M.x;
-        P.M.y /= P.M.x;
-    }
-}
-
-//force calculation and integration
-void Simulation(sampler2D ch, inout particle P, vec2 pos)
-{
-    //Compute the SPH force
-    vec2 F = vec2(0.);
-    vec3 avgV = vec3(0.);
-    range(i, -2, 2) range(j, -2, 2)
-    {
-        vec2 tpos = pos + vec2(i,j);
-        vec4 data = texelFetch(ch, ivec2(mod(tpos, R)), 0);
-        particle P0 = getParticle(data, tpos);
-        vec2 dx = P0.X - P.X;
-        float avgP = 0.5*P0.M.x*(Pf(P.M) + Pf(P0.M));
-        F -= 0.5*G(1.*dx)*avgP*dx;
-        avgV += P0.M.x*G(1.*dx)*vec3(P0.V,1.);
-    }
-    avgV.xy /= avgV.z;
-
-    //viscosity
-    F += 0.*P.M.x*(avgV.xy - P.V);
-
-    //gravity
-   // F += P.M.x*vec2(0., -0.0004);
-
-    if(Mouse.z > 0.)
-    {
-        vec2 dm =(Mouse.xy - Mouse.zw)/10.;
-        float d = distance(Mouse.xy, P.X)/20.;
-        F += 0.001*dm*exp(-d*d);
-       // P.M.y += 0.1*exp(-40.*d*d);
-    }
-
-    //integrate
-    P.V += F*dt/P.M.x;
-
-    //border
-    vec3 N = bN(P.X);
-    float vdotN = step(N.z, border_h)*dot(-N.xy, P.V);
-    P.V += 0.5*(N.xy*vdotN + N.xy*abs(vdotN));
-    P.V += 0.*P.M.x*N.xy*step(abs(N.z), border_h)*exp(-N.z);
-
-    if(N.z < 0.) P.V = vec2(0.);
-
-
-    //velocity limit
-    float v = length(P.V);
-    P.V /= (v > 1.)?v:1.;
-}
-
 
 vec4 V(vec2 p)
 {
@@ -299,7 +212,39 @@ void main()
         P.V = vec2(0);
         P.M = vec2(0);
 
-        Reintegration(bufferB, P, pos);
+        // Diffusion and advection: basically integrate over all updated
+        // neighbor distributions that fall inside of this pixel. This makes the
+        // tracking conservative.
+        range(i, -2, 2) range(j, -2, 2)
+        {
+            vec2 tpos = pos + vec2(i,j);
+            vec4 data = texelFetch(bufferB, ivec2(mod(tpos, R)), 0);
+
+            particle P0 = getParticle(data, tpos);
+
+            P0.X += P0.V*dt; //integrate position
+
+            float difR = 0.9 + 0.21*smoothstep(fluid_rho*0., fluid_rho*0.333, P0.M.x);
+            vec3 D = distribution(P0.X, pos, difR);
+            //the deposited mass into this cell
+            float m = P0.M.x*D.z;
+
+            //add weighted by mass
+            P.X += D.xy*m;
+            P.V += P0.V*m;
+            P.M.y += P0.M.y*m;
+
+            //add mass
+            P.M.x += m;
+        }
+
+        //normalization
+        if(P.M.x != 0.)
+        {
+            P.X /= P.M.x;
+            P.V /= P.M.x;
+            P.M.y /= P.M.x;
+        }
 
         //initial condition
         if(iFrame < 1)
@@ -335,7 +280,50 @@ void main()
 
         if(P.M.x != 0.) //not vacuum
         {
-            Simulation(bufferA, P, pos);
+            //Compute the SPH force
+            vec2 F = vec2(0.);
+            vec3 avgV = vec3(0.);
+            range(i, -2, 2) range(j, -2, 2)
+            {
+                vec2 tpos = pos + vec2(i,j);
+                vec4 data = texelFetch(bufferA, ivec2(mod(tpos, R)), 0);
+                particle P0 = getParticle(data, tpos);
+                vec2 dx = P0.X - P.X;
+                float avgP = 0.5*P0.M.x*(Pf(P.M) + Pf(P0.M));
+                F -= 0.5*G(1.*dx)*avgP*dx;
+                avgV += P0.M.x*G(1.*dx)*vec3(P0.V,1.);
+            }
+            avgV.xy /= avgV.z;
+
+            //viscosity
+            F += 0.*P.M.x*(avgV.xy - P.V);
+
+            //gravity
+           // F += P.M.x*vec2(0., -0.0004);
+
+            if(Mouse.z > 0.)
+            {
+                vec2 dm =(Mouse.xy - Mouse.zw)/10.;
+                float d = distance(Mouse.xy, P.X)/20.;
+                F += 0.001*dm*exp(-d*d);
+               // P.M.y += 0.1*exp(-40.*d*d);
+            }
+
+            //integrate
+            P.V += F*dt/P.M.x;
+
+            //border
+            vec3 N = bN(P.X);
+            float vdotN = step(N.z, border_h)*dot(-N.xy, P.V);
+            P.V += 0.5*(N.xy*vdotN + N.xy*abs(vdotN));
+            P.V += 0.*P.M.x*N.xy*step(abs(N.z), border_h)*exp(-N.z);
+
+            if(N.z < 0.) P.V = vec2(0.);
+
+
+            //velocity limit
+            float v = length(P.V);
+            P.V /= (v > 1.)?v:1.;
         }
 
 
