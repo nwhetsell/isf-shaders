@@ -46,10 +46,6 @@
 //
 // ShaderToy Common
 //
-
-#define loop(i,x) for(int i = 0; i < x; i++)
-#define range(i,a,b) for(int i = a; i <= b; i++)
-
 #define dt 1.5
 
 #define border_h 5.
@@ -182,8 +178,8 @@ void main()
         // Diffusion and advection: basically integrate over all updated
         // neighbor distributions that fall inside of this pixel. This makes the
         // tracking conservative.
-        range(i, -2, 2) range(j, -2, 2)
-        {
+        for (int i = -2; i <= 2; i++)
+        for (int j = -2; j <= 2; j++) {
             vec2 tpos = position + vec2(i,j);
 
             particle P0 = getParticle(
@@ -256,8 +252,8 @@ void main()
             //Compute the SPH force
             vec2 F = vec2(0.);
             vec3 avgV = vec3(0.);
-            range(i, -2, 2) range(j, -2, 2)
-            {
+            for (int i = -2; i <= 2; i++)
+            for (int j = -2; j <= 2; j++) {
                 vec2 tpos = position + vec2(i,j);
                 particle P0 = getParticle(
                     texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
@@ -315,8 +311,8 @@ void main()
 
         //particle render
         vec4 rho = vec4(0.);
-        range(i, -1, 1) range(j, -1, 1)
-        {
+        for (int i = -2; i <= 2; i++)
+        for (int j = -2; j <= 2; j++) {
             vec2 tpos = position + vec2(i,j);
             particle P0 = getParticle(
                 texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
