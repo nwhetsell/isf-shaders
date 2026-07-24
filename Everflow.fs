@@ -172,7 +172,6 @@ vec4 V(vec2 p)
 }
 
 
-#define pos gl_FragCoord.xy
 #define iFrame FRAMEINDEX
 #define iResolution RENDERSIZE
 #define iTime TIME
@@ -180,11 +179,12 @@ vec4 V(vec2 p)
 
 void main()
 {
+    vec2 position = gl_FragCoord.xy;
+
     if (PASSINDEX == 0 || PASSINDEX == 1) // ShaderToy Buffer A
     {
         R = iResolution.xy; time = iTime;
         // Mouse = iMouse;
-        ivec2 p = ivec2(pos);
 
         particle P;
         P.X = vec2(0);
@@ -196,7 +196,7 @@ void main()
         // tracking conservative.
         range(i, -2, 2) range(j, -2, 2)
         {
-            vec2 tpos = pos + vec2(i,j);
+            vec2 tpos = position + vec2(i,j);
 
             particle P0 = getParticle(
                 texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, R)), 0),
@@ -207,7 +207,7 @@ void main()
             P0.X += P0.V*dt; //integrate position
 
             float difR = 0.9 + 0.21*smoothstep(fluid_rho*0., fluid_rho*0.333, P0.M.x);
-            vec3 D = distribution(P0.X, pos, difR);
+            vec3 D = distribution(P0.X, position, difR);
             //the deposited mass into this cell
             float m = P0.M.x*D.z;
 
@@ -231,24 +231,24 @@ void main()
         //initial condition
         if(iFrame < 1)
         {
+            P.X = position;
+
             //random
-            vec3 rand = hash32(pos);
+            vec3 rand = hash32(position);
             if(rand.z < 0.2)
             {
-                P.X = pos;
-                P.V = 0.5*(rand.xy-0.5) + vec2(sin(2.*pos.x/R.x), cos(2.*pos.x/R.x));
-                P.M = vec2(mass, 0.5 - 0.5*sin(10.*pos.x/R.x));
+                P.V = 0.5*(rand.xy-0.5) + vec2(sin(2.*position.x/R.x), cos(2.*position.x/R.x));
+                P.M = vec2(mass, 0.5 - 0.5*sin(10.*position.x/R.x));
             }
             else
             {
-                P.X = pos;
                 P.V = vec2(0.);
                 P.M = vec2(1e-6);
             }
         }
 
         if (PASSINDEX == 0) {
-            P.X = clamp(P.X - pos, vec2(-0.5), vec2(0.5));
+            P.X = clamp(P.X - position, vec2(-0.5), vec2(0.5));
             gl_FragColor = vec4(PRE_PACK(P.X), P.M);
         } else {
             gl_FragColor = vec4(PRE_PACK(P.V), 0, 1);
@@ -258,12 +258,11 @@ void main()
     {
         R = iResolution.xy; time = iTime;
         //Mouse = iMouse;
-        ivec2 p = ivec2(pos);
 
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(pos, R)), 0),
-            texelFetch(bufferA_velocity, ivec2(mod(pos, R)), 0),
-            pos
+            texelFetch(bufferA_positionAndMass, ivec2(mod(position, R)), 0),
+            texelFetch(bufferA_velocity, ivec2(mod(position, R)), 0),
+            position
         );
 
 
@@ -274,7 +273,7 @@ void main()
             vec3 avgV = vec3(0.);
             range(i, -2, 2) range(j, -2, 2)
             {
-                vec2 tpos = pos + vec2(i,j);
+                vec2 tpos = position + vec2(i,j);
                 particle P0 = getParticle(
                     texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, R)), 0),
                     texelFetch(bufferA_velocity, ivec2(mod(tpos, R)), 0),
@@ -324,19 +323,18 @@ void main()
     else if (PASSINDEX == 3) // ShaderToy Buffer C
     {
         R = iResolution.xy; time = iTime;
-        ivec2 p = ivec2(pos);
 
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(pos, R)), 0),
-            texelFetch(bufferA_velocity, ivec2(mod(pos, R)), 0),
-            pos
+            texelFetch(bufferA_positionAndMass, ivec2(mod(position, R)), 0),
+            texelFetch(bufferA_velocity, ivec2(mod(position, R)), 0),
+            position
         );
 
         //particle render
         vec4 rho = vec4(0.);
         range(i, -1, 1) range(j, -1, 1)
         {
-            vec2 tpos = pos + vec2(i,j);
+            vec2 tpos = position + vec2(i,j);
             particle P0 = getParticle(
                 texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, R)), 0),
                 texelFetch(bufferA_velocity, ivec2(mod(tpos, R)), 0),
@@ -345,7 +343,7 @@ void main()
 
             vec2 x0 = P0.X; //update position
             //how much mass falls into this pixel
-            rho += 1.*vec4(P.V, P.M)*G((pos - x0)/1.);
+            rho += 1.*vec4(P.V, P.M)*G((position - x0)/1.);
         }
 
         gl_FragColor = rho;
@@ -353,23 +351,21 @@ void main()
     else // ShaderToy Image
     {
         R = iResolution.xy; time = iTime;
-        //pos = R*0.5 + pos*0.1;
-        ivec2 p = ivec2(pos);
 
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(pos, R)), 0),
-            texelFetch(bufferB, ivec2(mod(pos, R)), 0),
-            pos
+            texelFetch(bufferA_positionAndMass, ivec2(mod(position, R)), 0),
+            texelFetch(bufferB, ivec2(mod(position, R)), 0),
+            position
         );
 
         //border render
         vec3 Nb = bN(P.X);
-        float bord = smoothstep(2.*border_h,border_h*0.5,border(pos));
+        float bord = smoothstep(2.*border_h,border_h*0.5,border(position));
 
-        vec4 rho = V(pos);
+        vec4 rho = V(position);
         vec3 dx = vec3(-1., 0., 1.);
-        vec4 grad = -0.5*vec4(V(pos + dx.zy).zw - V(pos + dx.xy).zw,
-                                V(pos + dx.yz).zw - V(pos + dx.yx).zw);
+        vec4 grad = -0.5*vec4(V(position + dx.zy).zw - V(position + dx.xy).zw,
+                                V(position + dx.yz).zw - V(position + dx.yx).zw);
         vec2 N = pow(length(grad.xz),0.2)*normalize(grad.xz+1e-5);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0,0,1),n);
