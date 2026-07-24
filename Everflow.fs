@@ -180,12 +180,12 @@ void main()
         // tracking conservative.
         for (int i = -2; i <= 2; i++)
         for (int j = -2; j <= 2; j++) {
-            vec2 tpos = position + vec2(i,j);
+            vec2 translatedPosition = position + vec2(i,j);
 
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
-                texelFetch(bufferB, ivec2(mod(tpos, RENDERSIZE)), 0),
-                tpos
+                texelFetch(bufferA_positionAndMass, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                texelFetch(bufferB, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                translatedPosition
             );
 
             P0.X += P0.V*dt; //integrate position
@@ -254,11 +254,11 @@ void main()
             vec3 avgV = vec3(0.);
             for (int i = -2; i <= 2; i++)
             for (int j = -2; j <= 2; j++) {
-                vec2 tpos = position + vec2(i,j);
+                vec2 translatedPosition = position + vec2(i,j);
                 particle P0 = getParticle(
-                    texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
-                    texelFetch(bufferA_velocity, ivec2(mod(tpos, RENDERSIZE)), 0),
-                    tpos
+                    texelFetch(bufferA_positionAndMass, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                    texelFetch(bufferA_velocity, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                    translatedPosition
                 );
                 vec2 dx = P0.X - P.X;
                 float avgP = 0.5*P0.M.x*(Pf(P.M) + Pf(P0.M));
@@ -313,11 +313,11 @@ void main()
         vec4 rho = vec4(0.);
         for (int i = -2; i <= 2; i++)
         for (int j = -2; j <= 2; j++) {
-            vec2 tpos = position + vec2(i,j);
+            vec2 translatedPosition = position + vec2(i,j);
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
-                texelFetch(bufferA_velocity, ivec2(mod(tpos, RENDERSIZE)), 0),
-                tpos
+                texelFetch(bufferA_positionAndMass, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                texelFetch(bufferA_velocity, ivec2(mod(translatedPosition, RENDERSIZE)), 0),
+                translatedPosition
             );
 
             vec2 x0 = P0.X; //update position
