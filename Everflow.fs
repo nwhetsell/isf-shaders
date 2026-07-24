@@ -53,9 +53,6 @@
 #define dt 1.5
 
 #define border_h 5.
-vec2 R;
-vec4 Mouse;
-float time;
 
 #define mass 1.
 
@@ -87,9 +84,9 @@ float sdBox( in vec2 p, in vec2 b )
 
 float border(vec2 p)
 {
-    float bound = -sdBox(p - R*0.5, R*vec2(0.5, 0.5));
-    float box = sdBox(Rot(0.*time)*(p - R*vec2(0.5, 0.6)) , R*vec2(0.05, 0.01));
-    float drain = -sdBox(p - R*vec2(0.5, 0.7), R*vec2(1.5, 2.5));
+    float bound = -sdBox(p - RENDERSIZE*0.5, RENDERSIZE*vec2(0.5, 0.5));
+    float box = sdBox(Rot(0.*TIME)*(p - RENDERSIZE*vec2(0.5, 0.6)) , RENDERSIZE*vec2(0.05, 0.01));
+    float drain = -sdBox(p - RENDERSIZE*vec2(0.5, 0.7), RENDERSIZE*vec2(1.5, 2.5));
     return max(drain,min(bound, box));
 }
 
@@ -152,7 +149,6 @@ float G0(vec2 x)
 }
 
 //diffusion amount
-#define dif 1.12
 vec3 distribution(vec2 x, vec2 p, float K)
 {
     vec4 aabb0 = vec4(p - 0.5, p + 0.5);
@@ -168,14 +164,9 @@ vec3 distribution(vec2 x, vec2 p, float K)
 
 vec4 V(vec2 p)
 {
-    return texture(bufferC, p/R);
+    return texture(bufferC, p/RENDERSIZE);
 }
 
-
-#define iFrame FRAMEINDEX
-#define iResolution RENDERSIZE
-#define iTime TIME
-#define U gl_FragColor
 
 void main()
 {
@@ -183,9 +174,6 @@ void main()
 
     if (PASSINDEX == 0 || PASSINDEX == 1) // ShaderToy Buffer A
     {
-        R = iResolution.xy; time = iTime;
-        // Mouse = iMouse;
-
         particle P;
         P.X = vec2(0);
         P.V = vec2(0);
@@ -199,8 +187,8 @@ void main()
             vec2 tpos = position + vec2(i,j);
 
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, R)), 0),
-                texelFetch(bufferB, ivec2(mod(tpos, R)), 0),
+                texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
+                texelFetch(bufferB, ivec2(mod(tpos, RENDERSIZE)), 0),
                 tpos
             );
 
@@ -229,7 +217,7 @@ void main()
         }
 
         //initial condition
-        if(iFrame < 1)
+        if(FRAMEINDEX < 1)
         {
             P.X = position;
 
@@ -237,8 +225,8 @@ void main()
             vec3 rand = hash32(position);
             if(rand.z < 0.2)
             {
-                P.V = 0.5*(rand.xy-0.5) + vec2(sin(2.*position.x/R.x), cos(2.*position.x/R.x));
-                P.M = vec2(mass, 0.5 - 0.5*sin(10.*position.x/R.x));
+                P.V = 0.5*(rand.xy-0.5) + vec2(sin(2.*position.x/RENDERSIZE.x), cos(2.*position.x/RENDERSIZE.x));
+                P.M = vec2(mass, 0.5 - 0.5*sin(10.*position.x/RENDERSIZE.x));
             }
             else
             {
@@ -256,12 +244,9 @@ void main()
     }
     else if (PASSINDEX == 2) // ShaderToy Buffer B
     {
-        R = iResolution.xy; time = iTime;
-        //Mouse = iMouse;
-
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(position, R)), 0),
-            texelFetch(bufferA_velocity, ivec2(mod(position, R)), 0),
+            texelFetch(bufferA_positionAndMass, ivec2(mod(position, RENDERSIZE)), 0),
+            texelFetch(bufferA_velocity, ivec2(mod(position, RENDERSIZE)), 0),
             position
         );
 
@@ -275,8 +260,8 @@ void main()
             {
                 vec2 tpos = position + vec2(i,j);
                 particle P0 = getParticle(
-                    texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, R)), 0),
-                    texelFetch(bufferA_velocity, ivec2(mod(tpos, R)), 0),
+                    texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
+                    texelFetch(bufferA_velocity, ivec2(mod(tpos, RENDERSIZE)), 0),
                     tpos
                 );
                 vec2 dx = P0.X - P.X;
@@ -292,13 +277,13 @@ void main()
             //gravity
            // F += P.M.x*vec2(0., -0.0004);
 
-            if(Mouse.z > 0.)
-            {
-                vec2 dm =(Mouse.xy - Mouse.zw)/10.;
-                float d = distance(Mouse.xy, P.X)/20.;
-                F += 0.001*dm*exp(-d*d);
-               // P.M.y += 0.1*exp(-40.*d*d);
-            }
+            // if(Mouse.z > 0.)
+            // {
+            //     vec2 dm =(Mouse.xy - Mouse.zw)/10.;
+            //     float d = distance(Mouse.xy, P.X)/20.;
+            //     F += 0.001*dm*exp(-d*d);
+            //    // P.M.y += 0.1*exp(-40.*d*d);
+            // }
 
             //integrate
             P.V += F*dt/P.M.x;
@@ -322,11 +307,9 @@ void main()
     }
     else if (PASSINDEX == 3) // ShaderToy Buffer C
     {
-        R = iResolution.xy; time = iTime;
-
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(position, R)), 0),
-            texelFetch(bufferA_velocity, ivec2(mod(position, R)), 0),
+            texelFetch(bufferA_positionAndMass, ivec2(mod(position, RENDERSIZE)), 0),
+            texelFetch(bufferA_velocity, ivec2(mod(position, RENDERSIZE)), 0),
             position
         );
 
@@ -336,8 +319,8 @@ void main()
         {
             vec2 tpos = position + vec2(i,j);
             particle P0 = getParticle(
-                texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, R)), 0),
-                texelFetch(bufferA_velocity, ivec2(mod(tpos, R)), 0),
+                texelFetch(bufferA_positionAndMass, ivec2(mod(tpos, RENDERSIZE)), 0),
+                texelFetch(bufferA_velocity, ivec2(mod(tpos, RENDERSIZE)), 0),
                 tpos
             );
 
@@ -350,11 +333,9 @@ void main()
     }
     else // ShaderToy Image
     {
-        R = iResolution.xy; time = iTime;
-
         particle P = getParticle(
-            texelFetch(bufferA_positionAndMass, ivec2(mod(position, R)), 0),
-            texelFetch(bufferB, ivec2(mod(position, R)), 0),
+            texelFetch(bufferA_positionAndMass, ivec2(mod(position, RENDERSIZE)), 0),
+            texelFetch(bufferB, ivec2(mod(position, RENDERSIZE)), 0),
             position
         );
 
