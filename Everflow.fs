@@ -11,11 +11,53 @@
             "TYPE" : "image"
         },
         {
+            "NAME": "restart",
+            "LABEL": "Restart",
+            "TYPE": "event"
+        },
+        {
+            "NAME": "mass",
+            "LABEL": "Initial mass",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "enableMouse",
+            "LABEL": "Enable mouse",
+            "TYPE": "bool",
+            "DEFAULT": false
+        },
+        {
+            "NAME": "mouse",
+            "TYPE": "point2D",
+            "DEFAULT": [0.5, 0.5],
+            "MIN": [0, 0],
+            "MAX": [1, 1]
+        },
+        {
+            "NAME": "dt",
+            "LABEL": "Simulation speed",
+            "TYPE": "float",
+            "DEFAULT": 1.5,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "viscosity",
             "LABEL": "Viscosity",
             "TYPE": "float",
             "DEFAULT": 0,
             "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "fluid_rho",
+            "LABEL": "Fluid rho",
+            "TYPE": "float",
+            "DEFAULT": 0.5,
+            "MAX": 1,
             "MIN": 0
         },
         {
@@ -31,6 +73,14 @@
             "LABEL": "Maximum speed",
             "TYPE": "float",
             "DEFAULT": 1,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "border_h",
+            "LABEL": "Border",
+            "TYPE": "float",
+            "DEFAULT": 5,
             "MAX": 10,
             "MIN": 0
         },
@@ -92,7 +142,6 @@ float rectSDF(vec2 p, vec2 b) {
 }
 
 
-
 // Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
 //
 // Copyright © 2014 David Hoskins.
@@ -125,11 +174,6 @@ vec3 hash32(vec2 p)
 //
 // ShaderToy Common
 //
-#define dt 1.5
-#define border_h 5.
-#define mass 1.
-#define fluid_rho 0.5
-
 float Pf(vec2 rho)
 {
     // Water pressure
@@ -231,7 +275,7 @@ void main()
 
             P0.X += P0.V * dt; //integrate position
 
-            float difR = 0.9 + 0.21*smoothstep(fluid_rho * 0., fluid_rho * 0.333, P0.M.x);
+            float difR = 0.9 + 0.21 * smoothstep(fluid_rho * 0., fluid_rho * 0.333, P0.M.x);
             vec3 D = distribution(P0.X, position, difR);
             // the deposited mass into this cell
             float m = P0.M.x * D.z;
@@ -253,12 +297,12 @@ void main()
         }
 
         // initial condition
-        if (FRAMEINDEX < 1) {
+        if (FRAMEINDEX < 2 || restart) {
             P.X = position;
 
             // random
             vec3 rand = hash32(position);
-            if(rand.z < 0.2) {
+            if (rand.z < 0.2) {
                 P.V = 0.5 * (rand.xy - 0.5) + vec2(sin(2. * position.x / RENDERSIZE.x), cos(2. * position.x / RENDERSIZE.x));
                 P.M = vec2(mass, 0.5 - 0.5 * sin(10. * position.x / RENDERSIZE.x));
             }
@@ -310,16 +354,15 @@ void main()
             // gravity
             F += P.M.x * vec2(0, gravity);
 
-            // if (Mouse.z > 0.) {
-            //     vec2 dm =(Mouse.xy - Mouse.zw) / 10.;
-            //     float d = distance(Mouse.xy, P.X) / 20.;
-            //     F += 0.001 * dm * exp(-d * d);
-            // }
+            if (enableMouse) {
+                float d = distance(mouse.xy * RENDERSIZE, P.X) / 20.;
+                F += exp(-d * d);
+            }
 
-            //integrate
+            // integrate
             P.V += F * dt / P.M.x;
 
-            //border
+            // border
             vec3 N = bN(P.X);
             float vdotN = step(N.z, border_h) * dot(-N.xy, P.V);
             P.V += 0.5 * (N.xy * vdotN + N.xy * abs(vdotN));
