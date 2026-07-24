@@ -16,25 +16,24 @@
             "TYPE": "event"
         },
         {
+            "NAME": "col0",
+            "LABEL": "Color 1",
+            "TYPE": "color",
+            "DEFAULT": [1, 0.5, 0, 1]
+        },
+        {
+            "NAME": "col1",
+            "LABEL": "Color 2",
+            "TYPE": "color",
+            "DEFAULT": [0.1, 0.4, 1, 1]
+        },
+        {
             "NAME": "mass",
             "LABEL": "Initial mass",
             "TYPE": "float",
             "DEFAULT": 1,
             "MAX": 10,
             "MIN": 0
-        },
-        {
-            "NAME": "enableMouse",
-            "LABEL": "Enable mouse",
-            "TYPE": "bool",
-            "DEFAULT": false
-        },
-        {
-            "NAME": "mouse",
-            "TYPE": "point2D",
-            "DEFAULT": [0.5, 0.5],
-            "MIN": [0, 0],
-            "MAX": [1, 1]
         },
         {
             "NAME": "dt",
@@ -59,6 +58,19 @@
             "DEFAULT": 0.5,
             "MAX": 1,
             "MIN": 0
+        },
+        {
+            "NAME": "enableMouse",
+            "LABEL": "Enable mouse",
+            "TYPE": "bool",
+            "DEFAULT": false
+        },
+        {
+            "NAME": "mouse",
+            "TYPE": "point2D",
+            "DEFAULT": [0.5, 0.5],
+            "MIN": [0, 0],
+            "MAX": [1, 1]
         },
         {
             "NAME": "gravity",
@@ -432,15 +444,13 @@ void main()
 
         float a = pow(smoothstep(fluid_rho * 0., fluid_rho * 2., rho.z), 0.1);
         float b = exp(-1.7 * smoothstep(fluid_rho * 1., fluid_rho * 7.5, rho.z));
-        vec3 col0 = vec3(1, 0.5, 0);
-        vec3 col1 = vec3(0.1, 0.4, 1);
 
         // Output to screen
 #ifndef VIDEOSYNC
 #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
 #endif
         float c = tanh(3. * (rho.w - 1.)) * 0.5 + 0.5;
-        gl_FragColor.xyz = mix(col0, col1, c) * (1.5 * b + specularb * specularAmount) * a;
+        gl_FragColor = mix(col0, col1, c) * (1.5 * b + specularb * specularAmount) * a;
         gl_FragColor.xyz = tanh(gl_FragColor.xyz * gl_FragColor.xyz);
         gl_FragColor.a = 1.;
     }
