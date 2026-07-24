@@ -39,8 +39,25 @@
     ]
 }*/
 
+#define INV_SQRT_2 0.7071067811865475244008443621048
+
 // Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
 #define PI 3.1415926535897932384626433832795
+
+float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
+
+vec2 polar2cart(in vec2 polar) {
+    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
+}
+
+float rectSDF(vec2 p, vec2 b, float r) {
+    vec2 d = abs(p - 0.5) * 4.2 - b + vec2(r);
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
+}
+float rectSDF(vec2 p, vec2 b) {
+    // Why the LYGIA function shifts by 0.5 and scales by 4.2 is a complete mystery.
+    return rectSDF((p + 0.5) / 4.2, b, 0.);
+}
 
 
 //
@@ -61,28 +78,11 @@ float Pf(vec2 rho)
     return mix(0.5*rho.x,0.04*rho.x*(rho.x/fluid_rho - 1.), GF); //water pressure
 }
 
-mat2 Rot(float ang)
-{
-    return mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
-}
-
-vec2 Dir(float ang)
-{
-    return vec2(cos(ang), sin(ang));
-}
-
-
-float sdBox( in vec2 p, in vec2 b )
-{
-    vec2 d = abs(p)-b;
-    return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
-}
-
 float border(vec2 p)
 {
-    float bound = -sdBox(p - RENDERSIZE*0.5, RENDERSIZE*vec2(0.5, 0.5));
-    float box = sdBox(Rot(0.*TIME)*(p - RENDERSIZE*vec2(0.5, 0.6)) , RENDERSIZE*vec2(0.05, 0.01));
-    float drain = -sdBox(p - RENDERSIZE*vec2(0.5, 0.7), RENDERSIZE*vec2(1.5, 2.5));
+    float bound = -rectSDF(p - RENDERSIZE*0.5, RENDERSIZE*vec2(0.5, 0.5));
+    float box = rectSDF(p - RENDERSIZE*vec2(0.5, 0.6), RENDERSIZE*vec2(0.05, 0.01));
+    float drain = -rectSDF(p - RENDERSIZE*vec2(0.5, 0.7), RENDERSIZE*vec2(1.5, 2.5));
     return max(drain,min(bound, box));
 }
 
@@ -132,16 +132,6 @@ vec3 hash32(vec2 p)
 	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
     p3 += dot(p3, p3.yxz+33.33);
     return fract((p3.xxy+p3.yzz)*p3.zyx);
-}
-
-float G(vec2 x)
-{
-    return exp(-dot(x,x));
-}
-
-float G0(vec2 x)
-{
-    return exp(-length(x));
 }
 
 //diffusion amount
@@ -264,8 +254,8 @@ void main()
                 );
                 vec2 dx = P0.X - P.X;
                 float avgP = 0.5*P0.M.x*(Pf(P.M) + Pf(P0.M));
-                F -= 0.5*G(1.*dx)*avgP*dx;
-                avgV += P0.M.x*G(1.*dx)*vec3(P0.V,1.);
+                F -= 0.5*gaussian(dx, INV_SQRT_2)*avgP*dx;
+                avgV += P0.M.x*gaussian(dx, INV_SQRT_2)*vec3(P0.V,1.);
             }
             avgV.xy /= avgV.z;
 
@@ -326,7 +316,7 @@ void main()
 
             vec2 x0 = P0.X; //update position
             //how much mass falls into this pixel
-            rho += 1.*vec4(P.V, P.M)*G((position - x0)/1.);
+            rho += 1.*vec4(P.V, P.M)*gaussian(position - x0, INV_SQRT_2);
         }
 
         gl_FragColor = rho;
@@ -351,8 +341,8 @@ void main()
         vec2 N = pow(length(grad.xz),0.2)*normalize(grad.xz+1e-5);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0,0,1),n);
-        // vec3 specular = 0.7*pow(texture(iChannel0, r).xyz,vec3(2.));//pow(max(dot(N, Dir(1.4)), 0.), 3.5);
-        float specularb = 0.*G(0.4*(Nb.zz - border_h))*pow(max(dot(Nb.xy, Dir(1.4)), 0.), 3.);
+        // vec3 specular = 0.7*pow(texture(iChannel0, r).xyz,vec3(2.));//pow(max(dot(N, polar2cart(vec2(1.4, 1))), 0.), 3.5);
+        float specularb = 0.*gaussian(0.4*(Nb.zz - border_h), INV_SQRT_2)*pow(max(dot(Nb.xy, polar2cart(vec2(1.4, 1))), 0.), 3.);
 
         float a = pow(smoothstep(fluid_rho*0., fluid_rho*2., rho.z),0.1);
         float b = exp(-1.7*smoothstep(fluid_rho*1., fluid_rho*7.5, rho.z));
