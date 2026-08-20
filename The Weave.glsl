@@ -41,14 +41,8 @@
     "ISFVSN": "2"
 }*/
 
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
-
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
+#include "lygia/math/const.glsl"
+#include "lygia/math/rotate2d.glsl"
 
 
 vec3 cmap(float x)

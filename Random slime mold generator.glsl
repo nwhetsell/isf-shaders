@@ -161,26 +161,12 @@
     ]
 }*/
 
+#include "lygia/color/luminance.glsl"
+#include "lygia/math/const.glsl"
+#include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
-
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
-#define HALF_PI 1.5707963267948966192313216916398
-
-float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
-
-float luminance(in vec3 linear) { return dot(linear, vec3(0.21250175, 0.71537574, 0.07212251)); }
-float luminance(in vec4 linear) { return luminance( linear.rgb ); }
-
-vec2 polar2cart(in vec2 polar) {
-    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
-}
-
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
+#include "lygia/math/rotate2d.glsl"
+#include "lygia/space/polar2cart.glsl"
 
 
 //
@@ -198,7 +184,7 @@ mat2 rotate2d(const in float r) {
 // also perform a `clamp` on the packed data. Without the `clamp` calls, this
 // shader seems to blow up numerically.
 #define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
-#define PRE_PACK(X) clamp(0.5 * X + 0.5, 0., 1.)
+#define PRE_PACK(X) clamp(0.5 * (X) + 0.5, 0., 1.)
 
 
 void main()

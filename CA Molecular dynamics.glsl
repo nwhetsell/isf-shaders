@@ -121,33 +121,14 @@
     ]
 }*/
 
+#include "lygia/color/space/hsv2rgb.glsl"
+#include "lygia/color/luminance.glsl"
+#include "lygia/math/const.glsl"
+#include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
-
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
-#define TWO_PI 6.2831853071795864769252867665590
-
-float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
-
-#define saturate(V) clamp(V, 0.0, 1.0)
-vec3 hue2rgb(const in float hue) {
-    float R = abs(hue * 6.0 - 3.0) - 1.0;
-    float G = 2.0 - abs(hue * 6.0 - 2.0);
-    float B = 2.0 - abs(hue * 6.0 - 4.0);
-    return saturate(vec3(R,G,B));
-}
-vec3 hsv2rgb(const in vec3 hsv) { return ((hue2rgb(hsv.x) - 1.0) * hsv.y + 1.0) * hsv.z; }
-vec4 hsv2rgb(const in vec4 hsv) { return vec4(hsv2rgb(hsv.rgb), hsv.a); }
-
-float luminance(in vec3 linear) { return dot(linear, vec3(0.21250175, 0.71537574, 0.07212251)); }
-float luminance(in vec4 linear) { return luminance( linear.rgb ); }
-
-float rectSDF(vec2 p, vec2 b, float r) {
-    vec2 d = abs(p - 0.5) * 4.2 - b + vec2(r);
-    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
-}
-float rectSDF(vec2 p, vec2 b) {
-    // Why the LYGIA function shifts by 0.5 and scales by 4.2 is a complete mystery.
+#include "lygia/sdf/rectSDF.glsl"
+float rectSDF_without_transform(vec2 p, vec2 b) {
+    // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
     return rectSDF((p + 0.5) / 4.2, b, 0.);
 }
 
@@ -187,14 +168,14 @@ vec3 particleDistribution(vec2 x, vec2 pos)
 // perform a `clamp` on the packed data. Without the `clamp` calls, this shader
 // seems to blow up numerically.
 #define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
-#define PRE_PACK(X) clamp(0.5 * X + 0.5, 0., 1.)
+#define PRE_PACK(X) clamp(0.5 * (X) + 0.5, 0., 1.)
 
 
 float border(vec2 p) // In ShaderToy buffer B
 {
-    float bound = -rectSDF(p - RENDERSIZE * 0.5, RENDERSIZE * vec2(0.49, 0.49));
-    // float box = rectSDF((p - RENDERSIZE * vec2(0.5, 0.6)), RENDERSIZE * vec2(0.05, 0.01));
-    // float drain = -rectSDF(p - RENDERSIZE * vec2(0.5, 0.7), RENDERSIZE * vec2(0));
+    float bound = -rectSDF_without_transform(p - RENDERSIZE * 0.5, RENDERSIZE * vec2(0.49, 0.49));
+    // float box = rectSDF_without_transform((p - RENDERSIZE * vec2(0.5, 0.6)), RENDERSIZE * vec2(0.05, 0.01));
+    // float drain = -rectSDF_without_transform(p - RENDERSIZE * vec2(0.5, 0.7), RENDERSIZE * vec2(0));
     return bound;
 }
 

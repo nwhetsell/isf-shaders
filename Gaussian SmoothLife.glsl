@@ -140,14 +140,9 @@
     ]
 }*/
 
+#include "lygia/math/const.glsl"
 #define SQRT_TWO_PI 2.5066282746310005024157652848110
-
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define TWO_PI 6.2831853071795864769252867665590
-
-vec2 polar2cart(in vec2 polar) {
-    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
-}
+#include "lygia/space/polar2cart.glsl"
 
 //
 // ShaderToy Buffer A

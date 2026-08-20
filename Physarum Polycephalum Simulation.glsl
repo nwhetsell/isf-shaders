@@ -184,16 +184,14 @@
 //   sensorAngle: 3.4
 //   angleDifferenceFactor: 3
 
+#include "lygia/math/const.glsl"
+#include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
+#include "lygia/space/polar2cart.glsl"
 
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
-
-float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
-
-vec2 polar2cart(in vec2 polar) {
-    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
-}
+// #define particleMaxSearchRadius 5.
+// #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
+// #define round(x) floor((x) + 0.5)
 
 // In the ShaderToy shader, values less than 0 and greater than 1 are written to
 // an image buffer. This is impossible without floating-point buffers; ISF
@@ -201,13 +199,8 @@ vec2 polar2cart(in vec2 polar) {
 // floating-point buffers are available, we must scale particle data to be
 // between 0 and 1 when writing them to an image, and unscale particle data when
 // reading from an image.
-#ifdef VIDEOSYNC
-#define SCALE_PARTICLE(PARTICLE) // do nothing
-#define UNSCALE_PARTICLE(PARTICLE) // do nothing
-#else
-#define SCALE_PARTICLE(PARTICLE) PARTICLE.xy /= RENDERSIZE; PARTICLE.zw += 0.5;
-#define UNSCALE_PARTICLE(PARTICLE) PARTICLE.xy *= RENDERSIZE; PARTICLE.zw -= 0.5;
-#endif
+#define SCALE_PARTICLE(PARTICLE) // PARTICLE.xy /= RENDERSIZE; PARTICLE.zw += 0.5;
+#define UNSCALE_PARTICLE(PARTICLE) // PARTICLE.xy *= RENDERSIZE; PARTICLE.zw -= 0.5;
 
 
 //
@@ -272,14 +265,7 @@ void main()
 
         // Check neighbours
         vec2 halfSize = 0.5 * RENDERSIZE;
-        for (float radius = 1.;
-#ifdef VIDEOSYNC
-             radius <= particleMaxSearchRadius;
-#else
-             radius <= 5.;
-#endif
-             radius += 1.) {
-
+        for (float radius = 1.; radius <= particleMaxSearchRadius; radius += 1.) {
             // This would be *much* easier to do with an array initializer:
             //    vec2 positionOffsets[] = vec2[](vec2(-radius, 0), vec2(radius, 0), vec2(0, -radius), vec2(0, radius));
             // and the array length member function:
@@ -319,9 +305,6 @@ void main()
         // It’s unclear whether IMG_NORM_PIXEL is doing any interpolation.
         float sensedDirection = IMG_NORM_PIXEL(trails, sensorCounterclockwisePosition / RENDERSIZE).x -
                                 IMG_NORM_PIXEL(trails, sensorClockwisePosition / RENDERSIZE).x;
-#ifndef VIDEOSYNC
-#define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
-#endif
         particle.z += simulationSpeed * scaledSensorStrength * tanh(sensedDirectionFactor * sensedDirection);
 
         vec2 particleVelocity = polar2cart(vec2(particle.z, particleSpeed)) + particleSpeedRandomness * (hash22(particle.xy + TIME) - 0.5);
@@ -340,9 +323,6 @@ void main()
         }
 
         if (FRAMEINDEX < 1 || restart) {
-#ifndef VIDEOSYNC
-#define round(x) floor((x) + 0.5)
-#endif
             particle.xy = vec2(
                 INITIAL_PARTICLE_DENSITY * round(position.x / INITIAL_PARTICLE_DENSITY),
                 INITIAL_PARTICLE_DENSITY * round(position.y / INITIAL_PARTICLE_DENSITY)

@@ -94,38 +94,14 @@
     "ISFVSN": "2"
 }*/
 
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
+#include "lygia/math/const.glsl"
+#include "lygia/math/rotate2d.glsl"
+#include "lygia/sdf/sphereSDF.glsl"
+#include "lygia/space/lookAt.glsl"
 
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/math/rotate2d.glsl
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
+// #define motion_frames 1.
+// #define sphereCount 15.
 
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/sdf/sphereSDF.glsl
-float sphereSDF(vec3 p) { return length(p); }
-float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
-
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/space/lookAt.glsl
-#define LOOK_AT_RIGHT_HANDED
-mat3 lookAt(vec3 forward, vec3 up) {
-    vec3 zaxis = normalize(forward);
-#if defined(LOOK_AT_RIGHT_HANDED)
-    vec3 xaxis = normalize(cross(zaxis, up));
-    vec3 yaxis = cross(xaxis, zaxis);
-#else
-    vec3 xaxis = normalize(cross(up, zaxis));
-    vec3 yaxis = cross(zaxis, xaxis);
-#endif
-    return mat3(xaxis, yaxis, zaxis);
-}
-
-mat3 lookAt(vec3 eye, vec3 target, vec3 up) {
-    vec3 forward = normalize(target - eye);
-    return lookAt(forward, up);
-}
 
 // Weird endless living creature
 // inspired by Inigo Quilez live stream shader deconstruction
@@ -151,13 +127,7 @@ float geometry (vec3 pos, float time) {
     float t = time * .5 + pos.x / 30.;
     t = floor(t)+smoothstep(0.0,.9,pow(fract(t),2.));
     pos.x = repeat(pos.x+TIME*scrollSpeed, 5.);
-    for (int i =
-#ifdef VIDEOSYNC
-            int(sphereCount)
-#else
-            15
-#endif
-                            ; i > 0; --i) {
+    for (int i = int(sphereCount); i > 0; --i) {
         pos.x = abs(pos.x)-range*a;
         pos.xy *= rotate2dCounterclockwise(cos(t)*balance/a+a*2.);
         pos.zy *= rotate2dCounterclockwise(sin(t)*balance/a+a*2.);
@@ -199,13 +169,7 @@ void main()
 
     float total = 0.0;
     gl_FragColor = vec4(0);
-    for (float index =
-#ifdef VIDEOSYNC
-                       motion_frames
-#else
-                       1.
-#endif
-                                    ; index > 0.; --index) {
+    for (float index = motion_frames; index > 0.; --index) {
         float dither = random(ray.xy+fract(TIME+index));
         float time = TIME*speed+(dither+index)/10./motion_frames;
         gl_FragColor += vec4(raymarch(eye, ray, time, total))/motion_frames;

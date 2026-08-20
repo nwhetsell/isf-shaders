@@ -43,20 +43,8 @@
     "ISFVSN": "2"
 }*/
 
-// Functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/math/rotate2d.glsl
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
-
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/sdf/boxSDF.glsl
-float boxSDF( vec3 p, vec3 b ) {
-    vec3 d = abs(p) - b;
-    return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
-}
+#include "lygia/math/rotate2d.glsl"
+#include "lygia/sdf/boxSDF.glsl"
 
 
 // "shatter" function - subtracts a bunch of semi-random planes from the object

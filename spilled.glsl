@@ -134,27 +134,10 @@
 //   lightTheta = atan2(1, 1) = atan(1) = pi / 4 = 45°
 
 
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
-#define TWO_PI 6.2831853071795864769252867665590
-#define DEG2RAD (PI / 180.0)
+#include "lygia/math/const.glsl"
+#include "lygia/math/rotate2d.glsl"
+#include "lygia/space/polar2cart.glsl"
 
-vec2 polar2cart(in vec2 polar) {
-    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
-}
-
-vec3 polar2cart( in float r, in float phi, in float theta) {
-    float x = r * cos(theta) * sin(phi);
-    float y = r * sin(theta) * sin(phi);
-    float z = r * cos(phi);
-    return vec3(x, y, z);
-}
-
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
 
 // Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
 //

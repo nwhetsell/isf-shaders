@@ -135,27 +135,11 @@
     "ISFVSN": "2"
 }*/
 
-// Constants and functions from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-#define PI 3.1415926535897932384626433832795
-#define TWO_PI 6.2831853071795864769252867665590
-#define DEG2RAD (PI / 180.0)
+#include "lygia/math/const.glsl"
+#include "lygia/math/rotate2d.glsl"
+#include "lygia/sdf/boxSDF.glsl"
+#include "lygia/sdf/sphereSDF.glsl"
 
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/math/rotate2d.glsl
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
-
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/sdf/boxSDF.glsl
-float boxSDF( vec3 p, vec3 b ) {
-    vec3 d = abs(p) - b;
-    return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
-}
-
-// https://github.com/patriciogonzalezvivo/lygia/blob/main/sdf/sphereSDF.glsl
-float sphereSDF(vec3 p) { return length(p); }
-float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
 
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
 // Leon 2017-11-21

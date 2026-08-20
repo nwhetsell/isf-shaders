@@ -138,12 +138,8 @@
     ]
 }*/
 
-// Function from LYGIA <https://github.com/patriciogonzalezvivo/lygia>
-mat2 rotate2d(const in float r) {
-    float c = cos(r);
-    float s = sin(r);
-    return mat2(c, s, -s, c);
-}
+#include "lygia/math/rotate2d.glsl"
+
 
 //
 // ShaderToy Buffer A
