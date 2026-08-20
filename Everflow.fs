@@ -150,10 +150,9 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_LUMINANCE
+#define FNC_LUMINANCE 
 float luminance(in vec3 linear) { return dot(linear, vec3(0.21250175, 0.71537574, 0.07212251)); }
 float luminance(in vec4 linear) { return luminance( linear.rgb ); }
-
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -187,7 +186,7 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_GAUSSIAN
+#define FNC_GAUSSIAN 
 float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
 float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
 float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
@@ -207,7 +206,7 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_RECTSDF
+#define FNC_RECTSDF 
 float rectSDF(vec2 p, vec2 b, float r) {
     vec2 d = abs(p - 0.5) * 4.2 - b + vec2(r);
     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
@@ -235,7 +234,7 @@ contributors: [Ivan Dianov, Shadi El Hajj]
 description: polar to cartesian conversion.
 use: polar2cart(<vec2> polar)
 */
-#define FNC_POLAR2CART
+#define FNC_POLAR2CART 
 vec2 polar2cart(in vec2 polar) {
     return vec2(cos(polar.x), sin(polar.x)) * polar.y;
 }
@@ -491,7 +490,7 @@ void main()
         vec3 dx = vec3(-1, 0, 1);
         vec4 grad = -0.5 * vec4(V(position + dx.zy).zw - V(position + dx.xy).zw,
                                 V(position + dx.yz).zw - V(position + dx.yx).zw);
-        vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + 1e-5);
+        vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + EPSILON);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0, 0, 1), n);
         float specularb = gaussian(0.4 * (Nb.zz - border_h), INV_SQRT_2) *

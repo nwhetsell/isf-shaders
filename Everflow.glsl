@@ -438,7 +438,7 @@ void main()
         vec3 dx = vec3(-1, 0, 1);
         vec4 grad = -0.5 * vec4(V(position + dx.zy).zw - V(position + dx.xy).zw,
                                 V(position + dx.yz).zw - V(position + dx.yx).zw);
-        vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + 1e-5);
+        vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + EPSILON);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0, 0, 1), n);
         float specularb = gaussian(0.4 * (Nb.zz - border_h), INV_SQRT_2) *

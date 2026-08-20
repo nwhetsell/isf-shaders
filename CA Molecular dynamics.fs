@@ -387,7 +387,7 @@ void main()
                      vec3(-1./h, 0, 0.25) * border(X + vec2(-h, 0)) +
                      vec3( 0, 1./h, 0.25) * border(X + vec2( 0, h)) +
                      vec3( 0, -1./h, 0.25) * border(X + vec2( 0, -h));
-            vec3 BORD = vec3(normalize(r.xy), r.z + 1e-4);
+            vec3 BORD = vec3(normalize(r.xy), r.z + EPSILON);
             V += 0.5 * smoothstep(0., 5., -BORD.z) * BORD.xy;
             // Velocity limit
             float v = length(V);
