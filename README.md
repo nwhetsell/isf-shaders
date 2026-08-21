@@ -14,7 +14,7 @@ On macOS, after cloning this repository you can run the [make_links.sh](make_lin
 
 Many of these shaders are intended to be used with floating-point buffers.
 Not all ISF hosts support floating-point buffers.
-[Videosync](https://videosync.showsync.com/download) supports floating-point buffers in [v2.0.12](https://support.showsync.com/release-notes/videosync/2.0#2012) and later,
+[Videosync](https://videosync.showsync.com/download) supports floating-point buffers (in [v2.0.12](https://support.showsync.com/release-notes/videosync/2.0#2012) and later),
 but https://editor.isf.video does not.
 If floating-point buffers are not available, most of these shaders will look very different (if they run at all).
 
