@@ -193,7 +193,7 @@
 // #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
 // #define round(x) floor((x) + 0.5)
 
-// In the ShaderToy shader, values less than 0 and greater than 1 are written to
+// In the Shadertoy shader, values less than 0 and greater than 1 are written to
 // an image buffer. This is impossible without floating-point buffers; ISF
 // shaders clamp 8-bit buffers to be between 0 and 1. Consequently, unless
 // floating-point buffers are available, we must scale particle data to be
@@ -204,7 +204,7 @@
 
 
 //
-// ShaderToy Common
+// Shadertoy Common
 //
 
 // This should be an input variable, but the shader doesn’t initialize correctly
@@ -240,7 +240,7 @@ vec2 hash22(vec2 p)
 }
 
 
-// This is the `loop` function in Buffer A of the original ShaderToy shader.
+// This is the `loop` function in Buffer A of the original Shadertoy shader.
 vec2 wrapToRenderSize(vec2 position)
 {
 	return mod(position, RENDERSIZE);
@@ -250,7 +250,7 @@ void main()
 {
     vec2 position = gl_FragCoord.xy;
 
-    if (PASSINDEX == 0) // ShaderToy Buffer A
+    if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         float scaledSensorDistance = sensorDistance;
         float scaledSensorStrength = sensorStrength;
@@ -333,14 +333,14 @@ void main()
         SCALE_PARTICLE(particle);
         gl_FragColor = particle;
     }
-    else if (PASSINDEX == 1) // ShaderToy Buffer B
+    else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
         vec4 trail = IMG_PIXEL(trails, position);
 
         // Diffusion
 
         // This is the `Laplace` function in the Common tab of the original
-        // ShaderToy shader. In the jit.gl.isf Max object (available with the
+        // Shadertoy shader. In the jit.gl.isf Max object (available with the
         // ISF package), it seems that IMG_PIXEL cannot be used outside the GLSL
         // main function, so inline the `Laplace` function here.
         vec3 dx = vec3(-1, 0, 1);
@@ -375,14 +375,14 @@ void main()
             gl_FragColor = (1. - inputImageAmount) * trail + inputImageAmount * IMG_PIXEL(inputImage, position);
         }
     }
-    else if (PASSINDEX == 2) // ShaderToy Buffer C
+    else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
         gl_FragColor = blurProportion * IMG_PIXEL(diffuseTrails, position) + (1. - blurProportion) * IMG_PIXEL(trails, position);
         if (FRAMEINDEX < 1 || restart) {
             gl_FragColor = vec4(0);
         }
     }
-    else // ShaderToy Image
+    else // Shadertoy Image
     {
         vec4 diffuseTrail = 2.5 * IMG_PIXEL(diffuseTrails, position);
         gl_FragColor = vec4(sin(diffuseTrail.xyz * vec3(1, 1.2, 1.5)), 1);

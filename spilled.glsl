@@ -176,7 +176,7 @@ void main()
     vec2 pos = gl_FragCoord.xy;
     vec2 uv = pos / RENDERSIZE;
 
-    if (PASSINDEX == 0) // ShaderToy Buffer A
+    if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         int RotNum = 2 * int(agitation) + 1;
         float ang = TWO_PI / float(RotNum);
@@ -250,7 +250,7 @@ void main()
             gl_FragColor = IMG_PIXEL(inputImage, pos);
         }
     }
-    else // ShaderToy Image
+    else // Shadertoy Image
     {
         vec2 d = vec2(1 / RENDERSIZE.y, 0);
         vec3 n = vec3(

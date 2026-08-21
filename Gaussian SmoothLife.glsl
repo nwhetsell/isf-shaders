@@ -145,7 +145,7 @@
 #include "lygia/space/polar2cart.glsl"
 
 //
-// ShaderToy Buffer A
+// Shadertoy Buffer A
 //
 
 // the logistic function is used as a smooth step function
@@ -163,7 +163,7 @@ float logisticPulse(float x, float midpoint1, float midpoint2, float quarterInve
 
 float transformedLogistic(float x, float yShift, float maxValue, float quarterInverseSteepness)
 {
-    // The original ShaderToy shader effectively uses:
+    // The original Shadertoy shader effectively uses:
     //    return yShift * (1. - logistic(x, 0.5, quarterInverseSteepness)) + maxValue * logistic(x, 0.5, quarterInverseSteepness);
     // Simplifying this shows that this isn’t really two logistic functions.
     // It’s actually one logistic function shifted vertically by yShift with a
@@ -185,7 +185,7 @@ float transformedLogistic(float x, float yShift, float maxValue, float quarterIn
 
 
 //
-// ShaderToy Buffer B
+// Shadertoy Buffer B
 //
 
 struct GaussianSummation {
@@ -228,7 +228,7 @@ void main()
     vec2 tx = 1. / RENDERSIZE;
     vec2 uv = gl_FragCoord.xy * tx;
 
-    if (PASSINDEX == 0) // ShaderToy Buffer A
+    if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         vec4 current = IMG_NORM_PIXEL(cells, uv);
         current += inputImageAmount * IMG_NORM_PIXEL(inputImage, uv);
@@ -262,7 +262,7 @@ void main()
 
         gl_FragColor = vec4(new, fullness, current.w);
     }
-    else if (PASSINDEX == 1 || PASSINDEX == 2) // ShaderToy Buffer B and C
+    else if (PASSINDEX == 1 || PASSINDEX == 2) // Shadertoy Buffer B and C
     {
         if (PASSINDEX == 1) {
             if (mod(float(FRAMEINDEX), 2.) < 1.) {
@@ -309,7 +309,7 @@ void main()
 
         gl_FragColor = vec4(pass, 0, 1);
     }
-    else // ShaderToy Image
+    else // Shadertoy Image
     {
     	vec4 color = IMG_NORM_PIXEL(cells, uv);
 

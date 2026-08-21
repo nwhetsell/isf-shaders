@@ -185,7 +185,7 @@ vec3 hash32(vec2 p)
 
 
 //
-// ShaderToy Common
+// Shadertoy Common
 //
 float Pf(vec2 rho)
 {
@@ -213,12 +213,12 @@ vec3 bN(vec2 p)
 }
 
 
-// The ShaderToy shader uses the functions `floatBitsToUint` and
+// The Shadertoy shader uses the functions `floatBitsToUint` and
 // `uintBitsToFloat` to pack more than 4 floats (5 in this case) into a
 // 4-component pixel. These functions are available in GLSL v3.30 (OpenGL v3.3)
 // and later, but some ISF hosts (notably Videosync) use GLSL v1.50
-// (OpenGL v3.2). We can work around this by effectively running ShaderToy
-// buffers twice, but the packing operations in the ShaderToy shader also
+// (OpenGL v3.2). We can work around this by effectively running Shadertoy
+// buffers twice, but the packing operations in the Shadertoy shader also
 // perform a `clamp` on the packed data. Without the `clamp` calls, this shader
 // seems to blow up numerically.
 #define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
@@ -265,7 +265,7 @@ void main()
 {
     vec2 position = gl_FragCoord.xy;
 
-    if (PASSINDEX == 0 || PASSINDEX == 1) // ShaderToy Buffer A
+    if (PASSINDEX == 0 || PASSINDEX == 1) // Shadertoy Buffer A
     {
         particle P;
         P.X = vec2(0);
@@ -333,7 +333,7 @@ void main()
             gl_FragColor = vec4(PRE_PACK(P.V), 0, 1);
         }
     }
-    else if (PASSINDEX == 2) // ShaderToy Buffer B
+    else if (PASSINDEX == 2) // Shadertoy Buffer B
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
@@ -394,7 +394,7 @@ void main()
 
         gl_FragColor = vec4(PRE_PACK(P.V), 0, 1);
     }
-    else if (PASSINDEX == 3) // ShaderToy Buffer C
+    else if (PASSINDEX == 3) // Shadertoy Buffer C
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(
@@ -421,7 +421,7 @@ void main()
 
         gl_FragColor = rho;
     }
-    else // ShaderToy Image
+    else // Shadertoy Image
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
         particle P = getParticle(

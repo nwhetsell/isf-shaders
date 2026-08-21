@@ -203,7 +203,7 @@
 
 
 //
-// ShaderToy Common
+// Shadertoy Common
 //
 
 // Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
@@ -237,12 +237,12 @@ float hash11(float p)
 
 #define HALF_SENSOR_COUNT_MINUS_1 12
 
-// The ShaderToy shader uses the functions `floatBitsToUint` and
+// The Shadertoy shader uses the functions `floatBitsToUint` and
 // `uintBitsToFloat` to pack more than 4 floats (5 in this case) into a
 // 4-component pixel. These functions are available in GLSL v3.30 (OpenGL v3.3)
 // and later, but some ISF hosts (notably Videosync) use GLSL v1.50
 // (OpenGL v3.2). We can work around this by effectively running one of the
-// ShaderToy buffers twice, but the packing operations in the ShaderToy shader
+// Shadertoy buffers twice, but the packing operations in the Shadertoy shader
 // also perform a `clamp` on the packed data. Without the `clamp` calls, this
 // shader seems to blow up numerically.
 #define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
@@ -253,7 +253,7 @@ void main()
 {
     vec2 position = gl_FragCoord.xy;
 
-    if (PASSINDEX == 0 || PASSINDEX == 1) // ShaderToy Buffer A
+    if (PASSINDEX == 0 || PASSINDEX == 1) // Shadertoy Buffer A
     {
         vec2 X = vec2(0);
         vec2 V = vec2(0);
@@ -332,7 +332,7 @@ void main()
             gl_FragColor = vec4(PRE_PACK(V), 0, 1);
         }
     }
-    else if (PASSINDEX == 2) // ShaderToy Buffer B
+    else if (PASSINDEX == 2) // Shadertoy Buffer B
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
 
@@ -405,7 +405,7 @@ void main()
 
         gl_FragColor = vec4(PRE_PACK(V), 0, 1);
     }
-    else if (PASSINDEX == 3) // ShaderToy Buffer C
+    else if (PASSINDEX == 3) // Shadertoy Buffer C
     {
         float rho = 0.001;
         vec2 vel = vec2(0);
@@ -431,7 +431,7 @@ void main()
 
         gl_FragColor = vec4(vel, rho, 1);
     }
-    else // ShaderToy Image
+    else // Shadertoy Image
     {
         vec2 wrappedPosition = mod(position.xy, RENDERSIZE);
         float rho = IMG_NORM_PIXEL(bufferA_positionAndMass, wrappedPosition / RENDERSIZE).z;

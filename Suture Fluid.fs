@@ -152,7 +152,7 @@ mat2 rotate2d(const in float r){
     return mat2(c, s, -s, c);
 }
 //
-// ShaderToy Buffer A
+// Shadertoy Buffer A
 //
 // Simplex noise by Inigo Quilez, from https://www.shadertoy.com/view/Msf3WH
 // Copyright © 2013 Inigo Quilez.
@@ -232,10 +232,10 @@ void main()
     vec2 position = gl_FragCoord.xy;
     vec2 texelSize = 1. / RENDERSIZE;
     vec2 normalizedPosition = position * texelSize;
-    if (PASSINDEX == 0) // ShaderToy Buffer A
+    if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         // It’s unclear whether dividing by the advection distance scale is what
-        // was intended in the original ShaderToy shader.
+        // was intended in the original Shadertoy shader.
         float laplacianCenterWeight = -20. / advectionDistanceScale;
         float laplacianEdgeWeight = 4. / advectionDistanceScale;
         float laplacianVertexWeight = 1. / advectionDistanceScale;
@@ -292,7 +292,7 @@ void main()
             gl_FragColor = (1. - inputImageAmount) * gl_FragColor + inputImageAmount * IMG_PIXEL(inputImage, gl_FragCoord.xy);
         }
     }
-    else // ShaderToy Image
+    else // Shadertoy Image
     {
         vec3 abd = normalize(IMG_NORM_PIXEL(fluid, normalizedPosition).xyz);
         vec3 color = 0.5 + 0.6 * cross(abd, vec3(0.5, -0.4, 0.5));
