@@ -1,10 +1,10 @@
 # ISF Shaders
 
 <!--
-For screenshots, the -crop argument of magick should be:
-* When the image size is 1824x1424: '1576x1176+124+92'
-* When the image size is 1736x1336: '1576x1176+80+64'
-* When the image size is 1692x1292: '1576x1176+48+40'
+For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
+* 1824x1424 : '1576x1176+124+92'
+* 1736x1336 : '1576x1176+80+64'
+* 1692x1292 : '1576x1176+48+40'
 -->
 <table>
   <tr>
