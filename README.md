@@ -8,7 +8,7 @@ The .fs file is the .glsl file with `#include` directives expanded using the [Cl
 (This is needed because the GLSL preprocessor [does not support `#include`](https://wikis.khronos.org/opengl/Core_Language_(GLSL)#Preprocessor_directives).)
 Due to limitations of the Clang preprocessor, `#if`/`#else` directives are also evaluated when expanding `#include` directives.
 
-Many shaders use code from [LYGIA]([LYGIA](https://github.com/patriciogonzalezvivo/lygia)), which for non-commercial use is distributed under the [Prosperity Public License 3.0.0](https://prosperitylicense.com/versions/3.0.0).
+Many shaders use code from [LYGIA](https://github.com/patriciogonzalezvivo/lygia), which for non-commercial use is distributed under the [Prosperity Public License 3.0.0](https://prosperitylicense.com/versions/3.0.0).
 
 On macOS, after cloning this repository you can run the [make_links.sh](make_links.sh) script to add symbolic links .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
 
