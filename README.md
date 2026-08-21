@@ -18,7 +18,9 @@
         <li><a href="https://editor.isf.video/shaders/6a5b6b524d2be7001ab74daa">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “CA Molecular dynamics” shader" src="https://github.com/user-attachments/assets/3518a84b-b58c-4c24-8e24-d1c0176471bc" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “CA Molecular dynamics” shader" src="https://github.com/user-attachments/assets/0dfd7e90-2f53-4429-aff7-7ce9e9b224ce" />
+    </td>
   </tr>
   <tr>
     <td><a href="Cell%20system%202.glsl">Cell system 2</a></td>
@@ -30,7 +32,9 @@
         <li><a href="https://editor.isf.video/shaders/68cada72abb222001a42145e">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Cell system 2” shader" src="https://github.com/user-attachments/assets/3cd9cb77-657f-4050-9374-32ed2085beb1" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Cell system 2” shader" src="https://github.com/user-attachments/assets/61a7d910-fe93-4435-a089-46296b671bdb" />
+    </td>
   </tr>
   <tr>
     <td><a href="Endless%20living%20creature.glsl">Endless living creature</a></td>
@@ -42,7 +46,9 @@
         <li><a href="https://editor.isf.video/shaders/69c3befc13a628001ac60cb1">ISF</a></li>
       </ul>
     </td>
-    <td></td>
+    <td>
+      <img width="197" alt="Screenshot of “Endless living creature” shader" src="https://github.com/user-attachments/assets/f71f48c1-371b-414e-b63f-63f04d7106a9" />
+    </td>
   </tr>
   <tr>
     <td><a href="Everflow.glsl">Everflow</a></td>
@@ -54,7 +60,9 @@
         <li><a href="https://editor.isf.video/shaders/6a63abd74fe9d6001a8723be">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Everflow” shader" src="https://github.com/user-attachments/assets/f1849fcf-54d9-49d3-b511-ff642ef9e633" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Everflow” shader" src="https://github.com/user-attachments/assets/58878b46-f931-41e1-9bea-a0772debc691" />
+    </td>
   </tr>
   <tr>
     <td><a href="Gaussian%20SmoothLife.glsl">Gaussian SmoothLife</a></td>
@@ -66,7 +74,9 @@
         <li><a href="https://editor.isf.video/shaders/6885276e2f6812001a55f70b">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Gaussian SmoothLife” shader" src="https://github.com/user-attachments/assets/c1811756-50aa-47c5-8cb9-71bbde4b4daa" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Gaussian SmoothLife” shader" src="https://github.com/user-attachments/assets/4c51ad5b-868f-450b-8068-69bd912841d4" />
+    </td>
   </tr>
   <tr>
     <td><a href="Le%20Vortex.glsl">Le Vortex</a></td>
@@ -79,7 +89,9 @@
         <li><a href="https://editor.isf.video/shaders/6918c41f66081f001a4b4adc">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Le Vortex” shader" src="https://github.com/user-attachments/assets/cc36e958-4844-4bb3-81b5-7852449f843c" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Le Vortex” shader" src="https://github.com/user-attachments/assets/a18fb39d-b84a-4917-9361-72a5829b1044" />
+    </td>
   </tr>
   <tr>
     <td><a href="Lorenz%20system.glsl">Lorenz system</a></td>
@@ -91,7 +103,9 @@
         <li><a href="https://editor.isf.video/shaders/696fc12680748c001a899e44">ISF</a></li>
       </ul>
     </td>
-    <td></td>
+    <td>
+      <img width="197" alt="Screenshot of “Lorenz system” shader" src="https://github.com/user-attachments/assets/cc974df7-b9a2-4b33-be46-8ce07cdff7dc" />
+    </td>
   </tr>
   <tr>
     <td><a href="Physarum%20Polycephalum%20Simulation.glsl">Physarum Polycephalum Simulation</a></td>
@@ -103,7 +117,9 @@
         <li><a href="https://editor.isf.video/shaders/68618b61932476001a3ae982">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Physarum Polycephalum Simulation” shader" src="https://github.com/user-attachments/assets/36c072bb-0aa6-4c09-8cd6-ab533a53060f" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Physarum Polycephalum Simulation” shader" src="https://github.com/user-attachments/assets/ec175ac4-7659-4611-9dcb-e0a9490f7d88" />
+</td>
   </tr>
   <tr>
     <td><a href="Random%20slime%20mold%20generator.glsl">Random slime mold generator</a></td>
@@ -115,7 +131,9 @@
         <li><a href="https://editor.isf.video/shaders/689247373bc53b001a4d81b3">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Random slime mold generator” shader" src="https://github.com/user-attachments/assets/d1e71a06-6f25-42e0-ba5e-ec09250c392d" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Random slime mold generator” shader" src="https://github.com/user-attachments/assets/9f804502-69c1-485b-bcfe-dc99238c77ed" />
+    </td>
   </tr>
   <tr>
     <td><a href="Shattered%20Crystal.glsl">Shattered Crystal</a></td>
@@ -127,7 +145,9 @@
         <li><a href="https://editor.isf.video/shaders/69ac8d9ad1b29b0019164aea">ISF</a></li>
       </ul>
     </td>
-    <td></td>
+    <td>
+      <img width="197" alt=" of “Shattered Crystal” shader" src="https://github.com/user-attachments/assets/f7195e50-5297-431e-ac79-12533ad5321e" />
+    </td>
   </tr>
   <tr>
     <td><a href="spilled.glsl">spilled</a></td>
@@ -139,7 +159,9 @@
         <li><a href="https://editor.isf.video/shaders/688bd4413bc53b001a4d37fc">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “spilled” shader" src="https://github.com/user-attachments/assets/a5221dcd-044a-49b3-b1a3-f7fa70272bb0" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “spilled” shader" src="https://github.com/user-attachments/assets/627a035e-1122-4bfa-8f7d-4f81cbded1d7" />
+    </td>
   </tr>
   <tr>
     <td><a href="Suture%20Fluid.glsl">Suture Fluid</a></td>
@@ -151,7 +173,9 @@
         <li><a href="https://editor.isf.video/shaders/688e4c703bc53b001a4d55ce">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “Suture Fluid” shader" src="https://github.com/user-attachments/assets/50fb007e-046c-4f3b-9299-ac2ed7101d3b" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “Suture Fluid” shader" src="https://github.com/user-attachments/assets/a6b2b1b0-b25a-4bf4-8ae5-306ef065fa31" />
+    </td>
   </tr>
   <tr>
     <td><a href="The Weave.glsl">The Weave</a></td>
@@ -163,6 +187,8 @@
         <li><a href="https://editor.isf.video/shaders/688f907d3bc53b001a4d6198">ISF</a></li>
       </ul>
     </td>
-    <td><img width="197" alt="Screenshot of “The Weave” shader" src="https://github.com/user-attachments/assets/80aabc87-5923-4893-a3f7-705b41987789" /></td>
+    <td>
+      <img width="197" alt="Screenshot of “The Weave” shader" src="https://github.com/user-attachments/assets/4d138968-ae6b-46a4-8163-ad4607f6bad2" />
+    </td>
   </tr>
 </table>
