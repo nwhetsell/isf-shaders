@@ -10,7 +10,7 @@ Due to limitations of the Clang preprocessor, `#if`/`#else` directives are also 
 
 Many shaders use code from [LYGIA]([LYGIA](https://github.com/patriciogonzalezvivo/lygia)), which for non-commercial use is distributed under the [Prosperity Public License 3.0.0](https://prosperitylicense.com/versions/3.0.0).
 
-On macOS, after cloning this repository you can run the [make_links.sh][make_links.sh] script to add symbolic links .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
+On macOS, after cloning this repository you can run the [make_links.sh](make_links.sh) script to add symbolic links .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
 
 Many of these shaders are intended to be used with floating-point buffers.
 Not all ISF hosts support floating-point buffers.
