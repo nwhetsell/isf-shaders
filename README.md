@@ -1,5 +1,23 @@
 # ISF Shaders
 
+This is a collection of [ISF shaders](https://isf.video/).
+You should be able to use these shaders in any app that supports ISF.
+
+Each shader consists of .fs, .glsl, and .vs files.
+The .fs file is the .glsl, but with `#include` directives expanded and `#if`/`#else` directives evaluated using the [Clang](https://clang.llvm.org) preprocessor.
+(This is needed because the GLSL preprocessor [does not support `#include`](https://wikis.khronos.org/opengl/Core_Language_(GLSL)#Preprocessor_directives).)
+Due to limitations of the Clang preprocessor, `#if`/`#else` directives are also evaluated when expanding `#include` directives.
+
+Many shaders use code from [LYGIA]([LYGIA](https://github.com/patriciogonzalezvivo/lygia)), which for non-commercial use is distributed under the [Prosperity Public License 3.0.0](https://prosperitylicense.com/versions/3.0.0).
+
+On macOS, after cloning this repository you can run the [make_links.sh][make_links.sh] script to add symbolic links .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
+
+Many of these shaders are intended to be used with floating-point buffers.
+Not all ISF hosts support floating-point buffers.
+[Videosync](https://videosync.showsync.com/download) supports floating-point buffers in [v2.0.12](https://support.showsync.com/release-notes/videosync/2.0#2012) and later,
+but https://editor.isf.video does not.
+If floating-point buffers are not available, most of these shaders will look very different (if they run at all).
+
 <!--
 For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
 * 1824x1424 : '1576x1176+124+92'
