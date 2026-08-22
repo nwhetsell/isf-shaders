@@ -285,7 +285,7 @@ vec2 hash22(vec2 p)
 // This is the `loop` function in Buffer A of the original Shadertoy shader.
 vec2 wrapToRenderSize(vec2 position)
 {
- return mod(position, RENDERSIZE);
+    return mod(position, RENDERSIZE);
 }
 void main()
 {
@@ -296,7 +296,7 @@ void main()
         float scaledSensorStrength = sensorStrength;
         if (length(mouse.xy) > 0.) {
             scaledSensorDistance *= mouse.x;
-        scaledSensorStrength *= mouse.y;
+            scaledSensorStrength *= mouse.y;
         }
         // This pixel value
         vec4 particle = IMG_PIXEL(particles, position);
@@ -329,7 +329,7 @@ void main()
         particle.xy = wrapToRenderSize(particle.xy);
         // Cell cloning
         if (length(particle.xy - position) > particleCloneDistance) {
-         particle.xy += particleCloneFactor * (hash22(position) - 0.5);
+            particle.xy += particleCloneFactor * (hash22(position) - 0.5);
         }
         // Sensors
         vec2 sensorCounterclockwisePosition = particle.xy + polar2cart(vec2(particle.z + sensorAngle, scaledSensorDistance));

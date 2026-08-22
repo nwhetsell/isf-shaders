@@ -200,7 +200,7 @@ void main()
 
             vec2 X0 = POST_UNPACK(data.xy) + translatedPosition;
             vec2 V0 = POST_UNPACK(IMG_PIXEL(bufferB_velocity, wrappedPosition).xy);
-           	int M0 = int(data.z);
+            int M0 = int(data.z);
 
             X0 += V0 * dt; // Integrate position
 
@@ -278,7 +278,7 @@ void main()
                 F -= 0.003 * dx * gaussian(dx / 30., INV_SQRT_2);
             }
 
-           	// Gravity
+            // Gravity
             F += gravityScale * gravityDirection;
 
             // Integrate velocity

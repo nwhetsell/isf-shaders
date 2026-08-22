@@ -51,19 +51,19 @@
 float sh(vec3 p, float d, float a, float s, float o)
 {
     // loop for each plane
-	for (float i = 0.; i < 9.; i++) {
-	    // apply semi-random rotation
-		p.xy *= rotate2d(a);
-		p.xz *= rotate2d(a * 0.5);
-		p.yz *= rotate2d(a + a);
-		// pick semi-random axis for plane
-		float c = mod(i, 3.) == 0. ? p.x : mod(i, 3.) == 1. ? p.y : p.z;
-		// subtract plane from object, using onioning and offset
-		// to give the plane thickness and move it away from the centre
-		c = abs(c - o) - s;
-		d = max(d, -c);
-	}
-	return d; // return final sdf value
+    for (float i = 0.; i < 9.; i++) {
+        // apply semi-random rotation
+        p.xy *= rotate2d(a);
+        p.xz *= rotate2d(a * 0.5);
+        p.yz *= rotate2d(a + a);
+        // pick semi-random axis for plane
+        float c = mod(i, 3.) == 0. ? p.x : mod(i, 3.) == 1. ? p.y : p.z;
+        // subtract plane from object, using onioning and offset
+        // to give the plane thickness and move it away from the centre
+        c = abs(c - o) - s;
+        d = max(d, -c);
+    }
+    return d; // return final sdf value
 }
 
 // scene/map function
@@ -75,23 +75,23 @@ float indexOfRefraction = 0.;
 float mp(vec3 p)
 {
     // rotate entire scene slowly
-	p.xz *= rotate2d(time * 0.03 + 1.);
-	p.yz *= rotate2d(time * 0.05 + 0.5);
+    p.xz *= rotate2d(time * 0.03 + 1.);
+    p.yz *= rotate2d(time * 0.05 + 0.5);
     // create 2 boxes - one is the actual object, one is purely used for my fake subsurface
-	float d = boxSDF(p, vec3(objectSize)) - 0.1;
-	float c = boxSDF(p, vec3(subsurfaceSize));
+    float d = boxSDF(p, vec3(objectSize)) - 0.1;
+    float c = boxSDF(p, vec3(subsurfaceSize));
     // shatter box
-	d = sh(p, d, sin(time * 0.01 + 0.3) * 3., (cos(time * 0.1) * 0.5 + 0.5) * 0.5 + 0.008, 0.4);
+    d = sh(p, d, sin(time * 0.01 + 0.3) * 3., (cos(time * 0.1) * 0.5 + 0.5) * 0.5 + 0.008, 0.4);
     // set scene distance, add glow
-	float sceneDistance = d;
-	glowColor.rgb += 0.001 / (0.001 + d*d) * normalize(p*p) * 0.008;
+    float sceneDistance = d;
+    glowColor.rgb += 0.001 / (0.001 + d*d) * normalize(p*p) * 0.008;
     // set object values - doing inside the scene allows for easier and nicer effects!
-	if (sceneDistance < 0.001) {
-		subsurfaceColor = pow(c, 3.) * baseSubsurfaceColor; // fake subsurface
-		indexOfRefraction = 1.5 + c * 0.1; // index of refraction
-		objectTransmission = 0.8 - c * 0.2; // object transmission
-	}
-	return sceneDistance; // return the distance - this is only used for the normals function
+    if (sceneDistance < 0.001) {
+        subsurfaceColor = pow(c, 3.) * baseSubsurfaceColor; // fake subsurface
+        indexOfRefraction = 1.5 + c * 0.1; // index of refraction
+        objectTransmission = 0.8 - c * 0.2; // object transmission
+    }
+    return sceneDistance; // return the distance - this is only used for the normals function
 }
 
 // inlined raymarcher. Mostly standard, but multiplies the scene distance by the inversion factor

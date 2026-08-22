@@ -219,7 +219,7 @@ void addCell(inout float new, vec2 normalizedCoordinate)
     // from chronos' SmoothLife shader https://www.shadertoy.com/view/XtdSDn
     float dst = length(gl_FragCoord.xy - normalizedCoordinate * RENDERSIZE);
     if (dst <= or) {
-    	new = step((ir + 1.5), dst) * (1. - step(or, dst));
+        new = step((ir + 1.5), dst) * (1. - step(or, dst));
     }
 }
 
@@ -255,7 +255,7 @@ void main()
             const float initialCellCount = 20.;
 #endif
             for (float i = 0.; i < initialCellCount; i++) {
-               	vec2 initialCoordinate = polar2cart(vec2(TWO_PI * i / initialCellCount, 0.25)) + 0.5;
+                vec2 initialCoordinate = polar2cart(vec2(TWO_PI * i / initialCellCount, 0.25)) + 0.5;
                 addCell(new, initialCoordinate);
             }
         }
@@ -311,7 +311,7 @@ void main()
     }
     else // Shadertoy Image
     {
-    	vec4 color = IMG_NORM_PIXEL(cells, uv);
+        vec4 color = IMG_NORM_PIXEL(cells, uv);
 
         gl_FragColor = vec4(color.r * vec3(1) + color.g * vec3(1, 0.5, 0) + color.b * vec3(0, 0.5, 1), 1);
     }

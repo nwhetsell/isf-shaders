@@ -83,7 +83,7 @@
 // Calculate the next position
 vec3 Integrate(vec3 cur, float dt)
 {
-	vec3 next = vec3(0);
+    vec3 next = vec3(0);
 
     next.x = O * (cur.y - cur.x);
     next.y = cur.x * (P - cur.z) - cur.y;
@@ -95,9 +95,9 @@ vec3 Integrate(vec3 cur, float dt)
 // Distance to a line segment
 float dfLine(vec2 start, vec2 end, vec2 uv)
 {
-	vec2 line = end - start;
-	float frac = dot(uv - start, line) / dot(line, line);
-	return distance(start + line * clamp(frac, 0., 1.), uv);
+    vec2 line = end - start;
+    float frac = dot(uv - start, line) / dot(line, line);
+    return distance(start + line * clamp(frac, 0., 1.), uv);
 }
 
 
@@ -116,7 +116,7 @@ void main()
 #define MODE xz
     float d = FLT_MAX;
     for (int i = 0; i < STEPS; i++) {
-       	next = Integrate(last, 0.016 * SPEED);
+        next = Integrate(last, 0.016 * SPEED);
         d = min(d, dfLine(last.MODE * VIEW_SCALE, next.MODE * VIEW_SCALE, uv));
         last = next;
     }
@@ -130,10 +130,10 @@ void main()
         if (FRAMEINDEX == 0) {
             // Set up initial conditions.
             vec3 start = vec3(0.1, 0.001, 0);
-      		gl_FragColor = vec4(start, 0);
-       	} else {
+            gl_FragColor = vec4(start, 0);
+        } else {
             // Save current position.
-      		gl_FragColor = vec4(next, 0);
+            gl_FragColor = vec4(next, 0);
         }
     } else {
         gl_FragColor = vec4(vec3(c) + IMG_THIS_PIXEL(lastData).rgb * FADE, 1);
