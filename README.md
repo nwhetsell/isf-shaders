@@ -49,7 +49,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
   <tr>
     <td><a href="Cell%20system%202.fs">Cell system 2</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
-    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>n/a</td>
     <td>
       <ul>
         <li><a href="https://www.shadertoy.com/view/3tSfRW">Shadertoy</a></li>
@@ -77,7 +77,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
   <tr>
     <td><a href="Everflow.fs">Everflow</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
-    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>n/a</td>
     <td>
       <ul>
         <li><a href="https://www.shadertoy.com/view/ttBcWm">Shadertoy</a></li>
@@ -134,7 +134,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
   <tr>
     <td><a href="Physarum%20Polycephalum%20Simulation.fs">Physarum Polycephalum Simulation</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
-    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>n/a</td>
     <td>
       <ul>
         <li><a href="https://www.shadertoy.com/view/tlKGDh">Shadertoy</a></li>
@@ -190,7 +190,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
   <tr>
     <td><a href="Suture%20Fluid.fs">Suture Fluid</a></td>
     <td><a href="https://www.shadertoy.com/user/cornusammonis">cornusammonis</a></td>
-    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>n/a</td>
     <td>
       <ul>
         <li><a href="https://www.shadertoy.com/view/XddSRX">Shadertoy</a></li>
