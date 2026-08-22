@@ -141,6 +141,11 @@
     ]
 }*/
 
+// #define ISF_EDITOR_WEBSITE
+#ifdef ISF_EDITOR_WEBSITE
+#define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
+#endif
+
 #include "lygia/color/luminance.glsl"
 #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
@@ -154,8 +159,6 @@ float rectSDF_without_transform(vec2 p, vec2 b) {
     return rectSDF((p + 0.5) / 4.2, b, 0.);
 }
 #include "lygia/space/polar2cart.glsl"
-
-// #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
 
 
 //

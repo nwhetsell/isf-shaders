@@ -139,6 +139,7 @@
         }
     ]
 }*/
+// #define ISF_EDITOR_WEBSITE
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -267,7 +268,7 @@ void main()
         // For unclear reasons, FRAMEINDEX must be strictly less than 5, not 1,
         // here.
         if (FRAMEINDEX < 5 || addCells) {
-            const float initialCellCount = 20.;
+            float initialCellCount = min(RENDERSIZE.x, RENDERSIZE.y) / 50.;
             for (float i = 0.; i < initialCellCount; i++) {
                 vec2 initialCoordinate = polar2cart(vec2(TWO_PI * i / initialCellCount, 0.25)) + 0.5;
                 addCell(new, initialCoordinate);
@@ -299,7 +300,6 @@ void main()
         }
         gaussianSummation.sum += gaussianSummation.a;
         // sum up remaining terms symmetrically
-        const int oc = 50;
         for (int i = 1; i <= oc; i++) {
             float fi = float(i);
             vec2 g = GaussianSummation_computeGaussian(gaussianSummation, fi);

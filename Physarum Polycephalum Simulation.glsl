@@ -172,6 +172,13 @@
     ]
 }*/
 
+// #define ISF_EDITOR_WEBSITE
+#ifdef ISF_EDITOR_WEBSITE
+#define particleMaxSearchRadius 5.
+#define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
+#define round(x) floor((x) + 0.5)
+#endif
+
 // These are also interesting defaults on the ISF website:
 //   simulationSpeed: 0.19
 //   trailSize: 6
@@ -191,10 +198,6 @@
 #include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/space/polar2cart.glsl"
-
-// #define particleMaxSearchRadius 5.
-// #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
-// #define round(x) floor((x) + 0.5)
 
 // In the Shadertoy shader, values less than 0 and greater than 1 are written to
 // an image buffer. This is impossible without floating-point buffers; ISF

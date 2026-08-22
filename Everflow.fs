@@ -140,6 +140,7 @@
         }
     ]
 }*/
+// #define ISF_EDITOR_WEBSITE
 /*
 contributor: nan
 description: |
@@ -333,8 +334,6 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
-
-// #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
 //
 // Shadertoy Common
 //

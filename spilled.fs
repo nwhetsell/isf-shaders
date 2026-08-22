@@ -131,6 +131,7 @@
 //   lightRadius = length(vec3(1, 1, 2)) = sqrt(1 + 1 + 2 * 2) = sqrt(6) ≈ 2.4494897428
 //   lightPhi = acos(2 / lightRadius) ≈ 35.2643896828°
 //   lightTheta = atan2(1, 1) = atan(1) = pi / 4 = 45°
+// #define ISF_EDITOR_WEBSITE
 #define RANDOM_HIGHER_RANGE 
 #define RANDOM_SINLESS 
 /*
@@ -292,7 +293,7 @@ void main()
             }
             vec2 p = b;
             for (int i = 0; i <
-                                5
+                                RotNum
                                       ; i++) {
                 vec2 pos_plus_p = pos + p;
                 vec2 rotated_b =
@@ -301,7 +302,7 @@ void main()
                 float rotated_b_magnitude_squared = dot(rotated_b, rotated_b);
                 float rot = 0.;
                 for (int _ = 0; _ <
-                                    5
+                                    RotNum
                                           ; _++) {
                     rot += dot(
                         IMG_NORM_PIXEL(mainPass, fract((pos_plus_p + rotated_b) / RENDERSIZE)).xy - vec2(0.5),
@@ -333,6 +334,9 @@ void main()
             1000. - fluidHeight
         );
         vec3 spread_n = n;
+        for (int i = 1; i < int(spread); i++) {
+            spread_n *= n;
+        }
         n = normalize(spread_n);
         vec3 light = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
         float diff = clamp(dot(n, light), 0.5, 1.);

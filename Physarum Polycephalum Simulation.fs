@@ -171,6 +171,7 @@
         }
     ]
 }*/
+// #define ISF_EDITOR_WEBSITE
 // These are also interesting defaults on the ISF website:
 //   simulationSpeed: 0.19
 //   trailSize: 6
@@ -326,9 +327,6 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     return vec3(x, y, z);
 }
 
-// #define particleMaxSearchRadius 5.
-// #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
-// #define round(x) floor((x) + 0.5)
 // In the Shadertoy shader, values less than 0 and greater than 1 are written to
 // an image buffer. This is impossible without floating-point buffers; ISF
 // shaders clamp 8-bit buffers to be between 0 and 1. Consequently, unless

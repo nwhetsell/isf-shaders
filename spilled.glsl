@@ -133,6 +133,7 @@
 //   lightPhi = acos(2 / lightRadius) ≈ 35.2643896828°
 //   lightTheta = atan2(1, 1) = atan(1) = pi / 4 = 45°
 
+// #define ISF_EDITOR_WEBSITE
 
 #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
@@ -172,7 +173,7 @@ void main()
             vec2 p = b;
 
             for (int i = 0; i <
-#ifdef VIDEOSYNC
+#ifndef ISF_EDITOR_WEBSITE
                                 RotNum
 #else
                                 5
@@ -190,7 +191,7 @@ void main()
                 float rot = 0.;
                 for (int _ = 0; _ <
 
-#ifdef VIDEOSYNC
+#ifndef ISF_EDITOR_WEBSITE
                                     RotNum
 #else
                                     5
@@ -233,7 +234,7 @@ void main()
         );
 
         vec3 spread_n = n;
-#ifdef VIDEOSYNC
+#ifndef ISF_EDITOR_WEBSITE
         for (int i = 1; i < int(spread); i++) {
             spread_n *= n;
         }

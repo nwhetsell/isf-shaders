@@ -140,6 +140,8 @@
     ]
 }*/
 
+// #define ISF_EDITOR_WEBSITE
+
 #include "lygia/math/const.glsl"
 #define SQRT_TWO_PI 2.5066282746310005024157652848110
 #include "lygia/space/polar2cart.glsl"
@@ -249,7 +251,7 @@ void main()
         // For unclear reasons, FRAMEINDEX must be strictly less than 5, not 1,
         // here.
         if (FRAMEINDEX < 5 || addCells) {
-#ifdef VIDEOSYNC
+#ifndef ISF_EDITOR_WEBSITE
             float initialCellCount = min(RENDERSIZE.x, RENDERSIZE.y) / 50.;
 #else
             const float initialCellCount = 20.;
@@ -289,7 +291,7 @@ void main()
         gaussianSummation.sum += gaussianSummation.a;
 
         // sum up remaining terms symmetrically
-#ifndef VIDEOSYNC
+#ifdef ISF_EDITOR_WEBSITE
         const int oc = 50;
 #endif
         for (int i = 1; i <= oc; i++) {
