@@ -10,7 +10,7 @@
             "TYPE" : "image"
         },
         {
-            "NAME": "L",
+            "NAME": "searchDistance",
             "LABEL": "Search distance",
             "TYPE": "float",
             "DEFAULT": 8,
@@ -18,7 +18,7 @@
             "MIN": 1
         },
         {
-            "NAME": "T",
+            "NAME": "gridStep",
             "LABEL": "Grid step",
             "TYPE": "float",
             "DEFAULT": 4,
@@ -26,7 +26,7 @@
             "MIN": 1
         },
         {
-            "NAME": "d",
+            "NAME": "density",
             "LABEL": "Density",
             "TYPE": "float",
             "DEFAULT": 1,
@@ -39,7 +39,7 @@
 
 // #define ISF_EDITOR_WEBSITE
 #ifdef ISF_EDITOR_WEBSITE
-#define L 8.
+#define searchDistance 8.
 #endif
 
 #include "lygia/color/luminance.glsl"
@@ -49,20 +49,21 @@
 // ( doing it simpler: circles instead of scribbles ;-) )
 
 #define C(U,P,r) smoothstep(1.5, 0., abs(length(P - U) - r))                       // ring
-//#define C(U,P,r) exp(-.5*dot(P-U,P-U)/(r*r)) * sin(1.5*6.28*length(P-U)/r) // Gabor
+//#define C(U,P,radius) exp(-.5*dot(P-U,P-U)/(radius*radius)) * sin(1.5*6.28*length(P-U)/radius) // Gabor
 
 void main()
 {
     gl_FragColor = vec4(1);
 
-    for (float j = -L; j <= L; j++)    // test potential circle centers in a window around gl_FragCoord
-    for (float i = -L; i <= L; i++) {
-        vec2 P = floor(gl_FragCoord.xy / T + vec2(i,j)) * T; // potential circle center
-        P += T * (random2(P) - 0.5);
-        float v = luminance(IMG_PIXEL(inputImage, P)); // target grey value
-        float r = mix(2., L * T, v); // target radius
-        if (random(P) < ((1. - v) / r) * 4. * d/L * T*T) { // draw circle with probability
-            gl_FragColor.rgb -= C(gl_FragCoord.xy, P, r) * 0.2;
+    for (float j = -searchDistance; j <= searchDistance; j++) // test potential circle centers in a window around gl_FragCoord
+    for (float i = -searchDistance; i <= searchDistance; i++) {
+        vec2 P = floor(gl_FragCoord.xy / gridStep + vec2(i, j)) * gridStep; // potential circle center
+        P += gridStep * (random2(P) - 0.5);
+        float lum = luminance(IMG_PIXEL(inputImage, P)); // target grey value
+        float radius = mix(2., searchDistance * gridStep, lum); // target radius
+        // draw circle with probability
+        if (random(P) < ((1. - lum) / radius) * 4. * density/searchDistance * gridStep*gridStep) {
+            gl_FragColor.rgb -= C(gl_FragCoord.xy, P, radius) * 0.2;
         }
     }
 }
