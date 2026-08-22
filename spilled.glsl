@@ -273,6 +273,6 @@ void main()
         float spec = clamp(dot(reflect(light, n), vec3(0, 0, -1)), 0., 1.);
         spec = pow(spec, 36.) * 2.5;
 
-    	gl_FragColor = IMG_NORM_PIXEL(mainPass, uv) * vec4(diff) + specularReflectionAmount * vec4(spec);
+        gl_FragColor = IMG_NORM_PIXEL(mainPass, uv) * vec4(diff) + specularReflectionAmount * vec4(spec);
     }
 }
