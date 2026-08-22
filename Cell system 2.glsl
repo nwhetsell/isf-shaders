@@ -195,6 +195,9 @@
 
 #include "lygia/color/space/hsv2rgb.glsl"
 #include "lygia/color/luminance.glsl"
+#define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
@@ -205,35 +208,6 @@
 //
 // Shadertoy Common
 //
-
-// Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
-//
-// Copyright © 2014 David Hoskins.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the “Software”), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-float hash11(float p)
-{
-    p = fract(p * 0.1031);
-    p *= p + 33.33;
-    p *= p + p;
-    return fract(p);
-}
 
 #define HALF_SENSOR_COUNT_MINUS_1 12
 
@@ -318,7 +292,7 @@ void main()
             vec2 dx1 = position - 0.7 * RENDERSIZE;
             V = 0.5 * rotate2d(HALF_PI) * (dx0 * gaussian(dx0 / 30., INV_SQRT_2) - dx1 * gaussian(dx1 / 30., INV_SQRT_2));
             V += polar2cart(vec2(
-                TWO_PI * hash11(floor(position.x / 10.) + RENDERSIZE.x * floor(position.y / 20.)),
+                TWO_PI * random(floor(position.x / 10.) + RENDERSIZE.x * floor(position.y / 20.)),
                 1
             ));
 

@@ -153,6 +153,94 @@ license:
 #define FNC_LUMINANCE 
 float luminance(in vec3 linear) { return dot(linear, vec3(0.21250175, 0.71537574, 0.07212251)); }
 float luminance(in vec4 linear) { return luminance( linear.rgb ); }
+#define RANDOM_HIGHER_RANGE 
+#define RANDOM_SINLESS 
+/*
+contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
+description: Pass a value and get some random normalize value between 0 and 1
+use: float random[2|3](<float|vec2|vec3> value)
+options:
+    - RANDOM_HIGHER_RANGE: for working with a range over 0 and 1
+    - RANDOM_SINLESS: Use sin-less random, which tolerates bigger values before producing pattern. From https://www.shadertoy.com/view/4djSRW
+    - RANDOM_SCALE: by default this scale if for number with a big range. For producing good random between 0 and 1 use bigger range
+examples:
+    - /shaders/generative_random.frag
+license:
+    - MIT License (MIT) Copyright 2014, David Hoskins
+*/
+#define RANDOM_SCALE vec4(.1031, .1030, .0973, .1099)
+#define FNC_RANDOM 
+float random(in float x) {
+    x = fract(x * RANDOM_SCALE.x);
+    x *= x + 33.33;
+    x *= x + x;
+    return fract(x);
+}
+float random(in vec2 st) {
+    vec3 p3 = fract(vec3(st.xyx) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+float random(in vec3 pos) {
+    pos = fract(pos * RANDOM_SCALE.xyz);
+    pos += dot(pos, pos.zyx + 31.32);
+    return fract((pos.x + pos.y) * pos.z);
+}
+float random(in vec4 pos) {
+    pos = fract(pos * RANDOM_SCALE);
+    pos += dot(pos, pos.wzxy + 33.33);
+    return fract((pos.x + pos.y) * (pos.z + pos.w));
+}
+vec2 random2(float p) {
+    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec2 random2(vec2 p) {
+    vec3 p3 = fract(p.xyx * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec2 random2(vec3 p3) {
+    p3 = fract(p3 * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec3 random3(float p) {
+    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+vec3 random3(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yxz + 19.19);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+vec3 random3(vec3 p) {
+    p = fract(p * RANDOM_SCALE.xyz);
+    p += dot(p, p.yxz + 19.19);
+    return fract((p.xxy + p.yzz) * p.zyx);
+}
+vec4 random4(float p) {
+    vec4 p4 = fract(p * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec2 p) {
+    vec4 p4 = fract(p.xyxy * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec3 p) {
+    vec4 p4 = fract(p.xyzx * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec4 p4) {
+    p4 = fract(p4 * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -247,33 +335,6 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
 }
 
 // #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
-// Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
-//
-// Copyright © 2014 David Hoskins.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the “Software”), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-vec3 hash32(vec2 p)
-{
-    vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yxz+33.33);
-    return fract((p3.xxy+p3.yzz)*p3.zyx);
-}
 //
 // Shadertoy Common
 //
@@ -381,8 +442,7 @@ void main()
         // initial condition
         if (FRAMEINDEX < 2 || restart) {
             P.X = position;
-            // random
-            vec3 rand = hash32(position);
+            vec3 rand = random3(position);
             if (rand.z < 0.2) {
                 P.V = 0.5 * (rand.xy - 0.5) + vec2(sin(2. * position.x / RENDERSIZE.x), cos(2. * position.x / RENDERSIZE.x));
                 P.M = vec2(mass, 0.5 - 0.5 * sin(10. * position.x / RENDERSIZE.x));

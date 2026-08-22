@@ -142,6 +142,9 @@
 }*/
 
 #include "lygia/color/luminance.glsl"
+#define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
 #include "lygia/math/const.glsl"
 #include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
@@ -153,35 +156,6 @@ float rectSDF_without_transform(vec2 p, vec2 b) {
 #include "lygia/space/polar2cart.glsl"
 
 // #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
-
-
-// Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
-//
-// Copyright © 2014 David Hoskins.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the “Software”), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-vec3 hash32(vec2 p)
-{
-    vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yxz+33.33);
-    return fract((p3.xxy+p3.yzz)*p3.zyx);
-}
 
 
 //
@@ -313,8 +287,7 @@ void main()
         if (FRAMEINDEX < 2 || restart) {
             P.X = position;
 
-            // random
-            vec3 rand = hash32(position);
+            vec3 rand = random3(position);
             if (rand.z < 0.2) {
                 P.V = 0.5 * (rand.xy - 0.5) + vec2(sin(2. * position.x / RENDERSIZE.x), cos(2. * position.x / RENDERSIZE.x));
                 P.M = vec2(mass, 0.5 - 0.5 * sin(10. * position.x / RENDERSIZE.x));

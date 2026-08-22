@@ -184,6 +184,9 @@
 //   sensorAngle: 3.4
 //   angleDifferenceFactor: 3
 
+#define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
 #include "lygia/math/const.glsl"
 #include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
@@ -210,35 +213,6 @@
 // This should be an input variable, but the shader doesn’t initialize correctly
 // unless this is a #define.
 #define INITIAL_PARTICLE_DENSITY 2.
-
-// Hash function from <https://www.shadertoy.com/view/4djSRW>, MIT-licensed:
-//
-// Copyright © 2014 David Hoskins.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the “Software”), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-vec2 hash22(vec2 p)
-{
-	vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
-    p3 += dot(p3, p3.yzx + 33.33);
-    return fract((p3.xx + p3.yz) * p3.zy);
-}
-
 
 // This is the `loop` function in Buffer A of the original Shadertoy shader.
 vec2 wrapToRenderSize(vec2 position)
@@ -295,7 +269,7 @@ void main()
 
         // Cell cloning
         if (length(particle.xy - position) > particleCloneDistance) {
-            particle.xy += particleCloneFactor * (hash22(position) - 0.5);
+            particle.xy += particleCloneFactor * (random2(position) - 0.5);
         }
 
         // Sensors
@@ -307,7 +281,7 @@ void main()
                                 IMG_NORM_PIXEL(trails, sensorClockwisePosition / RENDERSIZE).x;
         particle.z += simulationSpeed * scaledSensorStrength * tanh(sensedDirectionFactor * sensedDirection);
 
-        vec2 particleVelocity = polar2cart(vec2(particle.z, particleSpeed)) + particleSpeedRandomness * (hash22(particle.xy + TIME) - 0.5);
+        vec2 particleVelocity = polar2cart(vec2(particle.z, particleSpeed)) + particleSpeedRandomness * (random2(particle.xy + TIME) - 0.5);
 
         // Update the particle
         particle.xy += simulationSpeed * particleVelocity;
@@ -327,7 +301,7 @@ void main()
                 INITIAL_PARTICLE_DENSITY * round(position.x / INITIAL_PARTICLE_DENSITY),
                 INITIAL_PARTICLE_DENSITY * round(position.y / INITIAL_PARTICLE_DENSITY)
             );
-            particle.zw = hash22(particle.xy) - 0.5;
+            particle.zw = random2(particle.xy) - 0.5;
         }
 
         SCALE_PARTICLE(particle);
