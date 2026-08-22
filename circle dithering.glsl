@@ -13,6 +13,9 @@
     "ISFVSN": "2"
 }*/
 
+#include "lygia/color/luminance.glsl"
+#include "lygia/generative/random.glsl" // LYGIA’s functions aren’t exactly the same as the RNG in the Shadertoy shader.
+
 // ref image: http://www.boredpanda.com/single-line-plotter-scribbles-sergej-stoppel/
 // ( doing it simpler: circles instead of scribbles ;-) )
 
@@ -20,14 +23,7 @@ float L = 8.,                   // L*T = neightborhood size
       T = 4.,                   // grid step for circle centers
       d = 1.;                   // density
 
-#define T(U) texture(inputImage, (U)/R).r // * 1.4
-//#define T(U) sqrt( texture(inputImage, (U)/R).r * 1.4 )
-//#define T(U) length(texture(inputImage, (U)/R).rgb)
-
-#define rnd(P)  fract( sin( dot(P,vec2(12.1,31.7)) + 0.*TIME )*43758.5453123)
-#define rnd2(P) fract( sin( (P) * mat2(12.1,-37.4,-17.3,31.7) )*43758.5453123)
-
-#define C(U,P,r) smoothstep(1.5,0.,abs(length(P-U)-r))                       // ring
+#define C(U,P,r) smoothstep(1.5, 0., abs(length(P - U) - r))                       // ring
 //#define C(U,P,r) exp(-.5*dot(P-U,P-U)/(r*r)) * sin(1.5*6.28*length(P-U)/r) // Gabor
 
 void main()
@@ -37,12 +33,12 @@ void main()
 
     for (float j = -L; j <= L; j++)    // test potential circle centers in a window around gl_FragCoord
     for (float i = -L; i <= L; i++) {
-        vec2 P = floor(gl_FragCoord.xy / T + vec2(i,j)) * T;          // potential circle center
-        P += T * (rnd2(P) - 0.5);
-        float v = T(P);                                // target grey value
-        float r = mix(2., L * T, v);                     // target radius
-        if (rnd(P) < ((1. - v) / r) * 4. * d/L * T*T) {          // draw circle with probability
-            gl_FragColor -= C(gl_FragCoord.xy, P, r) * 0.2 ; // * (1.-texture(iChannel0, (U)/R)); // colored variant
+        vec2 P = floor(gl_FragCoord.xy / T + vec2(i,j)) * T; // potential circle center
+        P += T * (random2(P) - 0.5);
+        float v = luminance(IMG_PIXEL(inputImage, P)); // target grey value
+        float r = mix(2., L * T, v); // target radius
+        if (random(P) < ((1. - v) / r) * 4. * d/L * T*T) { // draw circle with probability
+            gl_FragColor -= C(gl_FragCoord.xy, P, r) * 0.2;
         }
     }
 }
