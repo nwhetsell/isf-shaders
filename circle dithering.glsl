@@ -38,18 +38,16 @@ float L = 8.,                   // L*T = neightborhood size
 void main()
 {
     vec2 R = iResolution.xy;
-//  O += T(U)-O; return;
     O = vec4(1);
 
     for (float j = -L; j <=L; j++)    // test potential circle centers in a window around U
-        for (float i = -L; i <=L; i++) {
-         // vec2 P = U+vec2(i,j);
-            vec2 P = floor( U/T + vec2(i,j) ) *T;          // potential circle center
-            P += T*(rnd2(P)-.5);
-            float v = T(P),                                // target grey value
-                  r = mix(2., L*T ,v);                     // target radius
-            if ( rnd(P) < (1.-v)/ r*4.*d /L*T*T )          // draw circle with probability
-                O -= C(U,P,r)*.2 ; // * (1.-texture(iChannel0, (U)/R)); // colored variant
+    for (float i = -L; i <=L; i++) {
+        vec2 P = floor( U/T + vec2(i,j) ) *T;          // potential circle center
+        P += T*(rnd2(P)-.5);
+        float v = T(P);                                // target grey value
+        float r = mix(2., L*T ,v);                     // target radius
+        if ( rnd(P) < (1.-v)/ r*4.*d /L*T*T ) {          // draw circle with probability
+            O -= C(U,P,r)*.2 ; // * (1.-texture(iChannel0, (U)/R)); // colored variant
         }
- // O = sqrt(O);
+    }
 }
