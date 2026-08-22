@@ -1,6 +1,7 @@
 shaders = \
 	CA\ Molecular\ dynamics.fs \
 	Cell\ system\ 2.fs \
+	circle\ dithering.fs \
 	Endless\ living\ creature.fs \
 	Everflow.fs \
 	Gaussian\ SmoothLife.fs \
@@ -18,6 +19,8 @@ all: $(shaders)
 CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Cell\ system\ 2.fs: Cell\ system\ 2.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+circle\ dithering.fs: circle\ dithering.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Endless\ living\ creature.fs: Endless\ living\ creature.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"

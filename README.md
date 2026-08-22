@@ -61,6 +61,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="circle%20dithering.fs">circle dithering</a></td>
+    <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/MdSfWK">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6a8995e2734c1a00193077c5">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      
+    </td>
+  </tr>
+  <tr>
     <td><a href="Endless%20living%20creature.fs">Endless living creature</a></td>
     <td><a href="https://www.shadertoy.com/user/leon">Leon Denise</a></td>
     <td>n/a</td>
