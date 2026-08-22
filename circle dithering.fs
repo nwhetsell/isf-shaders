@@ -32,6 +32,30 @@
             "DEFAULT": 1,
             "MAX": 100,
             "MIN": 0
+        },
+        {
+            "NAME": "thickness",
+            "LABEL": "Thickness",
+            "TYPE": "float",
+            "DEFAULT": 1.5,
+            "MAX": 100,
+            "MIN": 0
+        },
+        {
+            "VALUES": [0, 1],
+            "NAME": "shapeMode",
+            "LABEL": "Shape",
+            "TYPE": "long",
+            "DEFAULT" : 0,
+            "LABELS" : ["Ring", "Gabor"]
+        },
+        {
+            "NAME": "darkness",
+            "LABEL": "Darkness",
+            "TYPE": "float",
+            "DEFAULT": 0.2,
+            "MAX": 100,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2"
@@ -128,23 +152,64 @@ vec4 random4(vec4 p4) {
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define EIGHTH_PI 0.39269908169
+#define QTR_PI 0.78539816339
+#define HALF_PI 1.5707963267948966192313216916398
+#define PI 3.1415926535897932384626433832795
+#define TWO_PI 6.2831853071795864769252867665590
+#define TAU 6.2831853071795864769252867665590
+#define INV_PI 0.31830988618379067153776752674503
+#define INV_SQRT_TAU 0.39894228040143267793994605993439
+#define SQRT_HALF_PI 1.25331413732
+#define PHI 1.618033988749894848204586834
+#define EPSILON 0.0000001
+#define GOLDEN_RATIO 1.6180339887
+#define GOLDEN_RATIO_CONJUGATE 0.61803398875
+#define GOLDEN_ANGLE 2.39996323
+#define DEG2RAD (PI / 180.0)
+#define RAD2DEG (180.0 / PI)
+/*
+contributors: Patricio Gonzalez Vivo
+description: gaussian coefficient
+use: <vec4|vec3|vec2|float> gaussian(<float> sigma, <vec4|vec3|vec2|float> d)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_gaussian.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_GAUSSIAN 
+float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
+float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
+float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
+float gaussian( vec4 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z + d.w*d.w ) / (2.0 * s*s)); }
 
-// ref image: http://www.boredpanda.com/single-line-plotter-scribbles-sergej-stoppel/
-// ( doing it simpler: circles instead of scribbles ;-) )
-#define C(U,P,r) smoothstep(1.5, 0., abs(length(P - U) - r))
-//#define C(U,P,radius) exp(-.5*dot(P-U,P-U)/(radius*radius)) * sin(1.5*6.28*length(P-U)/radius) // Gabor
+// Based on https://www.boredpanda.com/single-line-plotter-scribbles-sergej-stoppel/
 void main()
 {
     gl_FragColor = vec4(1);
     for (float j = -searchDistance; j <= searchDistance; j++) // test potential circle centers in a window around gl_FragCoord
     for (float i = -searchDistance; i <= searchDistance; i++) {
-        vec2 P = floor(gl_FragCoord.xy / gridStep + vec2(i, j)) * gridStep; // potential circle center
-        P += gridStep * (random2(P) - 0.5);
-        float lum = luminance(IMG_PIXEL(inputImage, P)); // target grey value
+        vec2 centerPoint = floor(gl_FragCoord.xy / gridStep + vec2(i, j)) * gridStep; // potential circle center
+        centerPoint += (random2(centerPoint) - 0.5) * gridStep;
+        float lum = luminance(IMG_PIXEL(inputImage, centerPoint)); // target grey value
         float radius = mix(2., searchDistance * gridStep, lum); // target radius
         // draw circle with probability
-        if (random(P) < ((1. - lum) / radius) * 4. * density/searchDistance * gridStep*gridStep) {
-            gl_FragColor.rgb -= C(gl_FragCoord.xy, P, radius) * 0.2;
+        if (random(centerPoint) < ((1. - lum) / radius) * 4. * density/searchDistance * gridStep*gridStep) {
+            float shape;
+            if (shapeMode == 0) { // ring
+                shape = 1. - smoothstep(0., thickness, abs(length(centerPoint - gl_FragCoord.xy) - radius));
+            } else { // Gabor
+                shape = gaussian(centerPoint - gl_FragCoord.xy, radius) * sin(1.5 * TWO_PI * length(centerPoint - gl_FragCoord.xy) / radius);
+            }
+            gl_FragColor.rgb -= shape * darkness;
         }
     }
 }
