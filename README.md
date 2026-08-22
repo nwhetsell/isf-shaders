@@ -71,7 +71,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      
+      <img width="197" alt="Screenshot of “circle dithering” shader" src="https://github.com/user-attachments/assets/6096eb6e-0a52-4989-8d86-5b9e27aef640" />
     </td>
   </tr>
   <tr>
