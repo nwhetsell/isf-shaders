@@ -13,8 +13,8 @@ Many shaders use code from [LYGIA](https://github.com/patriciogonzalezvivo/lygia
 On macOS, after cloning this repository you can run the [make_links.sh](make_links.sh) script to add symbolic links to .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
 
 Many of these shaders are intended to be used with floating-point buffers.
-Not all ISF hosts support floating-point buffers.
-[Videosync](https://videosync.showsync.com/download) supports floating-point buffers (in [v2.0.12](https://support.showsync.com/release-notes/videosync/2.0#2012) and later),
+Not all ISF hosts support floating-point buffers:
+Videosync supports floating-point buffers (in [v2.0.12](https://support.showsync.com/release-notes/videosync/2.0#2012) and later),
 but https://editor.isf.video does not.
 If floating-point buffers are not available, most of these shaders will look very different (if they run at all).
 
