@@ -89,6 +89,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Ethereal Spectrum Cascade.fs">Ethereal Spectrum Cascade</a></td>
+    <td><a href="https://www.shadertoy.com/user/GPT4POWERUSER">GPT4POWERUSER</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/DsVSRy">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6a8acb8bec1b1d001980c44f">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Ethereal Spectrum Cascade” shader" src="https://github.com/user-attachments/assets/2c77d57d-31fc-418f-a903-9cb75352fd04" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Everflow.fs">Everflow</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
