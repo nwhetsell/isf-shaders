@@ -94,13 +94,16 @@
     "ISFVSN": "2"
 }*/
 
+// #define ISF_EDITOR_WEBSITE
+#ifdef ISF_EDITOR_WEBSITE
+#define sphereCount 15.
+#define motion_frames 1.
+#endif
+
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/lookAt.glsl"
-
-// #define motion_frames 1.
-// #define sphereCount 15.
 
 
 // Weird endless living creature

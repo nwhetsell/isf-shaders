@@ -93,6 +93,7 @@
     ],
     "ISFVSN": "2"
 }*/
+// #define ISF_EDITOR_WEBSITE
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -171,9 +172,6 @@ mat3 lookAt(vec3 eye, vec3 target, float roll) {
 mat3 lookAt(vec3 forward) {
     return lookAt(forward, vec3(0.0, 1.0, 0.0));
 }
-
-// #define motion_frames 1.
-// #define sphereCount 15.
 // Weird endless living creature
 // inspired by Inigo Quilez live stream shader deconstruction
 // Leon Denise (ponk) 2019.08.28
