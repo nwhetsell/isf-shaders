@@ -160,6 +160,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="oscilloscope%20analysis%20luminance.fs">oscilloscope analysis luminance</a></td>
+    <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/Nttyz4">Shadertoy</a></li>
+        <li>This shader uses [`fwidth`](https://registry.khronos.org/OpenGL-Refpages/gl4/html/fwidth.xhtml), which isn’t available on https://editor.isf.video.</li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “oscilloscope analysis luminance” shader" src="https://github.com/user-attachments/assets/8c9afa33-4983-4490-a60c-866368a44f2c" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Physarum%20Polycephalum%20Simulation.fs">Physarum Polycephalum Simulation</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
@@ -171,7 +185,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
     <td>
       <img width="197" alt="Screenshot of “Physarum Polycephalum Simulation” shader" src="https://github.com/user-attachments/assets/ec175ac4-7659-4611-9dcb-e0a9490f7d88" />
-</td>
+    </td>
   </tr>
   <tr>
     <td><a href="Random%20slime%20mold%20generator.fs">Random slime mold generator</a></td>
