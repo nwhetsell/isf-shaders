@@ -165,7 +165,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <td>n/a</td>
     <td>
       <ul>
-        <p><a href="https://www.shadertoy.com/view/Nttyz4">Shadertoy</a> only (this shader uses <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/fwidth.xhtml"><code>fwidth</code></a>, which isn’t available on https://editor.isf.video)</p>
+        <p><a href="https://www.shadertoy.com/view/Nttyz4">Shadertoy</a> only <!-- This shader uses <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/fwidth.xhtml"><code>fwidth</code></a>, which isn’t available on https://editor.isf.video --></p>
       </ul>
     </td>
     <td>
