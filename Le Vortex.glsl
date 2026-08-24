@@ -139,6 +139,7 @@
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/boxSDF.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
+#include "lygia/space/polar2cart.glsl"
 
 
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
@@ -163,7 +164,7 @@ float amod(inout vec2 p, float count) {
     float c = floor(a / an);
     c = mix(c, abs(c), step(count * 0.5, abs(c)));
     a = mod(a, an) - an / 2.;
-    p.xy = vec2(cos(a), sin(a)) * length(p);
+    p.xy = polar2cart(vec2(a, length(p)));
     return c;
 }
 

@@ -193,6 +193,22 @@ use: <float> sphereSDF( in <vec3> pos[], in <float> size] )
 #define FNC_SPHERESDF 
 float sphereSDF(vec3 p) { return length(p); }
 float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
+/*
+contributors: [Ivan Dianov, Shadi El Hajj]
+description: polar to cartesian conversion.
+use: polar2cart(<vec2> polar)
+*/
+#define FNC_POLAR2CART 
+vec2 polar2cart(in vec2 polar) {
+    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
+}
+// https://mathworld.wolfram.com/SphericalCoordinates.html
+vec3 polar2cart( in float r, in float phi, in float theta) {
+    float x = r * cos(theta) * sin(phi);
+    float y = r * sin(theta) * sin(phi);
+    float z = r * cos(phi);
+    return vec3(x, y, z);
+}
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
 // Leon 2017-11-21
 // using code from IQ, Mercury, LJ, Duke, Koltes
@@ -211,7 +227,7 @@ float amod(inout vec2 p, float count) {
     float c = floor(a / an);
     c = mix(c, abs(c), step(count * 0.5, abs(c)));
     a = mod(a, an) - an / 2.;
-    p.xy = vec2(cos(a), sin(a)) * length(p);
+    p.xy = polar2cart(vec2(a, length(p)));
     return c;
 }
 float amodIndex(vec2 p, float count) {
