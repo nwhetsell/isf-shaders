@@ -269,7 +269,7 @@ void main()
 
             P0.X += P0.V * dt; //integrate position
 
-            float difR = 0.9 + 0.21 * smoothstep(fluid_rho * 0., fluid_rho/ 3., P0.M.x);
+            float difR = 0.9 + 0.21 * smoothstep(fluid_rho * 0., fluid_rho / 3., P0.M.x);
             vec3 D = distribution(P0.X, position, difR);
             // the deposited mass into this cell
             float m = P0.M.x * D.z;
