@@ -405,10 +405,6 @@ vec3 distribution(vec2 x, vec2 p, float K)
     // if any of the dimensions are 0 then the mass is 0
     return vec3(center, m);
 }
-vec4 V(vec2 p)
-{
-    return IMG_NORM_PIXEL(bufferC, p/RENDERSIZE);
-}
 void main()
 {
     vec2 position = gl_FragCoord.xy;
@@ -555,10 +551,10 @@ void main()
         // border render
         vec3 Nb = bN(P.X);
         float bord = smoothstep(2. * border_h, border_h * 0.5, border(position));
-        vec4 rho = V(position);
+        vec4 rho = IMG_PIXEL(bufferC, position);
         vec3 dx = vec3(-1, 0, 1);
-        vec4 grad = -0.5 * vec4(V(position + dx.zy).zw - V(position + dx.xy).zw,
-                                V(position + dx.yz).zw - V(position + dx.yx).zw);
+        vec4 grad = -0.5 * vec4(IMG_PIXEL(bufferC, position + dx.zy).zw - IMG_PIXEL(bufferC, position + dx.xy).zw,
+                                IMG_PIXEL(bufferC, position + dx.yz).zw - IMG_PIXEL(bufferC, position + dx.yx).zw);
         vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + EPSILON);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0, 0, 1), n);
