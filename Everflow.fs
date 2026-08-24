@@ -68,6 +68,14 @@
             "MIN": 0
         },
         {
+            "NAME": "GF",
+            "LABEL": "Water pressure",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "enableMouse",
             "LABEL": "Enable mouse",
             "TYPE": "bool",
@@ -339,9 +347,11 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
 //
 float Pf(vec2 rho)
 {
-    // Water pressure
-    float GF = 1.;
-    return mix(0.5 * rho.x, 0.04 * rho.x * (rho.x / fluid_rho - 1.), GF);
+    return mix(
+        0.5 * rho.x,
+        0.04 * rho.x * (rho.x / fluid_rho - 1.),
+        GF // Water pressure
+    );
 }
 float border(vec2 p)
 {
