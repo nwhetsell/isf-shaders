@@ -3,7 +3,7 @@
 This is a collection of [ISF shaders](https://isf.video/).
 You should be able to use these shaders in any app that supports ISF.
 
-Each shader consists of .fs, .glsl, and .vs files.
+Each shader consists of an .fs and a .glsl file.
 The .fs file is the .glsl file with `#include` directives expanded using the [Clang](https://clang.llvm.org) preprocessor.
 (This is needed because the GLSL preprocessor [does not support `#include`](https://wikis.khronos.org/opengl/Core_Language_(GLSL)#Preprocessor_directives).)
 Due to limitations of the Clang preprocessor, `#if`/`#else` directives are also evaluated when expanding `#include` directives.
