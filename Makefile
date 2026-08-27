@@ -14,7 +14,7 @@ shaders = \
 	Shattered\ Crystal.fs \
 	spilled.fs \
 	Suture\ Fluid.fs \
-	The\ Weave.fs
+	The\ Weave.fs \
 
 all: $(shaders)
 
