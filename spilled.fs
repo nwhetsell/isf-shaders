@@ -7,8 +7,8 @@
     "DESCRIPTION": "Single-pass computational fluid dynamics, converted from <https://www.shadertoy.com/view/MsGSRd>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "inputImageAmount",

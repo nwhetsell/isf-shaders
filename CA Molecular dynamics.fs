@@ -7,8 +7,8 @@
     "DESCRIPTION": "Cellular automaton molecular dynamics, converted from <https://www.shadertoy.com/view/3s3cWr>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "inputImageAmount",

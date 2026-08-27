@@ -6,8 +6,8 @@
     "DESCRIPTION": "Oscilloscope luminance analysis, converted from <https://www.shadertoy.com/view/Nttyz4>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "gridDensity",

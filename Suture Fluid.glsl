@@ -7,8 +7,8 @@
     "DESCRIPTION": "Fake fluid dynamical system that creates viscous-fingering–like flow pattern, converted from <https://www.shadertoy.com/view/XddSRX>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "inputImageAmount",

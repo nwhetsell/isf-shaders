@@ -6,8 +6,8 @@
     "DESCRIPTION": "Circle dithering, converted from <https://www.shadertoy.com/view/MdSfWK>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "searchDistance",

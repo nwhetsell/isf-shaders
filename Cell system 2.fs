@@ -7,8 +7,8 @@
     "DESCRIPTION": "Cell system, converted from <https://www.shadertoy.com/view/3tSfRW>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "inputImageAmount",

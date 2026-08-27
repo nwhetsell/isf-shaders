@@ -7,8 +7,8 @@
     "DESCRIPTION": "Water flowing infinitely inside a looped space without gravity, converted from <https://www.shadertoy.com/view/ttBcWm>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "inputImageAmount",

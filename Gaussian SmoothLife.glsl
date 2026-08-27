@@ -7,8 +7,8 @@
     "DESCRIPTION": "Variant of Stephan Rafler’s SmoothLife that uses a separable Gaussian kernel to compute inner and outer fullness, converted from <https://www.shadertoy.com/view/XtVXzV>",
     "INPUTS": [
         {
-            "NAME" : "inputImage",
-            "TYPE" : "image"
+            "NAME": "inputImage",
+            "TYPE": "image"
         },
         {
             "NAME": "inputImageAmount",
