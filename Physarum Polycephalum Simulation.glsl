@@ -205,8 +205,13 @@
 // floating-point buffers are available, we must scale particle data to be
 // between 0 and 1 when writing them to an image, and unscale particle data when
 // reading from an image.
-#define SCALE_PARTICLE(PARTICLE) // PARTICLE.xy /= RENDERSIZE; PARTICLE.zw += 0.5;
-#define UNSCALE_PARTICLE(PARTICLE) // PARTICLE.xy *= RENDERSIZE; PARTICLE.zw -= 0.5;
+#ifndef ISF_EDITOR_WEBSITE
+#define SCALE_PARTICLE(PARTICLE) // do nothing
+#define UNSCALE_PARTICLE(PARTICLE) // do nothing
+#else
+#define SCALE_PARTICLE(PARTICLE) PARTICLE.xy /= RENDERSIZE; PARTICLE.zw += 0.5;
+#define UNSCALE_PARTICLE(PARTICLE) PARTICLE.xy *= RENDERSIZE; PARTICLE.zw -= 0.5;
+#endif
 
 
 //

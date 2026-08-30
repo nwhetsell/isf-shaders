@@ -333,6 +333,6 @@ void main()
 
         vel /= rho;
         vec3 vc = hsv2rgb(vec3(6. * atan(vel.x, vel.y) / TWO_PI, 1, rho * length(vel.xy)));
-        gl_FragColor.rgb = cos(0.9 * vec3(3, 2, 1) * rho) + velocityContribution * vc;
+        gl_FragColor = vec4(cos(0.9 * vec3(3, 2, 1) * rho) + velocityContribution * vc, 1);
     }
 }
