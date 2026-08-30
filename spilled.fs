@@ -327,7 +327,7 @@ void main()
     }
     else // Shadertoy Image
     {
-        vec2 d = vec2(1 / RENDERSIZE.y, 0);
+        vec2 d = vec2(1. / RENDERSIZE.y, 0);
         vec3 n = vec3(
             (length(IMG_NORM_PIXEL(mainPass, uv + d.xy).xyz) - length(IMG_NORM_PIXEL(mainPass, uv - d.xy).xyz)) * RENDERSIZE.y,
             (length(IMG_NORM_PIXEL(mainPass, uv + d.yx).xyz) - length(IMG_NORM_PIXEL(mainPass, uv - d.yx).xyz)) * RENDERSIZE.y,
