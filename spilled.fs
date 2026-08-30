@@ -292,18 +292,14 @@ void main()
                 break;
             }
             vec2 p = b;
-            for (int i = 0; i <
-                                RotNum
-                                      ; i++) {
+            for (int i = 0; i < RotNum; i++) {
                 vec2 pos_plus_p = pos + p;
                 vec2 rotated_b =
                                        // this is faster but works only for odd RotNum
                                        b;
                 float rotated_b_magnitude_squared = dot(rotated_b, rotated_b);
                 float rot = 0.;
-                for (int _ = 0; _ <
-                                    RotNum
-                                          ; _++) {
+                for (int _ = 0; _ < RotNum; _++) {
                     rot += dot(
                         IMG_NORM_PIXEL(mainPass, fract((pos_plus_p + rotated_b) / RENDERSIZE)).xy - vec2(0.5),
                         rotated_b.yx * vec2(1, -1)

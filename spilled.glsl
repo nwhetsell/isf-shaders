@@ -152,7 +152,11 @@ void main()
 
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
+#ifndef ISF_EDITOR_WEBSITE
         int RotNum = 2 * int(agitation) + 1;
+#else
+        const int RotNum = 5;
+#endif
         float ang = TWO_PI / float(RotNum);
         mat2 m = rotate2d(ang);
 #ifdef SUPPORT_EVEN_ROTNUM
@@ -172,13 +176,7 @@ void main()
 
             vec2 p = b;
 
-            for (int i = 0; i <
-#ifndef ISF_EDITOR_WEBSITE
-                                RotNum
-#else
-                                5
-#endif
-                                      ; i++) {
+            for (int i = 0; i < RotNum; i++) {
                 vec2 pos_plus_p = pos + p;
                 vec2 rotated_b =
 #ifdef SUPPORT_EVEN_ROTNUM
@@ -189,14 +187,7 @@ void main()
                 float rotated_b_magnitude_squared = dot(rotated_b, rotated_b);
 
                 float rot = 0.;
-                for (int _ = 0; _ <
-
-#ifndef ISF_EDITOR_WEBSITE
-                                    RotNum
-#else
-                                    5
-#endif
-                                          ; _++) {
+                for (int _ = 0; _ < RotNum; _++) {
                     rot += dot(
                         IMG_NORM_PIXEL(mainPass, fract((pos_plus_p + rotated_b) / RENDERSIZE)).xy - vec2(0.5),
                         rotated_b.yx * vec2(1, -1)
