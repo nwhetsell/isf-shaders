@@ -15,7 +15,7 @@
             "TYPE": "float",
             "DEFAULT": 8,
             "MAX": 30,
-            "MIN": 1
+            "MIN": 0
         },
         {
             "NAME": "gridStep",
