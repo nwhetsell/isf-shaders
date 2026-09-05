@@ -8,6 +8,7 @@ shaders = \
 	Gaussian\ SmoothLife.fs \
 	Le\ Vortex.fs \
 	Lorenz\ system.fs \
+	Mountains.fs \
 	oscilloscope\ analysis\ luminance.fs \
 	Physarum\ Polycephalum\ Simulation.fs \
 	Random\ slime\ mold\ generator.fs \
@@ -35,6 +36,8 @@ Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 Le\ Vortex.fs: Le\ Vortex.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Lorenz\ system.fs: Lorenz\ system.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Mountains.fs: Mountains.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
