@@ -10,6 +10,35 @@
     "ISFVSN": "2"
 }*/
 
+#define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#define FBM_NOISE_FNC(UV) gnoise(UV)
+#define FBM_NOISE3_FNC(UV) snoise(UV)
+#define FBM_SCALE_SCALAR 2.7
+#define FBM_AMPLITUDE_INITIAL 0.7
+float random_slow(vec2);
+#define GNOISE_NOISE2_FNC(UV) random_slow(UV)
+#include "lygia/generative/fbm.glsl"
+#include "lygia/generative/gnoise.glsl"
+// See also https://www.shadertoy.com/view/XdXGW8
+vec2 gnoise2(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+    vec2 a = random2(i);
+    vec2 b = random2(i + vec2(1.0, 0.0));
+    vec2 c = random2(i + vec2(0.0, 1.0));
+    vec2 d = random2(i + vec2(1.0, 1.0));
+    vec2 u = cubic(f);
+    return mix( a, b, u.x) +
+                (c - a)* u.y * (1.0 - u.x) +
+                (d - b) * u.x * u.y;
+}
+#include "lygia/generative/random.glsl"
+float random_slow(in vec2 p) {
+    return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
+}
+
+
 // Stereo version code thanks to Croqueteer :)
 //#define STEREO
 
@@ -22,10 +51,6 @@ vec3 sunColour = vec3(1.0, .9, .83);
 float specular = 0.0;
 vec3 cameraPos;
 float ambient;
-vec2 add = vec2(1.0, 0.0);
-#define HASHSCALE1 .1031
-#define HASHSCALE3 vec3(.1031, .1030, .0973)
-#define HASHSCALE4 vec4(1031, .1030, .0973, .1099)
 
 // This peturbs the fractal positions for each iteration down...
 // Helps make nice twisted landscapes...
@@ -34,71 +59,30 @@ const mat2 rotate2D = mat2(1.3623, 1.7531, -1.7131, 1.4623);
 // Alternative rotation:-
 // const mat2 rotate2D = mat2(1.2323, 1.999231, -1.999231, 1.22);
 
-
-//  1 out, 2 in...
-float Hash12(vec2 p)
-{
-	vec3 p3  = fract(vec3(p.xyx) * HASHSCALE1);
-    p3 += dot(p3, p3.yzx + 19.19);
-    return fract((p3.x + p3.y) * p3.z);
-}
-vec2 Hash22(vec2 p)
-{
-	vec3 p3 = fract(vec3(p.xyx) * HASHSCALE3);
-    p3 += dot(p3, p3.yzx+19.19);
-    return fract((p3.xx+p3.yz)*p3.zy);
-
-}
-
-float Noise( in vec2 x )
-{
-    vec2 p = floor(x);
-    vec2 f = fract(x);
-    f = f*f*(3.0-2.0*f);
-
-    float res = mix(mix( Hash12(p),          Hash12(p + add.xy),f.x),
-                    mix( Hash12(p + add.yx), Hash12(p + add.xx),f.x),f.y);
-    return res;
-}
-
-vec2 Noise2( in vec2 x )
-{
-    vec2 p = floor(x);
-    vec2 f = fract(x);
-    f = f*f*(3.0-2.0*f);
-    float n = p.x + p.y * 57.0;
-   vec2 res = mix(mix( Hash22(p),          Hash22(p + add.xy),f.x),
-                  mix( Hash22(p + add.yx), Hash22(p + add.xx),f.x),f.y);
-    return res;
-}
-
 //--------------------------------------------------------------------------
 float Trees(vec2 p)
 {
-
- 	//return (texture(iChannel1,0.04*p).x * treeLine);
-    return Noise(p*13.0)*treeLine;
+    return gnoise(p*13.0)*treeLine;
 }
-
 
 //--------------------------------------------------------------------------
 // Low def version for ray-marching through the height field...
-// Thanks to IQ for all the noise stuff...
-
 float Terrain( in vec2 p)
 {
+    // There's some real magic numbers in here!
+	// The gnoise calls add large mountain ranges for more variation over distances...
 	vec2 pos = p*0.05;
-	float w = (Noise(pos*.25)*0.75+.15);
+	float w = (gnoise(pos*.25)*0.75+.15);
 	w = 66.0 * w * w;
 	vec2 dxy = vec2(0.0, 0.0);
 	float f = .0;
 	for (int i = 0; i < 5; i++)
 	{
-		f += w * Noise(pos);
+		f += w * gnoise(pos);
 		w = -w * 0.4;	//...Flip negative and positive for variation
 		pos = rotate2D * pos;
 	}
-	float ff = Noise(pos*.002);
+	float ff = gnoise(pos*.002);
 
 	f += pow(abs(ff), 5.0)*275.-5.0;
 	return f;
@@ -111,7 +95,7 @@ float Map(in vec3 p)
 	float h = Terrain(p.xz);
 
 
-	float ff = Noise(p.xz*.3) + Noise(p.xz*3.3)*.5;
+	float ff = gnoise(p.xz*.3) + gnoise(p.xz*3.3)*.5;
 	treeLine = smoothstep(ff, .0+ff*2.0, h) * smoothstep(1.0+ff*3.0, .4+ff, h) ;
 	treeCol = Trees(p.xz);
 	h += treeCol;
@@ -123,21 +107,20 @@ float Map(in vec3 p)
 // High def version only used for grabbing normal information.
 float Terrain2( in vec2 p)
 {
-	// There's some real magic numbers in here!
-	// The Noise calls add large mountain ranges for more variation over distances...
 	vec2 pos = p*0.05;
-	float w = (Noise(pos*.25)*0.75+.15);
+	float w = (gnoise(pos*.25)*0.75+.15);
 	w = 66.0 * w * w;
 	vec2 dxy = vec2(0.0, 0.0);
 	float f = .0;
 	for (int i = 0; i < 5; i++)
 	{
-		f += w * Noise(pos);
+		f += w * gnoise(pos);
 		w =  - w * 0.4;	//...Flip negative and positive for varition
 		pos = rotate2D * pos;
 	}
-	float ff = Noise(pos*.002);
+	float ff = gnoise(pos*.002);
 	f += pow(abs(ff), 5.0)*275.-5.0;
+	// float f = Terrain(p);
 
 
 	treeCol = Trees(p);
@@ -148,27 +131,12 @@ float Terrain2( in vec2 p)
 	// That's the last of the low resolution, now go down further for the Normal data...
 	for (int i = 0; i < 6; i++)
 	{
-		f += w * Noise(pos);
+		f += w * gnoise(pos);
 		w =  - w * 0.4;
 		pos = rotate2D * pos;
 	}
 
 
-	return f;
-}
-
-//--------------------------------------------------------------------------
-float FractalNoise(in vec2 xy)
-{
-	float w = .7;
-	float f = 0.0;
-
-	for (int i = 0; i < 4; i++)
-	{
-		f += Noise(xy) * w;
-		w *= 0.5;
-		xy *= 2.7;
-	}
 	return f;
 }
 
@@ -182,7 +150,7 @@ vec3 GetClouds(in vec3 sky, in vec3 rd)
 	rd.xz *= v;
 	rd.xz += cameraPos.xz;
 	rd.xz *= .010;
-	float f = (FractalNoise(rd.xz) -.55) * 5.0;
+	float f = (fbm(rd.xz) -.55) * 5.0;
 	// Uses the ray's y component for horizon fade of fixed colour clouds...
 	sky = mix(sky, vec3(.55, .55, .52), clamp(f*rd.y-.1, 0.0, 1.0));
 
@@ -244,8 +212,8 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
 
 	float disSqrd = dis * dis;// Squaring it gives better distance scales.
 
-	float f = clamp(Noise(matPos.xz*.05), 0.0,1.0);//*10.8;
-	f += Noise(matPos.xz*.1+normal.yz*1.08)*.85;
+	float f = clamp(gnoise(matPos.xz*.05), 0.0,1.0);//*10.8;
+	f += gnoise(matPos.xz*.1+normal.yz*1.08)*.85;
 	f *= .55;
 	vec3 m = mix(vec3(.63*f+.2, .7*f+.1, .7*f+.1), vec3(f*.43+.1, f*.3+.2, f*.35+.1), f*.65);
 	mat = m*vec3(f*m.x+.36, f*m.y+.30, f*m.z+.28);
@@ -255,8 +223,8 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
 		float v = normal.y;
 		float c = (.5-normal.y) * 4.0;
 		c = clamp(c*c, 0.1, 1.0);
-		f = Noise(vec2(matPos.x*.09, matPos.z*.095+matPos.yy*0.15));
-		f += Noise(vec2(matPos.x*2.233, matPos.z*2.23))*0.5;
+		f = gnoise(vec2(matPos.x*.09, matPos.z*.095+matPos.yy*0.15));
+		f += gnoise(vec2(matPos.x*2.233, matPos.z*2.23))*0.5;
 		mat = mix(mat, vec3(.4*f), c);
 		specular+=.1;
 	}
@@ -265,22 +233,22 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
 	if (matPos.y < 45.35 && normal.y > .65)
 	{
 
-		m = vec3(Noise(matPos.xz*.023)*.5+.15, Noise(matPos.xz*.03)*.6+.25, 0.0);
+		m = vec3(gnoise(matPos.xz*.023)*.5+.15, gnoise(matPos.xz*.03)*.6+.25, 0.0);
 		m *= (normal.y- 0.65)*.6;
 		mat = mix(mat, m, clamp((normal.y-.65)*1.3 * (45.35-matPos.y)*0.1, 0.0, 1.0));
 	}
 
 	if (treeCol > 0.0)
 	{
-		mat = vec3(.02+Noise(matPos.xz*5.0)*.03, .05, .0);
-		normal = normalize(normal+vec3(Noise(matPos.xz*33.0)*1.0-.5, .0, Noise(matPos.xz*33.0)*1.0-.5));
+		mat = vec3(.02+gnoise(matPos.xz*5.0)*.03, .05, .0);
+		normal = normalize(normal+vec3(gnoise(matPos.xz*33.0)*1.0-.5, .0, gnoise(matPos.xz*33.0)*1.0-.5));
 		specular = .0;
 	}
 
 	// Snow topped mountains...
 	if (matPos.y > 80.0 && normal.y > .42)
 	{
-		float snow = clamp((matPos.y - 80.0 - Noise(matPos.xz * .1)*28.0) * 0.035, 0.0, 1.0);
+		float snow = clamp((matPos.y - 80.0 - gnoise(matPos.xz * .1)*28.0) * 0.035, 0.0, 1.0);
 		mat = mix(mat, vec3(.7,.7,.8), snow);
 		specular += snow;
 		ambient+=snow *.3;
@@ -290,7 +258,7 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
 	{
 		if (normal.y > .4)
 		{
-			f = Noise(matPos.xz * .084)*1.5;
+			f = gnoise(matPos.xz * .084)*1.5;
 			f = clamp((1.45-f-matPos.y) * 1.34, 0.0, .67);
 			float t = (normal.y-.4);
 			t = (t*t);
@@ -315,8 +283,8 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
 		// Make some dodgy waves...
 		float tx = cos(watPos.x*.052) *4.5;
 		float tz = sin(watPos.z*.072) *4.5;
-		vec2 co = Noise2(vec2(watPos.x*4.7+1.3+tz, watPos.z*4.69+time*35.0-tx));
-		co += Noise2(vec2(watPos.z*8.6+time*13.0-tx, watPos.x*8.712+tz))*.4;
+		vec2 co = gnoise2(vec2(watPos.x*4.7+1.3+tz, watPos.z*4.69+time*35.0-tx));
+		co += gnoise2(vec2(watPos.z*8.6+time*13.0-tx, watPos.x*8.712+tz))*.4;
 		vec3 nor = normalize(vec3(co.x, 20.0, co.y));
 		nor = normalize(reflect(dir, nor));//normalize((-2.0*(dot(dir, nor))*nor)+dir);
 		// Mix it in at depth transparancy to give beach cues..
@@ -353,7 +321,7 @@ float BinarySubdivision(in vec3 rO, in vec3 rD, vec2 t)
 //--------------------------------------------------------------------------
 bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord )
 {
-    float t = 1. + Hash12(fragCoord.xy)*1.;
+    float t = 1. + random_slow(fragCoord.xy)*1.;
 	float oldT = 0.0;
 	float delta = 0.0;
 	bool fin = false;
