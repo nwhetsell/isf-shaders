@@ -478,11 +478,11 @@ float gnoise(vec3 p) {
     return -1.0 + 2.0 * mix( mix( mix( GNOISE_NOISE3_FNC(i + vec3(0.0,0.0,0.0)),
                                         GNOISE_NOISE3_FNC(i + vec3(1.0,0.0,0.0)), u.x),
                                 mix( GNOISE_NOISE3_FNC(i + vec3(0.0,1.0,0.0)),
-                                    GNOISE_NOISE3_FNC(i + vec3(1.0,1.0,0.0)), u.x), u.y),
+                                        GNOISE_NOISE3_FNC(i + vec3(1.0,1.0,0.0)), u.x), u.y),
                             mix( mix( GNOISE_NOISE3_FNC(i + vec3(0.0,0.0,1.0)),
-                                GNOISE_NOISE3_FNC(i + vec3(1.0,0.0,1.0)), u.x),
-                            mix( GNOISE_NOISE3_FNC(i + vec3(0.0,1.0,1.0)),
-                                GNOISE_NOISE3_FNC(i + vec3(1.0,1.0,1.0)), u.x), u.y), u.z );
+                                        GNOISE_NOISE3_FNC(i + vec3(1.0,0.0,1.0)), u.x),
+                                mix( GNOISE_NOISE3_FNC(i + vec3(0.0,1.0,1.0)),
+                                        GNOISE_NOISE3_FNC(i + vec3(1.0,1.0,1.0)), u.x), u.y), u.z );
 }
 float gnoise(vec3 p, float tileLength) {
     vec3 i = floor(p);
@@ -491,11 +491,11 @@ float gnoise(vec3 p, float tileLength) {
     return mix( mix( mix( dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(0.0,0.0,0.0), tileLength), f - vec3(0.0,0.0,0.0)),
                             dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,0.0,0.0), tileLength), f - vec3(1.0,0.0,0.0)), u.x),
                     mix( dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(0.0,1.0,0.0), tileLength), f - vec3(0.0,1.0,0.0)),
-                        dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,1.0,0.0), tileLength), f - vec3(1.0,1.0,0.0)), u.x), u.y),
+                            dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,1.0,0.0), tileLength), f - vec3(1.0,1.0,0.0)), u.x), u.y),
                 mix( mix( dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(0.0,0.0,1.0), tileLength), f - vec3(0.0,0.0,1.0)),
-                    dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,0.0,1.0), tileLength), f - vec3(1.0,0.0,1.0)), u.x),
-                mix( dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(0.0,1.0,1.0), tileLength), f - vec3(0.0,1.0,1.0)),
-                    dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,1.0,1.0), tileLength), f - vec3(1.0,1.0,1.0)), u.x), u.y), u.z );
+                            dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,0.0,1.0), tileLength), f - vec3(1.0,0.0,1.0)), u.x),
+                    mix( dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(0.0,1.0,1.0), tileLength), f - vec3(0.0,1.0,1.0)),
+                            dot( GNOISE_NOISE_TILABLE_FNC(i + vec3(1.0,1.0,1.0), tileLength), f - vec3(1.0,1.0,1.0)), u.x), u.y), u.z );
 }
 vec3 gnoise3(vec3 x) {
     return vec3(gnoise(x+vec3(123.456, 0.567, 0.37)),
