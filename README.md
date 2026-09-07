@@ -94,8 +94,8 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>
     <td>
       <ul>
-        <li><a href="https://www.shadertoy.com/view/MsjSW3">nimitz</a></li>
-        <li><a href="https://www.shadertoy.com/view/DsVSRy">GPT4POWERUSER</a></li>
+        <li><a href="https://www.shadertoy.com/view/MsjSW3">Shadertoy</a></li>
+        <li><a href="https://www.shadertoy.com/view/DsVSRy">Shadertoy</a></li>
         <li><a href="https://editor.isf.video/shaders/6a8acb8bec1b1d001980c44f">ISF</a></li>
       </ul>
     </td>
