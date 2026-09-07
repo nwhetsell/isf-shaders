@@ -2,16 +2,16 @@
     "CATEGORIES": [
         "Generator"
     ],
-    "CREDIT": "GPT4POWERUSER <https://www.shadertoy.com/user/GPT4POWERUSER>",
-    "DESCRIPTION": "Converted from <https://www.shadertoy.com/view/DsVSRy>",
+    "CREDIT": "nimitz <https://www.shadertoy.com/user/nimitz> and GPT4POWERUSER <https://www.shadertoy.com/user/GPT4POWERUSER>",
+    "DESCRIPTION": "Converted from <https://www.shadertoy.com/view/MsjSW3> and <https://www.shadertoy.com/view/DsVSRy>",
     "INPUTS": [
         {
             "NAME": "SAMPLES",
-            "LABEL": "Ssamples",
+            "LABEL": "Samples",
             "TYPE": "float",
             "DEFAULT": 10,
             "MAX": 50,
-            "MIN": 2
+            "MIN": 1
         },
         {
             "NAME": "FOCAL_DISTANCE",
@@ -60,23 +60,32 @@ float map(vec3 p)
 
 void main()
 {
+    vec2 p = gl_FragCoord.xy / RENDERSIZE.y - vec2(0.9, 0.5);
     vec3 color = vec3(0);
     float depthSum = 0.;
 
     for (int i = 0; i < SAMPLES; i++) {
-        float depth = FOCAL_DISTANCE + (float(i) / float(SAMPLES - 1)) * FOCAL_RANGE;
+        float depth = FOCAL_DISTANCE;
+        if (SAMPLES > 1) {
+            depth += (float(i) / float(SAMPLES - 1)) * FOCAL_RANGE;
+        }
         float weight = 1. / (1. + abs(depth - FOCAL_DISTANCE));
 
-        vec2 p = gl_FragCoord.xy / RENDERSIZE.y - vec2(0.9, 0.5);
         vec3 sampleColor = vec3(0);
 
+        const int iterations = 5;
         for (int i = 0; i <= 5; i++) {
             vec3 p = vec3(0, 0, 5) + normalize(vec3(p, -1.)) * depth;
             float rz = map(p);
             float f = clamp((rz - map(p + 0.1)) * 0.5, -0.1, 1.);
 
-            float hue = mod(TIME * colorChangeSpeed + float(i) / 5., 1.);
-            vec3 rgbColor = hsl2rgb(vec3(hue, 1, 0.5));
+            vec3 rgbColor;
+            if (SAMPLES > 1) {
+                float hue = mod(TIME * colorChangeSpeed + float(i) / float(iterations), 1.);
+                rgbColor = hsl2rgb(vec3(hue, 1, 0.5));
+            } else {
+                rgbColor = vec3(0.1, 0.3, 0.4);
+            }
 
             vec3 l = rgbColor + vec3(5, 2.5, 3) * f;
             sampleColor = sampleColor * l + smoothstep(2.5, 0., rz) * 0.7 * l;

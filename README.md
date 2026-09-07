@@ -89,12 +89,13 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Ethereal Spectrum Cascade.fs">Ethereal Spectrum Cascade</a></td>
-    <td><a href="https://www.shadertoy.com/user/GPT4POWERUSER">GPT4POWERUSER</a></td>
-    <td>n/a</td>
+    <td><a href="Ether.fs">Ether</a></td>
+    <td><a href="https://www.shadertoy.com/user/nimitz">nimitz</a> and <a href="https://www.shadertoy.com/user/GPT4POWERUSER">GPT4POWERUSER</a></td>
+    <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>
     <td>
       <ul>
-        <li><a href="https://www.shadertoy.com/view/DsVSRy">Shadertoy</a></li>
+        <li><a href="https://www.shadertoy.com/view/MsjSW3">nimitz</a></li>
+        <li><a href="https://www.shadertoy.com/view/DsVSRy">GPT4POWERUSER</a></li>
         <li><a href="https://editor.isf.video/shaders/6a8acb8bec1b1d001980c44f">ISF</a></li>
       </ul>
     </td>
