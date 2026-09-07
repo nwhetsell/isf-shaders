@@ -19,10 +19,6 @@ shaders = \
 
 all: $(shaders)
 
-314.patch:
-	curl --remote-name 'https://patch-diff.githubusercontent.com/raw/patriciogonzalezvivo/lygia/pull/314.patch?full_index=1'
-	cd lygia && git apply ../314.patch
-
 CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Cell\ system\ 2.fs: Cell\ system\ 2.glsl
@@ -41,7 +37,7 @@ Le\ Vortex.fs: Le\ Vortex.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Lorenz\ system.fs: Lorenz\ system.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
-Mountains.fs: Mountains.glsl 314.patch
+Mountains.fs: Mountains.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
