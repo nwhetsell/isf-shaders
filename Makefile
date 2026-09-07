@@ -3,7 +3,7 @@ shaders = \
 	Cell\ system\ 2.fs \
 	circle\ dithering.fs \
 	Endless\ living\ creature.fs \
-	Ethereal\ Spectrum\ Cascade.fs \
+	Ether.fs \
 	Everflow.fs \
 	Gaussian\ SmoothLife.fs \
 	Le\ Vortex.fs \
@@ -27,7 +27,7 @@ circle\ dithering.fs: circle\ dithering.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Endless\ living\ creature.fs: Endless\ living\ creature.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
-Ethereal\ Spectrum\ Cascade.fs: Ethereal\ Spectrum\ Cascade.glsl
+Ether.fs: Ether.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Everflow.fs: Everflow.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
