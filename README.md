@@ -75,6 +75,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Colormap.fs">Colormap</a></td>
+    <td><a href="https://www.shadertoy.com/user/gehtsiegarnixan">GehtSieGarNixAn</a></td>
+    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/Nd3fR2">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6aa191c59fce22001a7b0223">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Colormap” shader" src="https://github.com/user-attachments/assets/236cf077-32c4-4917-ba3e-01b86373cc97" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Endless%20living%20creature.fs">Endless living creature</a></td>
     <td><a href="https://www.shadertoy.com/user/leon">Leon Denise</a></td>
     <td>n/a</td>

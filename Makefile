@@ -2,6 +2,7 @@ shaders = \
 	CA\ Molecular\ dynamics.fs \
 	Cell\ system\ 2.fs \
 	circle\ dithering.fs \
+	Colormap.fs \
 	Endless\ living\ creature.fs \
 	Ether.fs \
 	Everflow.fs \
@@ -25,6 +26,8 @@ CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl
 Cell\ system\ 2.fs: Cell\ system\ 2.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 circle\ dithering.fs: circle\ dithering.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Colormap.fs: Colormap.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Endless\ living\ creature.fs: Endless\ living\ creature.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
