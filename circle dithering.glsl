@@ -42,11 +42,11 @@
             "MIN": 0
         },
         {
-            "VALUES": [0, 1],
             "NAME": "shapeMode",
             "LABEL": "Shape",
             "TYPE": "long",
             "DEFAULT" : 0,
+            "VALUES": [0, 1],
             "LABELS" : ["Ring", "Gabor"]
         },
         {
