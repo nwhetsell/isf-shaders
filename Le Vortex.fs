@@ -389,7 +389,7 @@ float map(vec3 pos) {
 }
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy - 0.5 * RENDERSIZE.xy) / RENDERSIZE.y;
+    vec2 uv = (gl_FragCoord.xy - 0.5 * RENDERSIZE) / RENDERSIZE.y;
     vec3 eye = vec3(cameraX, cameraY, cameraZ);
     vec3 ray = normalize(vec3(uv, 1.3));
     camera(eye);

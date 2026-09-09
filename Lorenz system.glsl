@@ -103,7 +103,7 @@ float dfLine(vec2 start, vec2 end, vec2 uv)
 
 void main()
 {
-    vec2 res = RENDERSIZE.xy / RENDERSIZE.y;
+    vec2 res = RENDERSIZE / RENDERSIZE.y;
     vec2 uv = gl_FragCoord.xy / RENDERSIZE.y;
     uv -= 0.5 * res;
     uv.y += 0.375;
