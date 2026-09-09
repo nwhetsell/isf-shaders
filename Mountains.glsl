@@ -2,7 +2,7 @@
     "CATEGORIES": [
         "Generator"
     ],
-    "CREDIT": "",
+    "CREDIT": "Dave Hoskins <https://www.shadertoy.com/user/Dave_Hoskins>",
     "DESCRIPTION": "Mountains, converted from <https://www.shadertoy.com/view/4slGD4>",
     "INPUTS": [
 
