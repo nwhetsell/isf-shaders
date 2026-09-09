@@ -191,7 +191,7 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
-
+// #define ISF_EDITOR_WEBSITE
 #define RAND 
 // Linear congruential generator for random numbers
 // (https://en.wikipedia.org/wiki/Linear_congruential_generator).
@@ -212,7 +212,8 @@ const int randBitMask = 0x7fff;
 int rand(void)
 {
     seed = seed * a + c;
-    return (seed >> 16) & randBitMask; // Return bits 16 to 30.
+    // Return bits 16 to 30.
+    return (seed >> 16) & randBitMask;
 }
 float frand(void)
 {
@@ -229,7 +230,7 @@ void srand(int s)
 // https://gist.github.com/dragon0/f70e2637e6d4e64a6ab210faf8a85a50
 int hash(int n)
 {
-    n = (n << 13)^n;
+    n = (n << 13) ^ n;
     return n * (n * n * 15731 + 789221) + 1376312589;
 }
 // This is a heavily modified version of https://www.shadertoy.com/view/lst3zf

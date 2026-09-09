@@ -1,3 +1,10 @@
+// #define ISF_EDITOR_WEBSITE
+#ifdef ISF_EDITOR_WEBSITE
+#define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#include "../lygia/generative/random.glsl"
+#endif
+
 #ifndef RAND
 #define RAND
 
@@ -22,7 +29,14 @@ const int randBitMask = 0x7fff;
 int rand(void)
 {
     seed = seed * a + c;
-    return (seed >> 16) & randBitMask; // Return bits 16 to 30.
+    // Return bits 16 to 30.
+#ifdef ISF_EDITOR_WEBSITE
+    // Approximation of bitwise operations, based on
+    // https://stackoverflow.com/questions/1700871/how-do-i-perform-bit-operations-in-glsl#answer-1700928
+    return int(fract((float(seed) / float(65536)) / float(0x8000)) * float(0x8000));
+#else
+    return (seed >> 16) & randBitMask;
+#endif
 }
 
 float frand(void)
@@ -42,8 +56,12 @@ void srand(int s)
 // https://gist.github.com/dragon0/f70e2637e6d4e64a6ab210faf8a85a50
 int hash(int n)
 {
-    n = (n << 13)^n;
+#ifdef ISF_EDITOR_WEBSITE
+    return int(pow(2., 16.) * random(float(n)));
+#else
+    n = (n << 13) ^ n;
     return n * (n * n * 15731 + 789221) + 1376312589;
+#endif
 }
 
 #endif
