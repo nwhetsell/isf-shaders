@@ -135,7 +135,9 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <td><a href="Iterated%20function%20system">Iterated function system</a></td>
     <td>n/a</td>
     <td>n/a</td>
-    <td>n/a</td>
+    <td>
+      <p><a href="https://editor.isf.video/shaders/6aa17309bca9d5001a9d4ab8">ISF</a> only</p>
+    </td>
     <td>
       <img width="197" alt="Screenshot of “Iterated function system” shader" src="https://github.com/user-attachments/assets/6232fe21-4974-461c-bbaa-7f56ad184f66" />
     </td>
@@ -174,9 +176,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
     <td>n/a</td>
     <td>
-      <ul>
-        <p><a href="https://www.shadertoy.com/view/Nttyz4">Shadertoy</a> only <!-- This shader uses <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/fwidth.xhtml"><code>fwidth</code></a>, which isn’t available on https://editor.isf.video --></p>
-      </ul>
+      <p><a href="https://www.shadertoy.com/view/Nttyz4">Shadertoy</a> only <!-- This shader uses <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/fwidth.xhtml"><code>fwidth</code></a>, which isn’t available on https://editor.isf.video --></p>
     </td>
     <td>
       <img width="197" alt="Screenshot of “oscilloscope analysis luminance” shader" src="https://github.com/user-attachments/assets/8c9afa33-4983-4490-a60c-866368a44f2c" />
