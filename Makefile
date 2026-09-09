@@ -6,6 +6,7 @@ shaders = \
 	Ether.fs \
 	Everflow.fs \
 	Gaussian\ SmoothLife.fs \
+	Iterated\ function\ system.fs \
 	Le\ Vortex.fs \
 	Lorenz\ system.fs \
 	Mountains.fs \
@@ -32,6 +33,8 @@ Ether.fs: Ether.glsl
 Everflow.fs: Everflow.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Iterated\ function\ system.fs: Iterated\ function\ system.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Le\ Vortex.fs: Le\ Vortex.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"

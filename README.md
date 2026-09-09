@@ -132,6 +132,15 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Iterated%20function%20system">Iterated function system</a></td>
+    <td>n/a</td>
+    <td>n/a</td>
+    <td>n/a</td>
+    <td>
+      <img width="197" alt="Screenshot of “Iterated function system” shader" src="https://github.com/user-attachments/assets/6232fe21-4974-461c-bbaa-7f56ad184f66" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Le%20Vortex.fs">Le Vortex</a></td>
     <td><a href="https://www.shadertoy.com/user/leon">Leon Denise</a></td>
     <!-- Based on page 34 or 36 of Le Processus (1993) <https://fr.wikipedia.org/wiki/Le_Processus> by Marc-Antoine Mathieu <https://fr.wikipedia.org/wiki/Marc-Antoine_Mathieu> -->
