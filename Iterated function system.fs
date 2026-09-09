@@ -196,8 +196,8 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
 // Linear congruential generator for random numbers
 // (https://en.wikipedia.org/wiki/Linear_congruential_generator).
 int seed = 1;
-// This is the multiplier (a) and increment (c) from used in Microsoft’s Visual
-// C implementation; see
+// This is the multiplier (a) and increment (c) from in Microsoft’s Visual C
+// implementation; see
 // https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 // in the “Microsoft Visual/Quick C/C++” row. The multiplier may not be a good
 // choice. Table 4 (page 258) of “Tables of Linear Congruential Generators of
