@@ -34,7 +34,7 @@ Everflow.fs: Everflow.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
-Iterated\ function\ system.fs: Iterated\ function\ system.glsl
+Iterated\ function\ system.fs: Iterated\ function\ system.glsl rand/rand.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Le\ Vortex.fs: Le\ Vortex.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
