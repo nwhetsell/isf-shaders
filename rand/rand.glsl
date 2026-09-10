@@ -13,7 +13,7 @@
 
 int seed = 1;
 
-// This is the multiplier (a) and increment (c) from in Microsoft’s Visual C
+// This is the multiplier (a) and increment (c) from Microsoft’s Visual C
 // implementation; see
 // https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 // in the “Microsoft Visual/Quick C/C++” row. The multiplier may not be a good
