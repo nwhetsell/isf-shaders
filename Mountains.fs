@@ -5,7 +5,62 @@
     "CREDIT": "Dave Hoskins <https://www.shadertoy.com/user/Dave_Hoskins>",
     "DESCRIPTION": "Mountains, converted from <https://www.shadertoy.com/view/4slGD4>",
     "INPUTS": [
-
+        {
+            "NAME": "mountainHeight",
+            "LABEL": "Mountain height",
+            "TYPE": "float",
+            "DEFAULT": 0.75,
+            "MAX": 2,
+            "MIN": 0
+        },
+        {
+            "NAME": "mountainSize",
+            "LABEL": "Mountain size",
+            "TYPE": "float",
+            "DEFAULT": 0.15,
+            "MAX": 2,
+            "MIN": 0
+        },
+        {
+            "NAME": "terrain",
+            "LABEL": "Terrain",
+            "TYPE": "float",
+            "DEFAULT": 0.25,
+            "MAX": 2,
+            "MIN": 0
+        },
+        {
+            "NAME": "flatness",
+            "LABEL": "Flatness",
+            "TYPE": "float",
+            "DEFAULT": 5,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "detail",
+            "LABEL": "Detail",
+            "TYPE": "float",
+            "DEFAULT": 66,
+            "MAX": 100,
+            "MIN": 0
+        },
+        {
+            "NAME": "cragginess",
+            "LABEL": "Cragginess",
+            "TYPE": "float",
+            "DEFAULT": -0.4,
+            "MAX": 1,
+            "MIN": -1
+        },
+        {
+            "NAME": "cloudHeight",
+            "LABEL": "Cloud height",
+            "TYPE": "float",
+            "DEFAULT": 200,
+            "MAX": 1000,
+            "MIN": 0
+        }
     ],
     "ISFVSN": "2"
 }*/
@@ -596,9 +651,9 @@ vec2 gnoise2(vec2 st) {
     vec2 c = random2(i + vec2(0.0, 1.0));
     vec2 d = random2(i + vec2(1.0, 1.0));
     vec2 u = cubic(f);
-    return mix( a, b, u.x) +
-                (c - a)* u.y * (1.0 - u.x) +
-                (d - b) * u.x * u.y;
+    return mix(a, b, u.x) +
+           (c - a) * u.y * (1.0 - u.x) +
+           (d - b) * u.x * u.y;
 }
 /*
 contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
@@ -637,24 +692,27 @@ float Trees(vec2 p)
 }
 //--------------------------------------------------------------------------
 // Low def version for ray-marching through the height field...
-float Terrain( in vec2 p)
+float Terrain(in vec2 p, out vec2 pos, out float w)
 {
     // There's some real magic numbers in here!
  // The gnoise calls add large mountain ranges for more variation over distances...
- vec2 pos = p*0.05;
- float w = (gnoise(pos*.25)*0.75+.15);
- w = 66.0 * w * w;
- vec2 dxy = vec2(0.0, 0.0);
- float f = .0;
- for (int i = 0; i < 5; i++)
- {
-  f += w * gnoise(pos);
-  w = -w * 0.4; //...Flip negative and positive for variation
+ pos = p * 0.05;
+ w = gnoise(pos * terrain) * mountainHeight + mountainSize;
+ w = detail * w*w;
+ float f = 0.;
+ for (int i = 0; i < 5; i++) {
+  f += gnoise(pos) * w;
   pos = rotate2D * pos;
+  w = w * cragginess;
  }
- float ff = gnoise(pos*.002);
- f += pow(abs(ff), 5.0)*275.-5.0;
+ f += pow(abs(gnoise(pos * 0.002)), flatness) * 275. - 5.;
  return f;
+}
+float Terrain(in vec2 p)
+{
+    vec2 pos;
+    float w;
+ return Terrain(p, pos, w);
 }
 //--------------------------------------------------------------------------
 // Map to lower resolution for height field mapping for Scene function...
@@ -671,29 +729,19 @@ float Map(in vec3 p)
 // High def version only used for grabbing normal information.
 float Terrain2( in vec2 p)
 {
- vec2 pos = p*0.05;
- float w = (gnoise(pos*.25)*0.75+.15);
- w = 66.0 * w * w;
- vec2 dxy = vec2(0.0, 0.0);
- float f = .0;
- for (int i = 0; i < 5; i++)
- {
-  f += w * gnoise(pos);
-  w = - w * 0.4; //...Flip negative and positive for varition
-  pos = rotate2D * pos;
- }
- float ff = gnoise(pos*.002);
- f += pow(abs(ff), 5.0)*275.-5.0;
- // float f = Terrain(p);
+    vec2 pos;
+    float w;
+ float f = Terrain(p, pos, w);
  treeCol = Trees(p);
  f += treeCol;
- if (treeCol > 0.0) return f;
+ if (treeCol > 0.)
+     return f;
  // That's the last of the low resolution, now go down further for the Normal data...
  for (int i = 0; i < 6; i++)
  {
-  f += w * gnoise(pos);
-  w = - w * 0.4;
+  f += gnoise(pos) * w;
   pos = rotate2D * pos;
+  w = w * cragginess;
  }
  return f;
 }
@@ -702,8 +750,9 @@ float Terrain2( in vec2 p)
 // 200 units above the ground...
 vec3 GetClouds(in vec3 sky, in vec3 rd)
 {
- if (rd.y < 0.01) return sky;
- float v = (200.0-cameraPos.y)/rd.y;
+ if (rd.y < 0.01)
+     return sky;
+ float v = (cloudHeight - cameraPos.y) / rd.y;
  rd.xz *= v;
  rd.xz += cameraPos.xz;
  rd.xz *= .010;
@@ -892,7 +941,7 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord )
 vec3 CameraPath( float t )
 {
  float m = 1.0+(iMouse.x/iResolution.x)*300.0;
- t = (iTime*1.5+m+657.0)*.006 + t;
+ t = (iTime*1.5*0.+m+657.0)*.006 + t;
     vec2 p = 476.0*vec2( sin(3.5*t), cos(1.5*t) );
  return vec3(35.0-p.x, 0.6, 4108.0+p.y);
 }
