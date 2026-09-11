@@ -13,6 +13,7 @@ shaders = \
 	Mountains.fs \
 	oscilloscope\ analysis\ luminance.fs \
 	Physarum\ Polycephalum\ Simulation.fs \
+	Rainier\ mood.fs \
 	Random\ slime\ mold\ generator.fs \
 	Shattered\ Crystal.fs \
 	spilled.fs \
@@ -48,6 +49,8 @@ Mountains.fs: Mountains.glsl
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Rainier\ mood.fs: Rainier\ mood.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Random\ slime\ mold\ generator.fs: Random\ slime\ mold\ generator.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"

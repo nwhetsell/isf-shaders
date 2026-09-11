@@ -12,8 +12,8 @@ Many shaders use code from [LYGIA](https://github.com/patriciogonzalezvivo/lygia
 
 On macOS, after cloning this repository you can run the [make_links.sh](make_links.sh) script to add symbolic links to .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
 
-Many of these shaders are intended to be used with floating-point buffers.
-Not all ISF hosts support floating-point buffers:
+Many of these shaders are intended to be used with floating-point buffers,
+which not all ISF hosts support:
 Videosync supports floating-point buffers (in [v2.0.12](https://support.showsync.com/release-notes/videosync/2.0#2012) and later),
 but https://editor.isf.video does not.
 If floating-point buffers are not available, most of these shaders will look very different (if they run at all).
@@ -208,6 +208,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
     <td>
       <img width="197" alt="Screenshot of “Physarum Polycephalum Simulation” shader" src="https://github.com/user-attachments/assets/ec175ac4-7659-4611-9dcb-e0a9490f7d88" />
+    </td>
+  </tr>
+  <tr>
+    <td><a href="Rainier%20mood.fs">Rainier mood</a></td>
+    <td><a href="https://www.shadertoy.com/user/Zavie">Zavie</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/ldfyzl">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6aa447859fce22001a7b4286">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Rainier mood” shader" src="https://github.com/user-attachments/assets/32d1b87f-34c3-436b-a5c3-21fd2c08ad49" />
     </td>
   </tr>
   <tr>
