@@ -99,5 +99,5 @@ void main()
 
     color /= depthSum;
 
-    gl_FragColor = vec4(color, 1);
+    gl_FragColor = vec4(color, length(color));
 }
