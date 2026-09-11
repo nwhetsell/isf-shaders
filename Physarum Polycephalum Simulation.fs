@@ -449,7 +449,7 @@ void main()
         if (decayInputImage) {
             gl_FragColor = trail;
         } else {
-            gl_FragColor = (1. - inputImageAmount) * trail + inputImageAmount * IMG_PIXEL(inputImage, position);
+            gl_FragColor = mix(trail, IMG_PIXEL(inputImage, position), inputImageAmount);
         }
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C

@@ -316,7 +316,7 @@ void main()
         // add a little "motor"
         vec2 scr = 2. * (uv - motorLocation);
         gl_FragColor.xy += motorSize * scr / (10. * dot(scr, scr) + motorAttenuation);
-        gl_FragColor = (1. - inputImageAmount) * gl_FragColor + inputImageAmount * IMG_PIXEL(inputImage, pos);
+        gl_FragColor = mix(gl_FragColor, IMG_PIXEL(inputImage, pos), inputImageAmount);
         if (FRAMEINDEX < 5) {
             gl_FragColor = IMG_PIXEL(inputImage, pos);
         }

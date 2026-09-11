@@ -490,7 +490,7 @@ void main()
             gl_FragColor.rg = clamp(length(abd.xy) > 1. ? normalize(abd.xy) : abd.xy, -1., 1.);
             gl_FragColor.b = clamp(abd.z, -1., 1.);
             gl_FragColor.a = 1.;
-            gl_FragColor = (1. - inputImageAmount) * gl_FragColor + inputImageAmount * IMG_PIXEL(inputImage, gl_FragCoord.xy);
+            gl_FragColor = mix(gl_FragColor, IMG_PIXEL(inputImage, gl_FragCoord.xy), inputImageAmount);
         }
     }
     else // Shadertoy Image
