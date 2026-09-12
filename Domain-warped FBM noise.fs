@@ -708,7 +708,7 @@ mat2 rotate2d(const in float r){
 float gnoise1WithShift(inout vec2 st)
 {
     float noise = gnoise1(st);
-    st = rotate2d(fbmRotation * DEG2RAD) * st * 2. +fbmShift;
+    st = rotate2d(fbmRotation * DEG2RAD) * st * 2. + fbmShift;
     return noise;
 }
 vec2 scaledRandom(vec2 st)
