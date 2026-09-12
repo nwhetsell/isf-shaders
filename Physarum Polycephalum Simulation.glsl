@@ -176,7 +176,7 @@
 #ifdef ISF_EDITOR_WEBSITE
 #define particleMaxSearchRadius 5.
 #define tanh(x) (2. / (1. + exp(-2. * (x))) - 1.)
-#define round(x) floor((x) + 0.5)
+#include "lygia/math/round.glsl"
 #endif
 
 // These are also interesting defaults on the ISF website:
