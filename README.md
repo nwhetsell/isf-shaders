@@ -89,6 +89,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Domain-warped%20FBM%20noise.fs">Domain-warped FBM noise</a></td>
+    <td><a href="https://www.shadertoy.com/user/liamegan">liamegan</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/wttXz8">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6aa552cf9fce22001a7b81ec">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Domain-warped FBM noise” shader" src="https://github.com/user-attachments/assets/f06a5169-a53f-44df-bfbb-80ac1e260840" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Endless%20living%20creature.fs">Endless living creature</a></td>
     <td><a href="https://www.shadertoy.com/user/leon">Leon Denise</a></td>
     <td>n/a</td>

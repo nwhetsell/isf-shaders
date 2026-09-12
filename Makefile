@@ -3,6 +3,7 @@ shaders = \
 	Cell\ system\ 2.fs \
 	circle\ dithering.fs \
 	Colormap.fs \
+	Domain-warped\ FBM\ noise.fs \
 	Endless\ living\ creature.fs \
 	Ether.fs \
 	Everflow.fs \
@@ -29,6 +30,8 @@ Cell\ system\ 2.fs: Cell\ system\ 2.glsl
 circle\ dithering.fs: circle\ dithering.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Colormap.fs: Colormap.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Domain-warped\ FBM\ noise.fs: Domain-warped\ FBM\ noise.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Endless\ living\ creature.fs: Endless\ living\ creature.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
