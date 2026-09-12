@@ -7,6 +7,7 @@ shaders = \
 	Endless\ living\ creature.fs \
 	Ether.fs \
 	Everflow.fs \
+	expansive\ reaction-diffusion.fs \
 	Gaussian\ SmoothLife.fs \
 	Iterated\ function\ system.fs \
 	Le\ Vortex.fs \
@@ -38,6 +39,8 @@ Endless\ living\ creature.fs: Endless\ living\ creature.glsl
 Ether.fs: Ether.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Everflow.fs: Everflow.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+expansive\ reaction-diffusion.fs: expansive\ reaction-diffusion.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
