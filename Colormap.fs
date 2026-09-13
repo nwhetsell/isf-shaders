@@ -268,7 +268,8 @@ vec3 turbo(float t) {
 }
 void main()
 {
-    float t = luminance(IMG_THIS_PIXEL(inputImage));
+    vec4 inputColor = IMG_THIS_PIXEL(inputImage);
+    float t = luminance(inputColor);
     vec3 color;
     // Perceptually uniform
          if (id == 0) color = viridis(t);
@@ -301,5 +302,5 @@ void main()
     else if (id == 23) color = turbo(t);
     // Gray
     else color = vec3(clamp(t, 0.0, 1.0));
-    gl_FragColor = vec4(color, 1);
+    gl_FragColor = vec4(color, inputColor.a);
 }
