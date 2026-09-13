@@ -34,25 +34,25 @@
     ]
 }*/
 
-#define iResolution RENDERSIZE
+#define ISF_EDITOR_WEBSITE
+#ifdef ISF_EDITOR_WEBSITE
+vec4 texture(sampler2D, vec2);
+#endif
 
+#include "complex/complex.glsl"
 #include "lygia/generative/random.glsl"
+#define SAMPLER_FNC(TEX, UV) texture(TEX, UV)
+#define GAUSSIANBLUR1D_SAMPLER_FNC(TEX, UV) IMG_NORM_PIXEL(TEX, UV)
+#define HORIZONTAL_COORDINATE_FNC(UV, SHIFT) fract(vec2(UV.x + (SHIFT), UV.y))
+#define VERTICAL_COORDINATE_FNC(UV, SHIFT) fract(vec2(UV.x, UV.y + (SHIFT)))
+#include "lygia/filter/gaussianBlur/1D.glsl"
 #include "lygia/math/const.glsl"
 #define INV_HALF_PI (0.5 * INV_PI)
+#include "lygia/space/aspect.glsl"
 
 // main reaction-diffusion loop
 
 // actually the diffusion is realized as a separated two-pass Gaussian blur kernel and is stored in buffer C
-
-vec2 complex_mul(vec2 factorA, vec2 factorB){
-    return vec2( factorA.x*factorB.x - factorA.y*factorB.y, factorA.x*factorB.y + factorA.y*factorB.x);
-}
-
-vec2 complex_div(vec2 numerator, vec2 denominator){
-    return vec2( numerator.x*denominator.x + numerator.y*denominator.y,
-                numerator.y*denominator.x - numerator.x*denominator.y)/
-        vec2(denominator.x*denominator.x + denominator.y*denominator.y);
-}
 
 float circle(vec2 uv, vec2 aspect, float scale){
     return clamp( 1. - length((uv-0.5)*aspect*scale), 0., 1.);
@@ -64,7 +64,7 @@ float sigmoid(float x) {
 
 float conetip(vec2 uv, vec2 pos, float size, float min)
 {
-    vec2 aspect = vec2(1.,iResolution.y/iResolution.x);
+    vec2 aspect = vec2(1., RENDERSIZE.y / RENDERSIZE.x);
     return max( min, 1. - length((uv - pos) * aspect / size) );
 }
 
@@ -75,17 +75,17 @@ float warpFilter(vec2 uv, vec2 pos, float size, float ramp)
 
 vec2 vortex_warp(vec2 uv, vec2 pos, float size, float ramp, vec2 rot)
 {
-    vec2 aspect = vec2(1.,iResolution.y/iResolution.x);
+    vec2 aspect = vec2(1., RENDERSIZE.y / RENDERSIZE.x);
 
     vec2 pos_correct = 0.5 + (pos - 0.5);
-    vec2 rot_uv = pos_correct + complex_mul((uv - pos_correct)*aspect, rot)/aspect;
+    vec2 rot_uv = pos_correct + complex_multiply((uv - pos_correct)*aspect, rot)/aspect;
     float _filter = warpFilter(uv, pos_correct, size, ramp);
     return mix(uv, rot_uv, _filter);
 }
 
 vec2 vortex_pair_warp(vec2 uv, vec2 pos, vec2 vel)
 {
-    vec2 aspect = vec2(1.,iResolution.y/iResolution.x);
+    vec2 aspect = vec2(1., RENDERSIZE.y / RENDERSIZE.x);
     float ramp = 5.;
 
     float d = 0.2;
@@ -109,10 +109,10 @@ vec2 vortex_pair_warp(vec2 uv, vec2 pos, vec2 vel)
 }
 
 // vec2 mouseDelta(){
-//     vec2 pixelSize = 1. / iResolution.xy;
+//     vec2 pixelSize = 1. / RENDERSIZE;
 //     float eighth = 1./8.;
 //     vec4 oldMouse = IMG_NORM_PIXEL(iChannel2, vec2(7.5 * eighth, 2.5 * eighth));
-//     vec4 nowMouse = vec4(iMouse.xy / iResolution.xy, iMouse.zw / iResolution.xy);
+//     vec4 nowMouse = vec4(iMouse.xy / RENDERSIZE, iMouse.zw / RENDERSIZE);
 //     if(oldMouse.z > pixelSize.x && oldMouse.w > pixelSize.y &&
 //        nowMouse.z > pixelSize.x && nowMouse.w > pixelSize.y)
 //     {
@@ -121,27 +121,20 @@ vec2 vortex_pair_warp(vec2 uv, vec2 pos, vec2 vel)
 //     return vec2(0.);
 // }
 
-#define fragCoord gl_FragCoord.xy
-#define fragColor gl_FragColor
-#define iFrame FRAMEINDEX
 #define iMouse vec2(0)
-#define iTime TIME
 
 void main()
 {
+    vec2 pixelSize = 1. / RENDERSIZE;
+    vec2 uv = gl_FragCoord.xy * pixelSize;
+
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        vec2 uv = fragCoord.xy / iResolution.xy;
-        vec2 pixelSize = 1. / iResolution.xy;
-
-
         // vec2 mouseV = mouseDelta();
-        vec2 aspect = vec2(1.,iResolution.y/iResolution.x);
+        vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
         // uv = vortex_pair_warp(uv, iMouse.xy*pixelSize, mouseV*aspect*1.4);
 
-        vec4 blur1 = IMG_NORM_PIXEL(bufferC, uv);
-
-        vec4 noise = random4(uv + fract(vec2(42,56)*iTime));// IMG_NORM_PIXEL(iChannel3, fragCoord.xy / iChannelResolution[3].xy + fract(vec2(42,56)*iTime));
+        vec4 noise = random4(uv + fract(vec2(42,56)*TIME));
 
         // get the gradients from the blurred image
         vec2 d = pixelSize*4.;
@@ -154,59 +147,32 @@ void main()
         new_red -= (IMG_NORM_PIXEL(bufferC, fract(uv_red + (noise.xy-0.5)*pixelSize)).x -
                     IMG_NORM_PIXEL(bufferA, fract(uv_red + (noise.xy-0.5)*pixelSize))).x * 0.047; // reaction-diffusion
 
-        if (iFrame < 10) {
-            fragColor = noise;
+        if (FRAMEINDEX < 10) {
+            gl_FragColor = noise;
         } else {
-            fragColor.x = clamp(new_red, 0., 1.);
+            gl_FragColor.r = clamp(new_red, 0., 1.);
         }
     }
     else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
-        vec2 pixelSize = 1. / RENDERSIZE;
-        vec2 uv = fragCoord.xy * pixelSize;
+        //
+        GAUSSIAN_BLUR_1D(bufferA, uv, pixelSize.x, 9, HORIZONTAL_COORDINATE_FNC)
 
-        float h = pixelSize.x;
-        vec4 sum = vec4(0.0);
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x - 4.0*h, uv.y)) ) * 0.05;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x - 3.0*h, uv.y)) ) * 0.09;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x - 2.0*h, uv.y)) ) * 0.12;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x - 1.0*h, uv.y)) ) * 0.15;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + 0.0*h, uv.y)) ) * 0.16;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + 1.0*h, uv.y)) ) * 0.15;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + 2.0*h, uv.y)) ) * 0.12;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + 3.0*h, uv.y)) ) * 0.09;
-        sum += IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + 4.0*h, uv.y)) ) * 0.05;
-
-        fragColor.xyz = sum.xyz/0.98; // normalize
-        fragColor.a = 1.;
+        gl_FragColor.rgb = accumColor.rgb / accumWeight;
+        gl_FragColor.a = 1.;
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        vec2 pixelSize = 1. / RENDERSIZE;
-        vec2 uv = fragCoord.xy * pixelSize;
+        GAUSSIAN_BLUR_1D(bufferB, uv, pixelSize.y, 9, VERTICAL_COORDINATE_FNC)
 
-        float v = pixelSize.y;
-        vec4 sum = vec4(0.0);
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y - 4.0*v)) ) * 0.05;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y - 3.0*v)) ) * 0.09;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y - 2.0*v)) ) * 0.12;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y - 1.0*v)) ) * 0.15;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + 0.0*v)) ) * 0.16;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + 1.0*v)) ) * 0.15;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + 2.0*v)) ) * 0.12;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + 3.0*v)) ) * 0.09;
-        sum += IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + 4.0*v)) ) * 0.05;
-
-        fragColor.xyz = sum.xyz/0.98; // normalize
-        fragColor.a = 1.;
+        gl_FragColor.rgb = accumColor.rgb / accumWeight;
+        gl_FragColor.a = 1.;
     }
     else // Shadertoy Image
     {
-        vec2 uv = fragCoord.xy / iResolution.xy;
-        vec2 pixelSize = 1. / iResolution.xy;
-        vec2 aspect = vec2(1.,iResolution.y/iResolution.x);
+        vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
 
-        vec4 noise = random4(uv + fract(vec2(42,56)*iTime));// IMG_NORM_PIXEL(iChannel3, fragCoord.xy / iChannelResolution[3].xy + fract(vec2(42,56)*iTime));
+        vec4 noise = random4(uv + fract(vec2(42,56)*TIME));
 
         vec2 lightSize=vec2(4.);
 
@@ -225,14 +191,14 @@ void main()
         vec4 rd = vec4(IMG_NORM_PIXEL(bufferA,uv+vec2(dx.x,dy.x)*pixelSize*8.).x)*vec4(0.7,1.5,2.0,1.0)-vec4(0.3,1.0,1.0,1.0);
 
         // and add the light map
-        fragColor = mix(
-            rd,
-            vec4(8, 6, 2, 1),
-            light * 0.75 * vec4(1. - IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x)
-        );
+        // gl_FragColor = mix(
+        //     rd,
+        //     vec4(8, 6, 2, 1),
+        //     light * 0.75 * vec4(1. - IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x)
+        // );
 
-        fragColor = rd;
+        gl_FragColor = rd;
 
-        fragColor.a = 1.;
+        gl_FragColor.a = 1.;
     }
 }

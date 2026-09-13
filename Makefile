@@ -41,7 +41,11 @@ Ether.fs: Ether.glsl
 Everflow.fs: Everflow.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 expansive\ reaction-diffusion.fs: expansive\ reaction-diffusion.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	cd lygia; \
+	git apply ../gaussianBlur1D.patch;
+	clang --preprocess --comments --no-line-commands --language=c --output="$@" "$<"
+	cd lygia; \
+	git reset --hard
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Iterated\ function\ system.fs: Iterated\ function\ system.glsl rand/rand.glsl
@@ -51,6 +55,8 @@ Le\ Vortex.fs: Le\ Vortex.glsl
 Lorenz\ system.fs: Lorenz\ system.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Mountains.fs: Mountains.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+notebook\ drawings.fs: notebook\ drawings.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"

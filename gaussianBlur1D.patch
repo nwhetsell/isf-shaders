@@ -1,0 +1,40 @@
+diff --git a/filter/gaussianBlur/1D.glsl b/filter/gaussianBlur/1D.glsl
+index 1e2b34b0..9ac94dea 100644
+--- a/filter/gaussianBlur/1D.glsl
++++ b/filter/gaussianBlur/1D.glsl
+@@ -55,22 +55,20 @@ GAUSSIANBLUR1D_TYPE gaussianBlur1D(in SAMPLER_TYPE tex,in vec2 st,in vec2 offset
+ 
+ #else
+ 
+-GAUSSIANBLUR1D_TYPE gaussianBlur1D(in SAMPLER_TYPE tex,in vec2 st,in vec2 offset,const int kernelSize){
+-    GAUSSIANBLUR1D_TYPE accumColor=GAUSSIANBLUR1D_TYPE(0.);
+-
+-    float kernelSizef = float(kernelSize);
+-    
+-    float accumWeight = 0.0;
+-    const float k = 0.39894228;// 1 / sqrt(2*PI)
+-    for (int i = 0; i < kernelSize; i++) {
+-        float x = -0.5 * ( kernelSizef -1.0) + float(i);
+-        float weight = (k / kernelSizef) * gaussian(x, kernelSizef);
+-        GAUSSIANBLUR1D_TYPE tex = GAUSSIANBLUR1D_SAMPLER_FNC(tex, st + x * offset);
+-        accumColor += weight * tex;
+-        accumWeight += weight;
++#define GAUSSIAN_BLUR_1D(TEX, ST, OFFSET, KERNEL_SIZE, COORDINATE_FNC) \
++    GAUSSIANBLUR1D_TYPE accumColor=GAUSSIANBLUR1D_TYPE(0.); \
++    \
++    float kernelSizef = float(KERNEL_SIZE); \
++    \
++    float accumWeight = 0.0; \
++    const float k = 1.44; \
++    for (int i = 0; i < KERNEL_SIZE; i++) { \
++        float x = -0.5 * ( kernelSizef -1.0) + float(i); \
++        float weight = (k / kernelSizef) * gaussian(x, kernelSizef * 0.2913965934); \
++        GAUSSIANBLUR1D_TYPE tex = GAUSSIANBLUR1D_SAMPLER_FNC(TEX, COORDINATE_FNC(ST, x * (OFFSET))); \
++        accumColor += weight * tex; \
++        accumWeight += weight; \
+     }
+-    return accumColor/accumWeight;
+-}
+ #endif
+ 
+ #endif
