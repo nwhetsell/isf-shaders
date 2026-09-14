@@ -146,6 +146,17 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="expansive%20reaction-diffusion.fs">expansive reaction-diffusion</a></td>
+    <td><a href="https://www.shadertoy.com/user/Flexi">Flexi</a></td>
+    <td>n/a</td>
+    <td>
+      <p><a href="https://www.shadertoy.com/view/4dcGW2">Shadertoy</a> only <!-- A bug in https://editor.isf.video prevents this shader from compiling. --></p>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “expansive reaction-diffusion” shader" src="https://github.com/user-attachments/assets/40ba64ff-3a2a-4904-8fab-fc1fc5331ff8" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Gaussian%20SmoothLife.fs">Gaussian SmoothLife</a></td>
     <td><a href="https://www.shadertoy.com/user/cornusammonis">cornusammonis</a></td>
     <td>n/a</td>
