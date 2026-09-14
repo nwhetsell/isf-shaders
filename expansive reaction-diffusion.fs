@@ -277,20 +277,27 @@ void main()
         vec4 dx = IMG_NORM_PIXEL(bufferC, fract(uv + vec2(1, 0) * d)) - IMG_NORM_PIXEL(bufferC, fract(uv - vec2(1, 0) * d));
         vec4 dy = IMG_NORM_PIXEL(bufferC, fract(uv + vec2(0, 1) * d)) - IMG_NORM_PIXEL(bufferC, fract(uv - vec2(0, 1) * d));
         // Add some diffusive expansion.
-        vec2 uv_red = uv + vec2(dx.x, dy.x) * d * diffusionFactor;
+        vec2 red = uv + vec2(dx.r, dy.r) * d * diffusionFactor;
         vec2 noise2 = noise.xy - 0.5;
-        float new_red = IMG_NORM_PIXEL(bufferA, fract(uv_red)).x + noise2.x * decayFactor - 0.002; // stochastic decay
-        new_red -= (IMG_NORM_PIXEL(bufferC, fract(uv_red + noise2 * pixelSize)).x -
-                    IMG_NORM_PIXEL(bufferA, fract(uv_red + noise2 * pixelSize)).x) * reactionDiffusionFactor; // reaction-diffusion
+        float newRed = IMG_NORM_PIXEL(bufferA, fract(red)).x + noise2.x * decayFactor - 0.002; // stochastic decay
+        newRed -= (IMG_NORM_PIXEL(bufferC, fract(red + noise2 * pixelSize)).x -
+                    IMG_NORM_PIXEL(bufferA, fract(red + noise2 * pixelSize)).x) * reactionDiffusionFactor; // reaction-diffusion
         if (FRAMEINDEX < 10) {
             gl_FragColor = noise;
         } else {
-            gl_FragColor.r = clamp(new_red, 0., 1.);
+            gl_FragColor.r = clamp(newRed, 0., 1.);
         }
     }
     else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
-        //
+        // A limitation of ISF shaders is that the texture look-ups are
+        // performed by macros like IMG_NORM_PIXEL, not functions like
+        // texture(), and IMG_NORM_PIXEL expands to a function call (like
+        // VVSAMPLER_2DBYNORM) that includes variables that are seemingly only
+        // defined in main():
+        //    https://github.com/search?q=owner%3AmrRay+VVSAMPLER_2DBYNORM&type=code
+        // As a workaround, we define LYGIA’s Gaussian blur function as a macro
+        // and completely expand it here.
         vec4 accumColor=vec4(0.); float kernelSizef = float(9); float accumWeight = 0.0; const float k = 1.44; for (int i = 0; i < 9; i++) { float x = -0.5 * ( kernelSizef -1.0) + float(i); float weight = (k / kernelSizef) * gaussian(x, kernelSizef * 0.2913965934); vec4 tex = IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + (x * (pixelSize.x)), uv.y))); accumColor += weight * tex; accumWeight += weight; }
         gl_FragColor.rgb = accumColor.rgb / accumWeight;
         gl_FragColor.a = 1.;
@@ -313,7 +320,8 @@ void main()
         vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
         float light = 0.;
         float lightSize = 1. / inverseLightSize;
-        vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
+        // Use only the red gradient as displacement vector.
+        vec2 displacement = vec2(dx.r, dy.r) * lightSize;
         if (showLightWithMouse) {
             light += pow(
                 max(1. - distance(0.5 + (uv - 0.5) * aspect * lightSize + displacement, 0.5 + (mouse.xy - 0.5) * aspect * lightSize), 0.),
@@ -322,7 +330,7 @@ void main()
         }
         if (showLightWithInputImage) {
             light += pow(
-                max(distance(displacement, luminance(IMG_NORM_PIXEL(inputImage, uv)) * aspect * lightSize), 0.),
+                distance(displacement, luminance(IMG_NORM_PIXEL(inputImage, uv)) * aspect * lightSize),
                 radiance
             );
         }
