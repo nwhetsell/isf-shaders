@@ -11,6 +11,38 @@
             "TYPE": "image"
         },
         {
+            "NAME": "gradientDistance",
+            "TYPE": "Gradient distance",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MIN": 1,
+            "MAX": 10
+        },
+        {
+            "NAME": "diffusionFactor",
+            "TYPE": "Diffusion factor",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MIN": 0,
+            "MAX": 2
+        },
+        {
+            "NAME": "reactionDiffusionFactor",
+            "TYPE": "Reaction-diffusion factor",
+            "TYPE": "float",
+            "DEFAULT": 0.047,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
+            "NAME": "decayFactor",
+            "TYPE": "Decay factor",
+            "TYPE": "float",
+            "DEFAULT": 0.0025,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
             "NAME": "showLightWithInputImage",
             "LABEL": "Show light with input image",
             "TYPE": "bool",
@@ -233,23 +265,23 @@ vec2 aspect(vec2 st, vec2 s) {
     st.x = st.x * (s.x / s.y);
     return st;
 }
-// main reaction-diffusion loop
-// actually the diffusion is realized as a separated two-pass Gaussian blur kernel and is stored in buffer C
 void main()
 {
     vec2 pixelSize = 1. / RENDERSIZE;
     vec2 uv = gl_FragCoord.xy * pixelSize;
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        vec4 noise = random4(uv + fract(vec2(42,56)*TIME));
-        // get the gradients from the blurred image
-        vec2 d = pixelSize*4.;
-        vec4 dx = (IMG_NORM_PIXEL(bufferC, fract(uv + vec2(1,0)*d)) - IMG_NORM_PIXEL(bufferC, fract(uv - vec2(1,0)*d))) * 0.5;
-        vec4 dy = (IMG_NORM_PIXEL(bufferC, fract(uv + vec2(0,1)*d)) - IMG_NORM_PIXEL(bufferC, fract(uv - vec2(0,1)*d))) * 0.5;
-        vec2 uv_red = uv + vec2(dx.x, dy.x)*pixelSize*8.; // add some diffusive expansion
-        float new_red = IMG_NORM_PIXEL(bufferA, fract(uv_red)).x + (noise.x - 0.5) * 0.0025 - 0.002; // stochastic decay
-        new_red -= (IMG_NORM_PIXEL(bufferC, fract(uv_red + (noise.xy-0.5)*pixelSize)).x -
-                    IMG_NORM_PIXEL(bufferA, fract(uv_red + (noise.xy-0.5)*pixelSize))).x * 0.047; // reaction-diffusion
+        vec4 noise = random4(uv + fract(vec2(42, 56) * TIME));
+        // Get the gradients from the blurred image.
+        vec2 d = pixelSize * gradientDistance;
+        vec4 dx = IMG_NORM_PIXEL(bufferC, fract(uv + vec2(1, 0) * d)) - IMG_NORM_PIXEL(bufferC, fract(uv - vec2(1, 0) * d));
+        vec4 dy = IMG_NORM_PIXEL(bufferC, fract(uv + vec2(0, 1) * d)) - IMG_NORM_PIXEL(bufferC, fract(uv - vec2(0, 1) * d));
+        // Add some diffusive expansion.
+        vec2 uv_red = uv + vec2(dx.x, dy.x) * d * diffusionFactor;
+        vec2 noise2 = noise.xy - 0.5;
+        float new_red = IMG_NORM_PIXEL(bufferA, fract(uv_red)).x + noise2.x * decayFactor - 0.002; // stochastic decay
+        new_red -= (IMG_NORM_PIXEL(bufferC, fract(uv_red + noise2 * pixelSize)).x -
+                    IMG_NORM_PIXEL(bufferA, fract(uv_red + noise2 * pixelSize)).x) * reactionDiffusionFactor; // reaction-diffusion
         if (FRAMEINDEX < 10) {
             gl_FragColor = noise;
         } else {
@@ -272,13 +304,13 @@ void main()
     else // Shadertoy Image
     {
         vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
-        // add the pixel gradients
-        vec2 d = pixelSize*1.;
-        vec4 dx = IMG_NORM_PIXEL(bufferA, uv + vec2(1,0)*d) - IMG_NORM_PIXEL(bufferA, uv - vec2(1,0)*d);
-        vec4 dy = IMG_NORM_PIXEL(bufferA, uv + vec2(0,1)*d) - IMG_NORM_PIXEL(bufferA, uv - vec2(0,1)*d);
-        // recolor the red channel
-        gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA,uv+vec2(dx.x,dy.x)*pixelSize*8.).x)*vec4(0.7,1.5,2.0,1.0)-vec4(0.3,1.0,1.0,1.0);
-        // and add the light map
+        // Add the pixel gradients.
+        vec2 d = pixelSize;
+        vec4 dx = IMG_NORM_PIXEL(bufferA, uv + vec2(1, 0) * d) - IMG_NORM_PIXEL(bufferA, uv - vec2(1, 0) * d);
+        vec4 dy = IMG_NORM_PIXEL(bufferA, uv + vec2(0, 1) * d) - IMG_NORM_PIXEL(bufferA, uv - vec2(0, 1) * d);
+        // Recolor the red channel.
+        gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x) * vec4(0.7, 1.5, 2.0, 1.0) - vec4(0.3, 1.0, 1.0, 1.0);
+        // Add the light map.
         float light = 0.;
         float lightSize = 1. / inverseLightSize;
         vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
