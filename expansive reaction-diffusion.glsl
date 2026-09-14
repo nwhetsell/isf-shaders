@@ -12,7 +12,7 @@
         },
         {
             "NAME": "gradientDistance",
-            "TYPE": "Gradient distance",
+            "LABEL": "Gradient distance",
             "TYPE": "float",
             "DEFAULT": 4,
             "MIN": 1,
@@ -20,7 +20,7 @@
         },
         {
             "NAME": "diffusionFactor",
-            "TYPE": "Diffusion factor",
+            "LABEL": "Diffusion factor",
             "TYPE": "float",
             "DEFAULT": 1,
             "MIN": 0,
@@ -28,7 +28,7 @@
         },
         {
             "NAME": "reactionDiffusionFactor",
-            "TYPE": "Reaction-diffusion factor",
+            "LABEL": "Reaction-diffusion factor",
             "TYPE": "float",
             "DEFAULT": 0.047,
             "MIN": 0,
@@ -36,7 +36,7 @@
         },
         {
             "NAME": "decayFactor",
-            "TYPE": "Decay factor",
+            "LABEL": "Decay factor",
             "TYPE": "float",
             "DEFAULT": 0.0025,
             "MIN": 0,
@@ -163,8 +163,6 @@ void main()
     }
     else // Shadertoy Image
     {
-        vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
-
         // Add the pixel gradients.
         vec2 d = pixelSize;
         vec4 dx = IMG_NORM_PIXEL(bufferA, uv + vec2(1, 0) * d) - IMG_NORM_PIXEL(bufferA, uv - vec2(1, 0) * d);
@@ -174,6 +172,7 @@ void main()
         gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x) * vec4(0.7, 1.5, 2.0, 1.0) - vec4(0.3, 1.0, 1.0, 1.0);
 
         // Add the light map.
+        vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
         float light = 0.;
         float lightSize = 1. / inverseLightSize;
         vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
