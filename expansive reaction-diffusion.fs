@@ -11,6 +11,12 @@
             "TYPE": "image"
         },
         {
+            "NAME": "showLightWithInputImage",
+            "LABEL": "Show light with input image",
+            "TYPE": "bool",
+            "DEFAULT": false
+        },
+        {
             "NAME": "showLightWithMouse",
             "LABEL": "Show light with mouse",
             "TYPE": "bool",
@@ -22,6 +28,22 @@
             "DEFAULT": [0.5, 0.5],
             "MIN": [0, 0],
             "MAX": [1, 1]
+        },
+        {
+            "NAME": "inverseLightSize",
+            "LABEL": "Light size",
+            "TYPE": "float",
+            "DEFAULT": 0.25,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "radiance",
+            "LABEL": "Radiance",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MIN": 0,
+            "MAX": 10
         }
     ],
     "ISFVSN": "2",
@@ -47,6 +69,18 @@
     ]
 }*/
 // #define ISF_EDITOR_WEBSITE
+/*
+contributor: nan
+description: |
+    Computes the luminance of the specified linear RGB color using the luminance coefficients from Rec. 709.
+    Note, ThreeJS seems to inject this in all their shaders. Which could lead to issues
+use: luminance(<vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+float luminance(in vec3 linear) { return dot(linear, vec3(0.21250175, 0.71537574, 0.07212251)); }
+float luminance(in vec4 linear) { return luminance( linear.rgb ); }
 /*
 contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
 description: Pass a value and get some random normalize value between 0 and 1
@@ -199,7 +233,6 @@ vec2 aspect(vec2 st, vec2 s) {
     st.x = st.x * (s.x / s.y);
     return st;
 }
-
 // main reaction-diffusion loop
 // actually the diffusion is realized as a separated two-pass Gaussian blur kernel and is stored in buffer C
 void main()
@@ -246,19 +279,26 @@ void main()
         // recolor the red channel
         gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA,uv+vec2(dx.x,dy.x)*pixelSize*8.).x)*vec4(0.7,1.5,2.0,1.0)-vec4(0.3,1.0,1.0,1.0);
         // and add the light map
+        float light = 0.;
+        float lightSize = 1. / inverseLightSize;
+        vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
         if (showLightWithMouse) {
-            vec2 lightSize = vec2(4);
-            vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
-            float light = pow(
+            light += pow(
                 max(1. - distance(0.5 + (uv - 0.5) * aspect * lightSize + displacement, 0.5 + (mouse.xy - 0.5) * aspect * lightSize), 0.),
-                4.
-            );
-            gl_FragColor = mix(
-                gl_FragColor,
-                vec4(8, 6, 2, 1),
-                light * 0.75 * vec4(1. - IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x)
+                radiance
             );
         }
+        if (showLightWithInputImage) {
+            light += pow(
+                max(distance(displacement, luminance(IMG_NORM_PIXEL(inputImage, uv)) * aspect * lightSize), 0.),
+                radiance
+            );
+        }
+        gl_FragColor = mix(
+            gl_FragColor,
+            vec4(8, 6, 2, 1),
+            light * 0.75 * vec4(1. - IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x)
+        );
         gl_FragColor.a = 1.;
     }
 }

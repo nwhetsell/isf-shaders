@@ -11,6 +11,12 @@
             "TYPE": "image"
         },
         {
+            "NAME": "showLightWithInputImage",
+            "LABEL": "Show light with input image",
+            "TYPE": "bool",
+            "DEFAULT": false
+        },
+        {
             "NAME": "showLightWithMouse",
             "LABEL": "Show light with mouse",
             "TYPE": "bool",
@@ -22,6 +28,22 @@
             "DEFAULT": [0.5, 0.5],
             "MIN": [0, 0],
             "MAX": [1, 1]
+        },
+        {
+            "NAME": "inverseLightSize",
+            "LABEL": "Light size",
+            "TYPE": "float",
+            "DEFAULT": 0.25,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "radiance",
+            "LABEL": "Radiance",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MIN": 0,
+            "MAX": 10
         }
     ],
     "ISFVSN": "2",
@@ -52,6 +74,7 @@
 vec4 texture(sampler2D, vec2);
 #endif
 
+#include "lygia/color/luminance.glsl"
 #include "lygia/generative/random.glsl"
 #define SAMPLER_FNC(TEX, UV) texture(TEX, UV)
 #define GAUSSIANBLUR1D_SAMPLER_FNC(TEX, UV) IMG_NORM_PIXEL(TEX, UV)
@@ -60,6 +83,8 @@ vec4 texture(sampler2D, vec2);
 #include "lygia/filter/gaussianBlur/1D.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/space/aspect.glsl"
+
+#define GAUSSIANBLUR_KERNEL_SIZE 9
 
 // main reaction-diffusion loop
 
@@ -94,14 +119,14 @@ void main()
     else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
         //
-        GAUSSIAN_BLUR_1D(bufferA, uv, pixelSize.x, 9, HORIZONTAL_COORDINATE_FNC)
+        GAUSSIAN_BLUR_1D(bufferA, uv, pixelSize.x, GAUSSIANBLUR_KERNEL_SIZE, HORIZONTAL_COORDINATE_FNC)
 
         gl_FragColor.rgb = accumColor.rgb / accumWeight;
         gl_FragColor.a = 1.;
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        GAUSSIAN_BLUR_1D(bufferB, uv, pixelSize.y, 9, VERTICAL_COORDINATE_FNC)
+        GAUSSIAN_BLUR_1D(bufferB, uv, pixelSize.y, GAUSSIANBLUR_KERNEL_SIZE, VERTICAL_COORDINATE_FNC)
 
         gl_FragColor.rgb = accumColor.rgb / accumWeight;
         gl_FragColor.a = 1.;
@@ -119,21 +144,29 @@ void main()
         gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA,uv+vec2(dx.x,dy.x)*pixelSize*8.).x)*vec4(0.7,1.5,2.0,1.0)-vec4(0.3,1.0,1.0,1.0);
 
         // and add the light map
+        float light = 0.;
+        float lightSize = 1. / inverseLightSize;
+        vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
+
         if (showLightWithMouse) {
-            vec2 lightSize = vec2(4);
-
-            vec2 displacement = vec2(dx.x, dy.x) * lightSize; // using only the red gradient as displacement vector
-            float light = pow(
+            light += pow(
                 max(1. - distance(0.5 + (uv - 0.5) * aspect * lightSize + displacement, 0.5 + (mouse.xy - 0.5) * aspect * lightSize), 0.),
-                4.
-            );
-
-            gl_FragColor = mix(
-                gl_FragColor,
-                vec4(8, 6, 2, 1),
-                light * 0.75 * vec4(1. - IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x)
+                radiance
             );
         }
+
+        if (showLightWithInputImage) {
+            light += pow(
+                max(distance(displacement, luminance(IMG_NORM_PIXEL(inputImage, uv)) * aspect * lightSize), 0.),
+                radiance
+            );
+        }
+
+        gl_FragColor = mix(
+            gl_FragColor,
+            vec4(8, 6, 2, 1),
+            light * 0.75 * vec4(1. - IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x)
+        );
 
         gl_FragColor.a = 1.;
     }
