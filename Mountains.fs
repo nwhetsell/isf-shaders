@@ -973,7 +973,7 @@ void main()
     vec3 rd = normalize(uv.x * cu + uv.y * cv + 1.5 * cw);
     vec3 col;
     float distance;
-    if (!Scene(cameraPos,rd, distance, gl_FragCoord)) {
+    if (!Scene(cameraPos, rd, distance, gl_FragCoord.xy)) {
         // Missed scene, now just get the sky value...
         col = GetSky(rd);
         col = GetClouds(col, rd);
