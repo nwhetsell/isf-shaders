@@ -116,13 +116,6 @@
             "DEFAULT": 0,
             "MAX": 100,
             "MIN": -100
-        },
-        {
-            "NAME": "mouse",
-            "TYPE": "point2D",
-            "DEFAULT": [0.5, 0.5],
-            "MIN": [0, 0],
-            "MAX": [1, 1]
         }
     ],
     "ISFVSN": "2"
@@ -434,8 +427,7 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
 
 vec3 CameraPath(float t)
 {
-    float m = 1. + (mouse.x / RENDERSIZE.x) * 300.;
-    t += (TIME * cameraSpeed + m + 657.) * 0.006;
+    t += (TIME * cameraSpeed + 658.) * 0.006;
     vec2 p = 476. * vec2(sin(3.5 * t), cos(1.5 * t));
     return vec3(35. - p.x, 0.6, 4108. + p.y);
 }
