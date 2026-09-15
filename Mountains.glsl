@@ -6,6 +6,22 @@
     "DESCRIPTION": "Mountains, converted from <https://www.shadertoy.com/view/4slGD4>",
     "INPUTS": [
         {
+            "NAME": "cameraSpeed",
+            "LABEL": "Camera speed",
+            "TYPE": "float",
+            "DEFAULT": 1.5,
+            "MAX": 50,
+            "MIN": 0
+        },
+        {
+            "NAME": "cameraRollAmplitude",
+            "LABEL": "Camera roll amplitude",
+            "TYPE": "float",
+            "DEFAULT": 0.15,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "mountainHeight",
             "LABEL": "Mountain height",
             "TYPE": "float",
@@ -92,6 +108,8 @@ float random_slow(vec2);
 #include "lygia/generative/gnoise.glsl"
 #include "lygia-additions/gnoise.glsl"
 #include "lygia/generative/random.glsl"
+#include "lygia/math/const.glsl"
+#include "lygia/space/polar2cart.glsl"
 float random_slow(in vec2 p) {
     return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
 }
@@ -385,7 +403,7 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
 vec3 CameraPath(float t)
 {
     float m = 1. + (mouse.x / RENDERSIZE.x) * 300.;
-    t = (TIME * 1.5 + m + 657.) * 0.006 + t;
+    t += (TIME * cameraSpeed + m + 657.) * 0.006;
     vec2 p = 476. * vec2(sin(3.5 * t), cos(1.5 * t));
     return vec3(35. - p.x, 0.6, 4108. + p.y);
 }
@@ -400,7 +418,6 @@ void main()
 {
     vec2 xy = -1. + 2. * gl_FragCoord.xy / RENDERSIZE.xy;
     vec2 uv = xy * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.);
-    vec3 camTar;
 
     #ifdef STEREO
     float isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
@@ -413,14 +430,17 @@ void main()
         h += Terrain(CameraPath((0.6 - f) * 0.008).xz) * f;
         f -= 0.1;
     }
-    cameraPos.xz = CameraPath(0.).xz;
-    camTar.xyz = CameraPath(0.1).xyz;
-    camTar.y = cameraPos.y = max((h * 0.25) + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
-    camTar.y -= smoothstep(60., 300., cameraPos.y) * 150.;
 
-    float roll = 0.15 * sin(TIME * 0.2);
-    vec3 cw = normalize(camTar - cameraPos);
-    vec3 cp = vec3(sin(roll), cos(roll), 0);
+    cameraPos.xz = CameraPath(0.).xz;
+    cameraPos.y = max((h * 0.25) + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
+
+    vec3 cameraTarget;
+    cameraTarget.xz = CameraPath(0.1).xz;
+    cameraTarget.y = cameraPos.y - smoothstep(60., 300., cameraPos.y) * 150.;
+
+    float roll = cameraRollAmplitude * sin(TIME * 0.2);
+    vec3 cw = normalize(cameraTarget - cameraPos);
+    vec3 cp = vec3(polar2cart(-vec2(roll + 0.5 * PI, 1.)), 0);
     vec3 cu = normalize(cross(cw, cp));
     vec3 cv = normalize(cross(cu, cw));
     vec3 rd = normalize(uv.x * cu + uv.y * cv + 1.5 * cw);
