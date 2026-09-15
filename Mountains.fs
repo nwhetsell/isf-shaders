@@ -705,47 +705,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define GNOISE2_NOISE2_FNC(UV) random2(UV)
-#define FNC_GNOISE2 
-// https://www.shadertoy.com/view/XdXGW8
-float gnoise1(in vec2 st) {
-    vec2 i = floor(st);
-    vec2 f = fract(st);
-    vec2 a = GNOISE2_NOISE2_FNC(i);
-    vec2 b = GNOISE2_NOISE2_FNC(i + vec2(1.0, 0.0));
-    vec2 c = GNOISE2_NOISE2_FNC(i + vec2(0.0, 1.0));
-    vec2 d = GNOISE2_NOISE2_FNC(i + vec2(1.0, 1.0));
-    vec2 u = cubic(f);
-    return mix(mix(dot(a, f),
-                   dot(b, f - vec2(1.0, 0.0)), u.x),
-               mix(dot(c, f - vec2(0.0, 1.0)),
-                   dot(d, f - vec2(1.0, 1.0)), u.x), u.y);
-}
-vec2 gnoise2(in vec2 st) {
-    vec2 i = floor(st);
-    vec2 f = fract(st);
-    vec2 a = GNOISE2_NOISE2_FNC(i);
-    vec2 b = GNOISE2_NOISE2_FNC(i + vec2(1.0, 0.0));
-    vec2 c = GNOISE2_NOISE2_FNC(i + vec2(0.0, 1.0));
-    vec2 d = GNOISE2_NOISE2_FNC(i + vec2(1.0, 1.0));
-    vec2 u = cubic(f);
-    return mix(a, b, u.x) +
-           (c - a) * u.y * (1.0 - u.x) +
-           (d - b) * u.x * u.y;
-}
-/*
-contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
-description: Pass a value and get some random normalize value between 0 and 1
-use: float random[2|3](<float|vec2|vec3> value)
-options:
-    - RANDOM_HIGHER_RANGE: for working with a range over 0 and 1
-    - RANDOM_SINLESS: Use sin-less random, which tolerates bigger values before producing pattern. From https://www.shadertoy.com/view/4djSRW
-    - RANDOM_SCALE: by default this scale if for number with a big range. For producing good random between 0 and 1 use bigger range
-examples:
-    - /shaders/generative_random.frag
-license:
-    - MIT License (MIT) Copyright 2014, David Hoskins
-*/
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -799,6 +758,47 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
+#define GNOISE2_NOISE2_FNC(UV) random2(UV)
+#define FNC_GNOISE2 
+// https://www.shadertoy.com/view/XdXGW8
+float gnoise1(in vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+    vec2 a = GNOISE2_NOISE2_FNC(i);
+    vec2 b = GNOISE2_NOISE2_FNC(i + vec2(1.0, 0.0));
+    vec2 c = GNOISE2_NOISE2_FNC(i + vec2(0.0, 1.0));
+    vec2 d = GNOISE2_NOISE2_FNC(i + vec2(1.0, 1.0));
+    vec2 u = cubic(f);
+    return mix(mix(dot(a, f),
+                   dot(b, f - vec2(1.0, 0.0)), u.x),
+               mix(dot(c, f - vec2(0.0, 1.0)),
+                   dot(d, f - vec2(1.0, 1.0)), u.x), u.y);
+}
+vec2 gnoise2(in vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+    vec2 a = GNOISE2_NOISE2_FNC(i);
+    vec2 b = GNOISE2_NOISE2_FNC(i + vec2(1.0, 0.0));
+    vec2 c = GNOISE2_NOISE2_FNC(i + vec2(0.0, 1.0));
+    vec2 d = GNOISE2_NOISE2_FNC(i + vec2(1.0, 1.0));
+    vec2 u = cubic(f);
+    return mix(a, b, u.x) +
+           (c - a) * u.y * (1.0 - u.x) +
+           (d - b) * u.x * u.y;
+}
+/*
+contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
+description: Pass a value and get some random normalize value between 0 and 1
+use: float random[2|3](<float|vec2|vec3> value)
+options:
+    - RANDOM_HIGHER_RANGE: for working with a range over 0 and 1
+    - RANDOM_SINLESS: Use sin-less random, which tolerates bigger values before producing pattern. From https://www.shadertoy.com/view/4djSRW
+    - RANDOM_SCALE: by default this scale if for number with a big range. For producing good random between 0 and 1 use bigger range
+examples:
+    - /shaders/generative_random.frag
+license:
+    - MIT License (MIT) Copyright 2014, David Hoskins
+*/
 float random_slow(in vec2 p) {
     return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
 }
@@ -846,7 +846,7 @@ float Map(in vec3 p)
 {
     float h = Terrain(p.xz);
     float ff = gnoise(p.xz * 0.3) + gnoise(p.xz * 3.3) * 0.5;
-    treeLine = smoothstep(ff, 0. + ff * 2., h) * smoothstep(1. + ff * 3., 0.4 + ff, h) ;
+    treeLine = smoothstep(ff, 0. + ff * 2., h) * smoothstep(1. + ff * 3., 0.4 + ff, h);
     treeCol = Trees(p.xz);
     h += treeCol;
     return p.y - h;
@@ -1037,7 +1037,7 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
         // and the distance already travelled.
         // It's a really fiddly compromise between speed and accuracy
         // Too large a step and the tops of ridges get missed.
-        delta = max(0.01, 0.3 * h) + (t * 0.0065);
+        delta = max(0.01, 0.3 * h) + t * 0.0065;
         oldT = t;
         t += delta;
     }
@@ -1069,7 +1069,7 @@ void main()
         f -= 0.1;
     }
     cameraPos.xz = CameraPath(0.).xz;
-    cameraPos.y = max((h * 0.25) + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
+    cameraPos.y = max(h * 0.25 + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
     vec3 cameraTarget;
     cameraTarget.xz = CameraPath(0.1).xz;
     cameraTarget.y = cameraPos.y - smoothstep(60., 300., cameraPos.y) * 150.;

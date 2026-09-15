@@ -138,11 +138,11 @@ float random_slow(vec2);
 #define GNOISE_NOISE2_FNC(UV) random_slow(UV)
 #include "lygia/generative/fbm.glsl"
 #include "lygia/generative/gnoise.glsl"
-#include "lygia-additions/gnoise.glsl"
-#include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/space/polar2cart.glsl"
+#include "lygia-additions/gnoise.glsl"
+#include "lygia/generative/random.glsl"
 float random_slow(in vec2 p) {
     return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
 }
@@ -204,7 +204,7 @@ float Map(in vec3 p)
     float h = Terrain(p.xz);
 
     float ff = gnoise(p.xz * 0.3) + gnoise(p.xz * 3.3) * 0.5;
-    treeLine = smoothstep(ff, 0. + ff * 2., h) * smoothstep(1. + ff * 3., 0.4 + ff, h) ;
+    treeLine = smoothstep(ff, 0. + ff * 2., h) * smoothstep(1. + ff * 3., 0.4 + ff, h);
     treeCol = Trees(p.xz);
     h += treeCol;
 
@@ -421,7 +421,7 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
         // and the distance already travelled.
         // It's a really fiddly compromise between speed and accuracy
         // Too large a step and the tops of ridges get missed.
-        delta = max(0.01, 0.3 * h) + (t * 0.0065);
+        delta = max(0.01, 0.3 * h) + t * 0.0065;
         oldT = t;
         t += delta;
     }
@@ -464,7 +464,7 @@ void main()
     }
 
     cameraPos.xz = CameraPath(0.).xz;
-    cameraPos.y = max((h * 0.25) + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
+    cameraPos.y = max(h * 0.25 + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
 
     vec3 cameraTarget;
     cameraTarget.xz = CameraPath(0.1).xz;
