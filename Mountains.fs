@@ -121,7 +121,7 @@
     "ISFVSN": "2",
     "IMPORTED":
     {
-        "pebbles": { "PATH": "pebbles.png" }
+        "pebbles": { "PATH": "ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png" }
     }
 }*/
 #define RANDOM_HIGHER_RANGE 
