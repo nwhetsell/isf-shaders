@@ -211,6 +211,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Mountains.fs">Mountains</a></td>
+    <td><a href="https://www.shadertoy.com/user/Dave_Hoskins">Dave Hoskins</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/4slGD4">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6a9c15eaa48ec400192c5f8f">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Mountains” shader" src="https://github.com/user-attachments/assets/f33fa6ac-7e00-4308-b018-85a3b63e1fff" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="oscilloscope%20analysis%20luminance.fs">oscilloscope analysis luminance</a></td>
     <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
     <td>n/a</td>
