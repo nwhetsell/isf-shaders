@@ -11,7 +11,7 @@
             "TYPE": "float",
             "DEFAULT": 1.5,
             "MAX": 50,
-            "MIN": 0
+            "MIN": -50
         },
         {
             "NAME": "cameraRollAmplitude",
@@ -20,6 +20,18 @@
             "DEFAULT": 0.15,
             "MAX": 10,
             "MIN": 0
+        },
+        {
+            "NAME": "autoCameraPitch",
+            "LABEL": "Automatic camera pitch",
+            "TYPE": "bool",
+            "DEFAULT": true
+        },
+        {
+            "NAME": "circuitousCameraPath",
+            "LABEL": "Circuitous camera path",
+            "TYPE": "bool",
+            "DEFAULT": true
         },
         {
             "NAME": "mountainHeight",
@@ -94,6 +106,12 @@
             "MIN": -1
         },
         {
+            "NAME": "addShore",
+            "LABEL": "Add shore",
+            "TYPE": "bool",
+            "DEFAULT": false
+        },
+        {
             "NAME": "fogDistance",
             "LABEL": "Fog distance",
             "TYPE": "float",
@@ -116,6 +134,12 @@
             "DEFAULT": 0,
             "MAX": 100,
             "MIN": -100
+        },
+        {
+            "NAME": "anaglyph3D",
+            "LABEL": "Anaglyph 3D",
+            "TYPE": "bool",
+            "DEFAULT": false
         }
     ],
     "ISFVSN": "2",
@@ -145,11 +169,8 @@ float random_slow(in vec2 p) {
 }
 
 
-// Stereo version code thanks to Croqueteer :)
-//#define STEREO
-
-float treeLine = 0.0;
-float treeCol = 0.0;
+float treeLine = 0.;
+float treeCol = 0.;
 
 vec3 sunLight  = normalize(vec3(0.4, 0.4, 0.48));
 vec3 sunColour = vec3(1, 0.9, 0.83);
@@ -373,7 +394,8 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
         tx = watPos.y - matPos.y;
         mat = mix(mat, GetClouds(GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
         // Add some extra water glint...
-        mat += vec3(0.1) * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(pebbles, watPos.xz * 0.1).x, 0., 1.);
+        if (addShore)
+            mat += vec3(0.1) * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(pebbles, watPos.xz * 0.1).x, 0., 1.);
         float sunAmount = max(dot(nor, sunLight), 0.);
         mat = mat + sunColour * pow(sunAmount, 228.5) * 0.6;
         vec3 temp = (watPos - cameraPos * 2.) * 0.5;
@@ -434,8 +456,16 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
 vec3 CameraPath(float t)
 {
     t += (TIME * cameraSpeed + 658.) * 0.006;
-    vec2 p = 476. * vec2(sin(3.5 * t), cos(1.5 * t));
-    return vec3(35. - p.x, 0.6, 4108. + p.y);
+
+    vec3 path = vec3(35., 0.6, 4108.);
+    if (circuitousCameraPath) {
+        vec2 p = 476. * vec2(sin(3.5 * t), cos(1.5 * t));
+        path.x -= p.x;
+        path.z += p.y;
+    } else {
+        path.z += 10. * t;
+    }
+    return path;
 }
 
 // Some would say, most of the magic is done in post! :D
@@ -448,10 +478,6 @@ void main()
 {
     vec2 xy = -1. + 2. * gl_FragCoord.xy / RENDERSIZE.xy;
     vec2 uv = xy * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.);
-
-    #ifdef STEREO
-    float isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
-    #endif
 
     // Use several forward heights, of decreasing influence with distance from the camera.
     float h = 0.;
@@ -466,7 +492,9 @@ void main()
 
     vec3 cameraTarget;
     cameraTarget.xz = CameraPath(0.1).xz;
-    cameraTarget.y = cameraPos.y - smoothstep(60., 300., cameraPos.y) * 150.;
+    cameraTarget.y = cameraPos.y;
+    if (autoCameraPitch)
+        cameraTarget.y -= smoothstep(60., 300., cameraPos.y) * 150.;
 
     float roll = cameraRollAmplitude * sin(TIME * 0.2);
     vec3 cw = normalize(cameraTarget - cameraPos);
@@ -475,9 +503,11 @@ void main()
     vec3 cv = normalize(cross(cu, cw));
     vec3 rd = normalize(uv.x * cu + uv.y * cv + 1.5 * cw);
 
-    #ifdef STEREO
-    cameraPos += 0.45 * cu * isCyan; // move camera to the right - the rd vector is still good
-    #endif
+    float isCyan;
+    if (anaglyph3D) {
+        isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
+        cameraPos += 0.45 * cu * isCyan; // move camera to the right - the rd vector is still good
+    }
 
     vec3 col;
     float distance;
@@ -503,9 +533,9 @@ void main()
 
     col = PostEffects(col, uv);
 
-    #ifdef STEREO
-    col *= vec3(isCyan, 1. - isCyan, 1. - isCyan);
-    #endif
+    if (anaglyph3D) {
+        col *= vec3(isCyan, 1. - isCyan, 1. - isCyan);
+    }
 
     gl_FragColor = vec4(col, 1.);
 }
