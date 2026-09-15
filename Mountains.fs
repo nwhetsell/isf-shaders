@@ -86,6 +86,14 @@
             "MIN": 0
         },
         {
+            "NAME": "cloudSpeed",
+            "LABEL": "Cloud speed",
+            "TYPE": "float",
+            "DEFAULT": 0,
+            "MAX": 100,
+            "MIN": -100
+        },
+        {
             "NAME": "mouse",
             "TYPE": "point2D",
             "DEFAULT": [0.5, 0.5],
@@ -834,7 +842,7 @@ vec3 GetClouds(in vec3 sky, in vec3 rd)
     rd.xz *= v;
     rd.xz += cameraPos.xz;
     rd.xz *= 0.01;
-    float f = (fbm(rd.xz) - 0.55) * 5.;
+    float f = (fbm(rd.xz + cloudSpeed * TIME) - 0.55) * 5.;
     // Uses the ray's y component for horizon fade of fixed colour clouds...
     sky = mix(sky, vec3(0.55, 0.55, 0.52), clamp(f * rd.y - 0.1, 0., 1.));
     return sky;
