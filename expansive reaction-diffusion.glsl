@@ -43,6 +43,22 @@
             "MAX": 1
         },
         {
+            "NAME": "gaussianKernelScale",
+            "LABEL": "Gaussian kernel scale",
+            "TYPE": "float",
+            "DEFAULT": 1.44,
+            "MIN": -10,
+            "MAX": 10
+        },
+        {
+            "NAME": "standardDeviationScale",
+            "LABEL": "Standard deviation scale",
+            "TYPE": "float",
+            "DEFAULT": 0.2913965934,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
             "NAME": "showLightWithInputImage",
             "LABEL": "Show light with input image",
             "TYPE": "bool",

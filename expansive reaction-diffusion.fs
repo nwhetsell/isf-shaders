@@ -43,6 +43,22 @@
             "MAX": 1
         },
         {
+            "NAME": "gaussianKernelScale",
+            "LABEL": "Gaussian kernel scale",
+            "TYPE": "float",
+            "DEFAULT": 1.44,
+            "MIN": -10,
+            "MAX": 10
+        },
+        {
+            "NAME": "standardDeviationScale",
+            "LABEL": "Standard deviation scale",
+            "TYPE": "float",
+            "DEFAULT": 0.2913965934,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
             "NAME": "showLightWithInputImage",
             "LABEL": "Show light with input image",
             "TYPE": "bool",
@@ -298,13 +314,13 @@ void main()
         //    https://github.com/search?q=owner%3AmrRay+VVSAMPLER_2DBYNORM&type=code
         // As a workaround, we define LYGIA’s Gaussian blur function as a macro
         // and completely expand it here.
-        vec4 accumColor=vec4(0.); float kernelSizef = float(9); float accumWeight = 0.0; const float k = 1.44; for (int i = 0; i < 9; i++) { float x = -0.5 * ( kernelSizef -1.0) + float(i); float weight = (k / kernelSizef) * gaussian(x, kernelSizef * 0.2913965934); vec4 tex = IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + (x * (pixelSize.x)), uv.y))); accumColor += weight * tex; accumWeight += weight; }
+        vec4 accumColor=vec4(0.); float kernelSizef = float(9); float accumWeight = 0.0; float k = gaussianKernelScale; for (int i = 0; i < 9; i++) { float x = -0.5 * ( kernelSizef -1.0) + float(i); float weight = (k / kernelSizef) * gaussian(x, kernelSizef * standardDeviationScale); vec4 tex = IMG_NORM_PIXEL(bufferA, fract(vec2(uv.x + (x * (pixelSize.x)), uv.y))); accumColor += weight * tex; accumWeight += weight; }
         gl_FragColor.rgb = accumColor.rgb / accumWeight;
         gl_FragColor.a = 1.;
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        vec4 accumColor=vec4(0.); float kernelSizef = float(9); float accumWeight = 0.0; const float k = 1.44; for (int i = 0; i < 9; i++) { float x = -0.5 * ( kernelSizef -1.0) + float(i); float weight = (k / kernelSizef) * gaussian(x, kernelSizef * 0.2913965934); vec4 tex = IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + (x * (pixelSize.y))))); accumColor += weight * tex; accumWeight += weight; }
+        vec4 accumColor=vec4(0.); float kernelSizef = float(9); float accumWeight = 0.0; float k = gaussianKernelScale; for (int i = 0; i < 9; i++) { float x = -0.5 * ( kernelSizef -1.0) + float(i); float weight = (k / kernelSizef) * gaussian(x, kernelSizef * standardDeviationScale); vec4 tex = IMG_NORM_PIXEL(bufferB, fract(vec2(uv.x, uv.y + (x * (pixelSize.y))))); accumColor += weight * tex; accumWeight += weight; }
         gl_FragColor.rgb = accumColor.rgb / accumWeight;
         gl_FragColor.a = 1.;
     }

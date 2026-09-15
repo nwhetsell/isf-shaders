@@ -25,10 +25,10 @@ index 1e2b34b0..9ac94dea 100644
 +    float kernelSizef = float(KERNEL_SIZE); \
 +    \
 +    float accumWeight = 0.0; \
-+    const float k = 1.44; \
++    float k = gaussianKernelScale; \
 +    for (int i = 0; i < KERNEL_SIZE; i++) { \
 +        float x = -0.5 * ( kernelSizef -1.0) + float(i); \
-+        float weight = (k / kernelSizef) * gaussian(x, kernelSizef * 0.2913965934); \
++        float weight = (k / kernelSizef) * gaussian(x, kernelSizef * standardDeviationScale); \
 +        GAUSSIANBLUR1D_TYPE tex = GAUSSIANBLUR1D_SAMPLER_FNC(TEX, COORDINATE_FNC(ST, x * (OFFSET))); \
 +        accumColor += weight * tex; \
 +        accumWeight += weight; \
