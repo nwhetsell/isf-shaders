@@ -281,14 +281,15 @@ void DoLighting(inout vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in 
 }
 
 // Hack the height, position, and normal data to create the coloured landscape
-vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
+vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
 {
-    vec3 mat;
     specular = 0.0;
     ambient = 0.1;
     vec3 dir = normalize(pos - cameraPos);
 
-    vec3 matPos = pos * 2.; // I had change scale halfway though, this lazy multiply allow me to keep the graphic scales I had
+    // I had to change scale halfway though, this lazy multiply allows me to
+    // keep the graphic scales I had.
+    vec3 matPos = pos * 2.;
 
     float f = clamp(gnoise(matPos.xz * 0.05), 0., 1.);//*10.8;
     f += gnoise(matPos.xz * 0.1 + normal.yz * 1.08) * 0.85;
@@ -298,7 +299,9 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
         vec3(f * 0.43 + 0.1, f * 0.3 + 0.2, f * 0.35 + 0.1),
         f * 0.65
     );
-    mat = m * (f * m + vec3(0.36, 0.3, 0.28));
+
+    vec3 mat = m * (f * m + vec3(0.36, 0.3, 0.28));
+
     // Should have used smoothstep to add colours, but left it using 'if' for sanity...
     if (normal.y < 0.5) {
         float v = normal.y;
@@ -346,8 +349,8 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
         }
     }
 
-    float disSqrd = dis * dis; // Squaring it gives better distance scales.
-    DoLighting(mat, pos, normal,dir, disSqrd);
+    float distanceSquared = distance * distance; // Squaring it gives better distance scales.
+    DoLighting(mat, pos, normal, dir, distanceSquared);
 
     // Do the water...
     if (matPos.y < 0.) {
@@ -361,18 +364,18 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float dis)
         vec2 co = gnoise2(vec2(watPos.x * 4.7 + 1.3 + tz, watPos.z * 4.69 + time * 35. - tx));
         co += gnoise2(vec2(watPos.z * 8.6 + time * 13. - tx, watPos.x * 8.712 + tz)) * 0.4;
         vec3 nor = normalize(vec3(co.x, 20., co.y));
-        nor = normalize(reflect(dir, nor));//normalize((-2.0*(dot(dir, nor))*nor)+dir);
+        nor = normalize(reflect(dir, nor));
         // Mix it in at depth transparancy to give beach cues..
         tx = watPos.y - matPos.y;
         mat = mix(mat, GetClouds(GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
         // Add some extra water glint...
-        // mat += vec3(.1)*clamp(1.-pow(tx+.5, 3.)*texture(iChannel1, watPos.xz*.1, -2.).x, 0.,1.0);
+        // mat += vec3(0.1) * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(pebbles, watPos.xz * 0.1, -2.).x, 0., 1.);
         float sunAmount = max(dot(nor, sunLight), 0.);
         mat = mat + sunColour * pow(sunAmount, 228.5) * 0.6;
         vec3 temp = (watPos - cameraPos * 2.) * 0.5;
-        disSqrd = dot(temp, temp);
+        distanceSquared = dot(temp, temp);
     }
-    mat = ApplyFog(mat, disSqrd, dir);
+    mat = ApplyFog(mat, distanceSquared, dir);
     return mat;
 }
 
