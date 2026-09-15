@@ -118,7 +118,11 @@
             "MIN": -100
         }
     ],
-    "ISFVSN": "2"
+    "ISFVSN": "2",
+    "IMPORTED":
+    {
+        "pebbles": { "PATH": "pebbles.png" }
+    }
 }*/
 
 #define RANDOM_HIGHER_RANGE
@@ -283,7 +287,7 @@ void DoLighting(inout vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in 
 // Hack the height, position, and normal data to create the coloured landscape
 vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
 {
-    specular = 0.0;
+    specular = 0.;
     ambient = 0.1;
     vec3 dir = normalize(pos - cameraPos);
 
@@ -291,7 +295,7 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
     // keep the graphic scales I had.
     vec3 matPos = pos * 2.;
 
-    float f = clamp(gnoise(matPos.xz * 0.05), 0., 1.);//*10.8;
+    float f = clamp(gnoise(matPos.xz * 0.05), 0., 1.);
     f += gnoise(matPos.xz * 0.1 + normal.yz * 1.08) * 0.85;
     f *= 0.55;
     vec3 m = mix(
@@ -369,7 +373,7 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
         tx = watPos.y - matPos.y;
         mat = mix(mat, GetClouds(GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
         // Add some extra water glint...
-        // mat += vec3(0.1) * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(pebbles, watPos.xz * 0.1, -2.).x, 0., 1.);
+        mat += vec3(0.1) * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(pebbles, watPos.xz * 0.1).x, 0., 1.);
         float sunAmount = max(dot(nor, sunLight), 0.);
         mat = mat + sunColour * pow(sunAmount, 228.5) * 0.6;
         vec3 temp = (watPos - cameraPos * 2.) * 0.5;
@@ -405,7 +409,6 @@ bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
             break;
 
         vec3 p = rO + t * rD;
-        //if (t > 240.0 || p.y > 195.0) break;
         float h = Map(p); // ...Get this positions height mapping.
         // Are we inside, and close enough to fudge a hit?...
         if (h < 0.5) {
