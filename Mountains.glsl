@@ -46,6 +46,30 @@
             "MIN": 0
         },
         {
+            "NAME": "perturbationAngle",
+            "LABEL": "Perturbation angle",
+            "TYPE": "float",
+            "DEFAULT": 52.14991,
+            "MAX": 360,
+            "MIN": -360
+        },
+        {
+            "NAME": "perturbationScale",
+            "LABEL": "Perturbation scale",
+            "TYPE": "float",
+            "DEFAULT": 2.2201844917,
+            "MAX": 2.5,
+            "MIN": -2.5
+        },
+        {
+            "NAME": "perturbationShift",
+            "LABEL": "Perturbation shift",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 10,
+            "MIN": -10
+        },
+        {
             "NAME": "flatness",
             "LABEL": "Flatness",
             "TYPE": "float",
@@ -117,6 +141,7 @@ float random_slow(vec2);
 #include "lygia-additions/gnoise.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
+#include "lygia/math/rotate2d.glsl"
 #include "lygia/space/polar2cart.glsl"
 float random_slow(in vec2 p) {
     return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
@@ -135,13 +160,6 @@ float specular = 0.;
 vec3 cameraPos;
 float ambient;
 
-// This peturbs the fractal positions for each iteration down...
-// Helps make nice twisted landscapes...
-const mat2 rotate2D = mat2(1.3623, 1.7531, -1.7131, 1.4623);
-
-// Alternative rotation:-
-// const mat2 rotate2D = mat2(1.2323, 1.999231, -1.999231, 1.22);
-
 float Trees(vec2 p)
 {
     return gnoise(p * 13.) * treeLine;
@@ -156,12 +174,16 @@ float Terrain(in vec2 p, out vec2 pos, out float w)
     w = gnoise(pos * terrain) * mountainHeight + mountainSize;
     w = detail * w*w;
 
+    // This peturbs the fractal positions for each iteration down...
+    // Helps make nice twisted landscapes...
+    mat2 rotate2D = perturbationScale * rotate2d(perturbationAngle * DEG2RAD) + perturbationShift * mat2(0., 0., 0.04, 0.1);
+
     float f = 0.;
     for (int i = 0; i < 5; i++) {
         f += gnoise(pos) * w;
 
-        pos = rotate2D * pos;
-        w = w * cragginess;
+        pos = rotate2D * pos; // Non-commutative matrix multiplication
+        w *= cragginess;
     }
 
     f += pow(abs(gnoise(pos * 0.002)), flatness) * 275. - flatness;
@@ -201,12 +223,14 @@ float Terrain2(in vec2 p)
     if (treeCol > 0.)
         return f;
 
+    mat2 rotate2D = perturbationScale * rotate2d(perturbationAngle * DEG2RAD) + perturbationShift * mat2(0., 0., 0.04, 0.1);
+
     // That's the last of the low resolution, now go down further for the Normal data...
     for (int i = 0; i < 6; i++) {
         f += gnoise(pos) * w;
 
-        pos = rotate2D * pos;
-        w =  w * cragginess;
+        pos = rotate2D * pos; // Non-commutative matrix multiplication
+        w *= cragginess;
     }
 
     return f;

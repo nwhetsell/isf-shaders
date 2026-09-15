@@ -46,6 +46,30 @@
             "MIN": 0
         },
         {
+            "NAME": "perturbationAngle",
+            "LABEL": "Perturbation angle",
+            "TYPE": "float",
+            "DEFAULT": 52.14991,
+            "MAX": 360,
+            "MIN": -360
+        },
+        {
+            "NAME": "perturbationScale",
+            "LABEL": "Perturbation scale",
+            "TYPE": "float",
+            "DEFAULT": 2.2201844917,
+            "MAX": 2.5,
+            "MIN": -2.5
+        },
+        {
+            "NAME": "perturbationShift",
+            "LABEL": "Perturbation shift",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 10,
+            "MIN": -10
+        },
+        {
             "NAME": "flatness",
             "LABEL": "Flatness",
             "TYPE": "float",
@@ -746,6 +770,20 @@ license:
 #define DEG2RAD (PI / 180.0)
 #define RAD2DEG (180.0 / PI)
 /*
+contributors: Patricio Gonzalez Vivo
+description: returns a 2x2 rotation matrix
+use: <mat2> rotate2d(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE2D 
+mat2 rotate2d(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat2(c, s, -s, c);
+}
+/*
 contributors: [Ivan Dianov, Shadi El Hajj]
 description: polar to cartesian conversion.
 use: polar2cart(<vec2> polar)
@@ -773,11 +811,6 @@ vec3 sunColour = vec3(1, 0.9, 0.83);
 float specular = 0.;
 vec3 cameraPos;
 float ambient;
-// This peturbs the fractal positions for each iteration down...
-// Helps make nice twisted landscapes...
-const mat2 rotate2D = mat2(1.3623, 1.7531, -1.7131, 1.4623);
-// Alternative rotation:-
-// const mat2 rotate2D = mat2(1.2323, 1.999231, -1.999231, 1.22);
 float Trees(vec2 p)
 {
     return gnoise(p * 13.) * treeLine;
@@ -790,11 +823,14 @@ float Terrain(in vec2 p, out vec2 pos, out float w)
     pos = p * 0.05;
     w = gnoise(pos * terrain) * mountainHeight + mountainSize;
     w = detail * w*w;
+    // This peturbs the fractal positions for each iteration down...
+    // Helps make nice twisted landscapes...
+    mat2 rotate2D = perturbationScale * rotate2d(perturbationAngle * DEG2RAD) + perturbationShift * mat2(0., 0., 0.04, 0.1);
     float f = 0.;
     for (int i = 0; i < 5; i++) {
         f += gnoise(pos) * w;
-        pos = rotate2D * pos;
-        w = w * cragginess;
+        pos = rotate2D * pos; // Non-commutative matrix multiplication
+        w *= cragginess;
     }
     f += pow(abs(gnoise(pos * 0.002)), flatness) * 275. - flatness;
     return f;
@@ -825,11 +861,12 @@ float Terrain2(in vec2 p)
     f += treeCol;
     if (treeCol > 0.)
         return f;
+    mat2 rotate2D = perturbationScale * rotate2d(perturbationAngle * DEG2RAD) + perturbationShift * mat2(0., 0., 0.04, 0.1);
     // That's the last of the low resolution, now go down further for the Normal data...
     for (int i = 0; i < 6; i++) {
         f += gnoise(pos) * w;
-        pos = rotate2D * pos;
-        w = w * cragginess;
+        pos = rotate2D * pos; // Non-commutative matrix multiplication
+        w *= cragginess;
     }
     return f;
 }
