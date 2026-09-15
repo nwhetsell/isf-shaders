@@ -54,6 +54,14 @@
             "MIN": -1
         },
         {
+            "NAME": "fogDistance",
+            "LABEL": "Fog distance",
+            "TYPE": "float",
+            "DEFAULT": 5,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "cloudHeight",
             "LABEL": "Cloud height",
             "TYPE": "float",
@@ -789,9 +797,9 @@ vec3 GetSky(in vec3 rd)
     return sky;
 }
 // Merge mountains into the sky background for correct disappearance...
-vec3 ApplyFog(in vec3 rgb, in float dis, in vec3 dir)
+vec3 ApplyFog(in vec3 rgb, in float distance, in vec3 dir)
 {
-    float fogAmount = exp(-dis * 0.00005);
+    float fogAmount = exp(-distance * fogDistance * 1e-5);
     return mix(GetSky(dir), rgb, fogAmount);
 }
 // Calculate sun light...
