@@ -166,7 +166,9 @@ float rectSDF_without_transform(vec2 p, vec2 b) {
     // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
     return rectSDF((p + 0.5) / 4.2, b, 0.);
 }
+#include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
+#include "lygia/space/uncenter.glsl"
 
 
 //
@@ -208,8 +210,8 @@ vec3 bN(vec2 p)
 // buffers twice, but the packing operations in the Shadertoy shader also
 // perform a `clamp` on the packed data. Without the `clamp` calls, this shader
 // seems to blow up numerically.
-#define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
-#define PRE_PACK(X) clamp(0.5 * (X) + 0.5, 0., 1.)
+#define POST_UNPACK(X) center(clamp(X, 0., 1.))
+#define PRE_PACK(X) clamp(uncenter(X), 0., 1.)
 
 
 struct particle

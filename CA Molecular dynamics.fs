@@ -252,6 +252,35 @@ float rectSDF(in vec2 st, in float s) {
 float rectSDF(in vec2 st) {
     return rectSDF(st, vec2(1.0));
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_CENTER 
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Moves the center from 0.0 to 0.5'
+use: <float|vec2|vec3> uncenter(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_UNCENTER 
+float uncenter(float v) { return v * 0.5 + 0.5; }
+vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
+vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
 float rectSDF_without_transform(vec2 p, vec2 b) {
     // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
     return rectSDF((p + 0.5) / 4.2, b, 0.);
@@ -285,8 +314,8 @@ vec3 particleDistribution(vec2 x, vec2 pos)
 // buffers twice, but the packing operations in the Shadertoy shader also
 // perform a `clamp` on the packed data. Without the `clamp` calls, this shader
 // seems to blow up numerically.
-#define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
-#define PRE_PACK(X) clamp(0.5 * (X) + 0.5, 0., 1.)
+#define POST_UNPACK(X) center(clamp(X, 0., 1.))
+#define PRE_PACK(X) clamp(uncenter(X), 0., 1.)
 float border(vec2 p) // In Shadertoy buffer B
 {
     float bound = -rectSDF_without_transform(p - RENDERSIZE * 0.5, RENDERSIZE * vec2(0.49, 0.49));

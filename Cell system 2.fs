@@ -394,6 +394,21 @@ mat2 rotate2d(const in float r){
     return mat2(c, s, -s, c);
 }
 /*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_CENTER 
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+/*
 contributors: [Ivan Dianov, Shadi El Hajj]
 description: polar to cartesian conversion.
 use: polar2cart(<vec2> polar)
@@ -409,6 +424,20 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Moves the center from 0.0 to 0.5'
+use: <float|vec2|vec3> uncenter(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_UNCENTER 
+float uncenter(float v) { return v * 0.5 + 0.5; }
+vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
+vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
 //
 // Shadertoy Common
 //
@@ -421,8 +450,8 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
 // Shadertoy buffers twice, but the packing operations in the Shadertoy shader
 // also perform a `clamp` on the packed data. Without the `clamp` calls, this
 // shader seems to blow up numerically.
-#define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
-#define PRE_PACK(X) clamp(0.5 * (X) + 0.5, 0., 1.)
+#define POST_UNPACK(X) center(clamp(X, 0., 1.))
+#define PRE_PACK(X) clamp(uncenter(X), 0., 1.)
 void main()
 {
     vec2 position = gl_FragCoord.xy;

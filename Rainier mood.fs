@@ -172,7 +172,7 @@ void main()
         circleCount++;
     }
     circles /= float(circleCount);
-    float intensity = mix(0.01, 0.15, smoothstep(0.1, 0.6, abs(fract(0.05 * TIME + 0.5) * 2. - 1.)));
+    float intensity = mix(0.01, 0.15, smoothstep(0.1, 0.6, abs(center(fract(0.05 * TIME + 0.5)))));
     vec3 n = vec3(circles, sqrt(1. - dot(circles, circles)));
     vec4 pixel = IMG_NORM_PIXEL(inputImage, gl_FragCoord.xy / RENDERSIZE - intensity * n.xy);
     vec3 color = pixel.rgb + specular * pow(clamp(dot(n, normalize(vec3(1., 0.7, 0.5))), 0., 1.), 6.);
