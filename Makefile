@@ -13,6 +13,7 @@ shaders = \
 	Le\ Vortex.fs \
 	Lorenz\ system.fs \
 	Mountains.fs \
+	notebook\ drawings.fs \
 	oscilloscope\ analysis\ luminance.fs \
 	Physarum\ Polycephalum\ Simulation.fs \
 	Rainier\ mood.fs \
