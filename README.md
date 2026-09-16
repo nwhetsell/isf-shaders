@@ -228,6 +228,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="notebook%20drawings.fs">notebook drawings</a></td>
+    <td><a href="https://www.flockaroo.at">Florian Berger</a></td>
+    <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/XtVGD1">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6aab0a87bca9d5001a9e85ee">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “notebook drawings” shader" src="https://github.com/user-attachments/assets/8323d633-765b-4ce2-a108-15685895dec6" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="oscilloscope%20analysis%20luminance.fs">oscilloscope analysis luminance</a></td>
     <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
     <td>n/a</td>
