@@ -8,6 +8,22 @@
         {
             "NAME": "inputImage",
             "TYPE": "image"
+        },
+        {
+            "NAME": "lineDefinition",
+            "LABEL": "Line definition",
+            "TYPE": "float",
+            "DEFAULT": 400,
+            "MAX": 1000,
+            "MIN": 1
+        },
+        {
+            "NAME": "rollAmplitude",
+            "LABEL": "Roll amplitude",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MAX": 10,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2"
@@ -30,7 +46,7 @@ float averageRGB(vec2 position)
  	return dot(IMG_PIXEL(inputImage, position).xyz, vec3(1. / 3.));
 }
 
-vec2 getGrad(vec2 position, float eps)
+vec2 getGradient(vec2 position, float eps)
 {
    	vec2 d = vec2(eps, 0);
     return vec2(
@@ -44,9 +60,9 @@ const int sampleCount = 16;
 
 void main()
 {
-    float scaleFactor = RENDERSIZE.y / 400.;
+    float scaleFactor = RENDERSIZE.y / lineDefinition;
 
-    vec2 position = gl_FragCoord.xy + 4. * sin(TIME * vec2(1, 1.7)) * scaleFactor;
+    vec2 position = gl_FragCoord.xy + rollAmplitude * sin(TIME * vec2(1, 1.7)) * scaleFactor;
     vec3 color1 = vec3(0);
     vec3 color2 = vec3(0);
     float sum = 0.;
@@ -61,7 +77,7 @@ void main()
             vec2 deltaPosition2 = vector * float(j * j) / float(sampleCount) * 0.5 * scaleFactor;
 
             for (float sgn = -1.; sgn <= 1.; sgn += 2.) {
-               	vec2 gradient = getGrad(position + (sgn * deltaPosition1 + deltaPosition2), 0.4);
+               	vec2 gradient = getGradient(position + (sgn * deltaPosition1 + deltaPosition2), 0.4);
 
                	float fact = clamp(dot(gradient, vector) - 0.5 * abs(dot(gradient, perpendicularVector)), 0., 0.05);
                 fact *= 1. - float(j) / float(sampleCount);
