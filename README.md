@@ -238,7 +238,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “notebook drawings” shader" src="https://github.com/user-attachments/assets/8323d633-765b-4ce2-a108-15685895dec6" />
+      <img width="197" alt="Screenshot of “notebook drawings” shader" src="https://github.com/user-attachments/assets/a8c2391e-8e08-446d-a79b-83cc73e26759" />
     </td>
   </tr>
   <tr>
