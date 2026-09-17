@@ -10,6 +10,14 @@
             "TYPE": "image"
         },
         {
+            "NAME": "rollAmplitude",
+            "LABEL": "Roll amplitude",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "lineDefinition",
             "LABEL": "Line definition",
             "TYPE": "float",
@@ -18,10 +26,42 @@
             "MIN": 1
         },
         {
-            "NAME": "rollAmplitude",
-            "LABEL": "Roll amplitude",
+            "NAME": "lineAngle",
+            "LABEL": "Line angle",
             "TYPE": "float",
-            "DEFAULT": 4,
+            "DEFAULT": 0.8,
+            "MAX": 1,
+            "MIN": 0
+        },
+        {
+            "NAME": "lineThinness",
+            "LABEL": "Line thinness",
+            "TYPE": "float",
+            "DEFAULT": 0.75,
+            "MAX": 1,
+            "MIN": 0
+        },
+        {
+            "NAME": "lineAmount",
+            "LABEL": "Line amount",
+            "TYPE": "float",
+            "DEFAULT": 3,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "lineDistance",
+            "LABEL": "Line distance",
+            "TYPE": "float",
+            "DEFAULT": 0.4,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "lineDensity",
+            "LABEL": "Line density",
+            "TYPE": "float",
+            "DEFAULT": 0.6,
             "MAX": 10,
             "MIN": 0
         }
@@ -165,6 +205,7 @@ float averageRGB(vec2 position)
 }
 vec2 getGradient(vec2 position, float eps)
 {
+    eps = max(eps, EPSILON);
     vec2 d = vec2(eps, 0);
     return vec2(
         averageRGB(position + d.xy) - averageRGB(position - d.xy),
@@ -181,27 +222,26 @@ void main()
     vec3 color2 = vec3(0);
     float sum = 0.;
     for (int i = 0; i < angleCount; i++) {
-        float angle = TWO_PI / float(angleCount) * (float(i) + 0.8);
+        float angle = TWO_PI / float(angleCount) * (float(i) + lineAngle);
         vec2 vector = polar2cart(vec2(angle, 1));
         vec2 perpendicularVector = vector.yx * vec2(1, -1);
         for (int j = 0; j < sampleCount; j++) {
             vec2 deltaPosition1 = perpendicularVector * float(j) * scaleFactor;
             vec2 deltaPosition2 = vector * float(j * j) / float(sampleCount) * 0.5 * scaleFactor;
             for (float sgn = -1.; sgn <= 1.; sgn += 2.) {
-                vec2 gradient = getGradient(position + (sgn * deltaPosition1 + deltaPosition2), 0.4);
-                float fact = clamp(dot(gradient, vector) - 0.5 * abs(dot(gradient, perpendicularVector)), 0., 0.05);
-                fact *= 1. - float(j) / float(sampleCount);
-                color1 += fact;
-                float fact2 = abs(dot(normalize(gradient + vec2(EPSILON)), perpendicularVector));
-                color2 += fact2 * getColHT(position + (sgn * deltaPosition1 + deltaPosition2).yx * vec2(1, -1) * 2.).rgb;
-                sum += fact2;
+                vec2 gradient = getGradient(position + (sgn * deltaPosition1 + deltaPosition2), lineDistance);
+                color1 += clamp(dot(gradient, vector) - 0.5 * abs(dot(gradient, perpendicularVector)), 0., 0.05)
+                          * (1. - float(j) / float(sampleCount));
+                float factor = abs(dot(normalize(gradient + vec2(EPSILON)), perpendicularVector));
+                color2 += factor * getColHT(position + (sgn * deltaPosition1 + deltaPosition2).yx * vec2(1, -1) * 2.).rgb;
+                sum += factor;
             }
         }
     }
-    color1 /= float(angleCount * sampleCount) * 0.75 / sqrt(RENDERSIZE.y);
-    color1.x *= 0.6 + 0.8 * random4(position * 0.7).x;
-    color1.x = 1. - color1.x;
-    color1.x *= color1.x * color1.x;
+    color1 /= float(angleCount * sampleCount) * lineThinness / sqrt(RENDERSIZE.y);
+    color1.r *= lineDensity + 0.8 * random4(position * 0.7).r;
+    color1.r = 1. - color1.x;
+    color1.r = pow(color1.x, lineAmount);
     color2 /= sum;
-    gl_FragColor = vec4(color1.x * color2, 1);
+    gl_FragColor = vec4(color1.r * color2, IMG_PIXEL(inputImage, position).a);
 }
