@@ -79,6 +79,19 @@
 #define RANDOM_HIGHER_RANGE 
 #define RANDOM_SINLESS 
 /*
+contributor: nan
+description: |
+    Computes the luminance of the specified linear RGB color using the luminance coefficients from Rec. 709.
+    Note, ThreeJS seems to inject this in all their shaders. Which could lead to issues
+use: luminance(<vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_LUMINANCE 
+float luminance(in vec3 linear) { return dot(linear, vec3(0.21250175, 0.71537574, 0.07212251)); }
+float luminance(in vec4 linear) { return luminance( linear.rgb ); }
+/*
 contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
 description: Pass a value and get some random normalize value between 0 and 1
 use: float random[2|3](<float|vec2|vec3> value)
@@ -203,15 +216,11 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
-float averageRGB(vec4 color)
-{
-  return (color.r + color.g + color.b) / 3.;
-}
 vec2 sampleDerivative(vec2 st, float pixel)
 {
     return vec2(
-        averageRGB(IMG_PIXEL(inputImage, st + vec2(pixel,0.0))) - averageRGB(IMG_PIXEL(inputImage, st - vec2(pixel,0.0))),
-        averageRGB(IMG_PIXEL(inputImage, st + vec2(0.0,pixel))) - averageRGB(IMG_PIXEL(inputImage, st - vec2(0.0,pixel)))
+        luminance(IMG_PIXEL(inputImage, st + vec2(pixel,0.0))) - luminance(IMG_PIXEL(inputImage, st - vec2(pixel,0.0))),
+        luminance(IMG_PIXEL(inputImage, st + vec2(0.0,pixel))) - luminance(IMG_PIXEL(inputImage, st - vec2(0.0,pixel)))
     );
 }
 const int angleCount = 3;

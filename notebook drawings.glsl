@@ -79,21 +79,17 @@
 
 #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
+#include "lygia/color/luminance.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/space/polar2cart.glsl"
 
 
-float averageRGB(vec4 color)
-{
- 	return (color.r + color.g + color.b) / 3.;
-}
-
 vec2 sampleDerivative(vec2 st, float pixel)
 {
     return vec2(
-        averageRGB(IMG_PIXEL(inputImage, st + vec2(pixel,0.0))) - averageRGB(IMG_PIXEL(inputImage, st - vec2(pixel,0.0))),
-        averageRGB(IMG_PIXEL(inputImage, st + vec2(0.0,pixel))) - averageRGB(IMG_PIXEL(inputImage, st - vec2(0.0,pixel)))
+        luminance(IMG_PIXEL(inputImage, st + vec2(pixel,0.0))) - luminance(IMG_PIXEL(inputImage, st - vec2(pixel,0.0))),
+        luminance(IMG_PIXEL(inputImage, st + vec2(0.0,pixel))) - luminance(IMG_PIXEL(inputImage, st - vec2(0.0,pixel)))
     );
 }
 
