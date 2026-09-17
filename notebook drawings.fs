@@ -229,8 +229,8 @@ void main()
 {
     float scaleFactor = RENDERSIZE.y / lineDefinition;
     vec2 position = gl_FragCoord.xy + rollAmplitude * sin(TIME * vec2(1, 1.7)) * scaleFactor;
-    vec3 color1 = vec3(0);
-    vec3 color2 = vec3(0);
+    float lineColor = 0.;
+    vec3 mainColor = vec3(0);
     float sum = 0.;
     for (int i = 0; i < angleCount; i++) {
         float angle = TWO_PI / float(angleCount) * (float(i) + lineAngle);
@@ -244,19 +244,19 @@ void main()
                 float derivativePixel = max(lineDistance, EPSILON);
                 vec2 gradient = sampleDerivative(position + displacementVector, derivativePixel);
                 gradient /= derivativePixel * 2.;
-                color1 += clamp(dot(gradient, vector) - 0.5 * abs(dot(gradient, perpendicularVector)), 0., 0.05)
+                lineColor += clamp(dot(gradient, vector) - 0.5 * abs(dot(gradient, perpendicularVector)), 0., 0.05)
                           * (1. - float(j) / float(sampleCount));
                 float factor = abs(dot(normalize(gradient + vec2(EPSILON)), perpendicularVector));
                 vec2 colorPosition = position + displacementVector.yx * vec2(1, -1) * 2.;
-                color2 += factor * smoothstep(0.95, 1.05, IMG_PIXEL(inputImage, colorPosition) * saturation + (1. - saturation) + random4(colorPosition * 0.7)).rgb;
+                mainColor += factor * smoothstep(0.95, 1.05, IMG_PIXEL(inputImage, colorPosition) * saturation + (1. - saturation) + random4(colorPosition * 0.7)).rgb;
                 sum += factor;
             }
         }
     }
-    color1 /= float(angleCount * sampleCount) * lineThinness / sqrt(RENDERSIZE.y);
-    color1.r *= lineDensity + 0.8 * random4(position * 0.7).r;
-    color1.r = 1. - color1.r;
-    color1.r = pow(color1.r, lineAmount);
-    color2 /= sum;
-    gl_FragColor = vec4(color1.r * color2, IMG_PIXEL(inputImage, position).a);
+    lineColor /= float(angleCount * sampleCount) * lineThinness / sqrt(RENDERSIZE.y);
+    lineColor *= lineDensity + 0.8 * random4(position * 0.7).x;
+    lineColor = 1. - lineColor;
+    lineColor = pow(lineColor, lineAmount);
+    mainColor /= sum;
+    gl_FragColor = vec4(lineColor * mainColor, IMG_PIXEL(inputImage, position).a);
 }
