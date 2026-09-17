@@ -85,11 +85,20 @@
 #include "lygia/space/polar2cart.glsl"
 
 
+// There appears to be a bug in the editor.isf.video viewer where using
+// IMG_PIXEL multiple times in the same function doesn’t produce the same result
+// as other ISF hosts, so wrap LYGIA’s luminance function to call IMG_PIXEL
+// once.
+float editor_isf_luminance(vec2 st)
+{
+    return luminance(IMG_PIXEL(inputImage, st));
+}
+
 vec2 sampleDerivative(vec2 st, float pixel)
 {
     return vec2(
-        luminance(IMG_PIXEL(inputImage, st + vec2(pixel,0.0))) - luminance(IMG_PIXEL(inputImage, st - vec2(pixel,0.0))),
-        luminance(IMG_PIXEL(inputImage, st + vec2(0.0,pixel))) - luminance(IMG_PIXEL(inputImage, st - vec2(0.0,pixel)))
+        editor_isf_luminance(st + vec2(pixel,0.0)) - editor_isf_luminance(st - vec2(pixel,0.0)),
+        editor_isf_luminance(st + vec2(0.0,pixel)) - editor_isf_luminance(st - vec2(0.0,pixel))
     );
 }
 
