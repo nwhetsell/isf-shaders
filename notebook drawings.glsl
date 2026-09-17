@@ -64,6 +64,14 @@
             "DEFAULT": 0.6,
             "MAX": 10,
             "MIN": 0
+        },
+        {
+            "NAME": "saturation",
+            "LABEL": "Saturation",
+            "TYPE": "float",
+            "DEFAULT": 0.8,
+            "MAX": 1,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2"
@@ -76,24 +84,17 @@
 #include "lygia/space/polar2cart.glsl"
 
 
-vec4 getColHT(vec2 position)
+float averageRGB(vec4 color)
 {
- 	return smoothstep(0.95, 1.05, IMG_PIXEL(inputImage, position) * 0.8 + 0.2 + random4(position * 0.7));
+ 	return (color.r + color.g + color.b) / 3.;
 }
 
-float averageRGB(vec2 position)
+vec2 sampleDerivative(vec2 st, float pixel)
 {
- 	return dot(IMG_PIXEL(inputImage, position).xyz, vec3(1. / 3.));
-}
-
-vec2 getGradient(vec2 position, float eps)
-{
-    eps = max(eps, EPSILON);
-   	vec2 d = vec2(eps, 0);
     return vec2(
-        averageRGB(position + d.xy) - averageRGB(position - d.xy),
-        averageRGB(position + d.yx) - averageRGB(position - d.yx)
-    ) / eps / 2.;
+        averageRGB(IMG_PIXEL(inputImage, st + vec2(pixel,0.0))) - averageRGB(IMG_PIXEL(inputImage, st - vec2(pixel,0.0))),
+        averageRGB(IMG_PIXEL(inputImage, st + vec2(0.0,pixel))) - averageRGB(IMG_PIXEL(inputImage, st - vec2(0.0,pixel)))
+    );
 }
 
 const int angleCount = 3;
@@ -118,13 +119,17 @@ void main()
             vec2 deltaPosition2 = vector * float(j * j) / float(sampleCount) * 0.5 * scaleFactor;
 
             for (float sgn = -1.; sgn <= 1.; sgn += 2.) {
-               	vec2 gradient = getGradient(position + (sgn * deltaPosition1 + deltaPosition2), lineDistance);
+                vec2 displacementVector = sgn * deltaPosition1 + deltaPosition2;
+                float derivativePixel = max(lineDistance, EPSILON);
+               	vec2 gradient = sampleDerivative(position + displacementVector, derivativePixel);
+                gradient /= derivativePixel * 2.;
 
                	color1 += clamp(dot(gradient, vector) - 0.5 * abs(dot(gradient, perpendicularVector)), 0., 0.05)
                           * (1. - float(j) / float(sampleCount));
 
                	float factor = abs(dot(normalize(gradient + vec2(EPSILON)), perpendicularVector));
-               	color2 += factor * getColHT(position + (sgn * deltaPosition1 + deltaPosition2).yx * vec2(1, -1) * 2.).rgb;
+                vec2 colorPosition = position + displacementVector.yx * vec2(1, -1) * 2.;
+               	color2 += factor * smoothstep(0.95, 1.05, IMG_PIXEL(inputImage, colorPosition) * saturation + (1. - saturation) + random4(colorPosition * 0.7)).rgb;
                	sum += factor;
             }
         }
@@ -132,8 +137,8 @@ void main()
 
     color1 /= float(angleCount * sampleCount) * lineThinness / sqrt(RENDERSIZE.y);
     color1.r *= lineDensity + 0.8 * random4(position * 0.7).r;
-    color1.r = 1. - color1.x;
-    color1.r = pow(color1.x, lineAmount);
+    color1.r = 1. - color1.r;
+    color1.r = pow(color1.r, lineAmount);
 
     color2 /= sum;
 
