@@ -115,7 +115,7 @@ float pattern(vec2 uv, float time, inout vec2 q, inout vec2 r)
 
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy - 0.5 * RENDERSIZE.xy) / min(RENDERSIZE.y, RENDERSIZE.x);
+    vec2 uv = (gl_FragCoord.xy - 0.5 * RENDERSIZE) / min(RENDERSIZE.y, RENDERSIZE.x);
 
     float time = TIME * frequency;
     uv = rotate2d(time * 0.1) * uv;

@@ -476,7 +476,7 @@ vec3 PostEffects(vec3 rgb, vec2 uv)
 
 void main()
 {
-    vec2 xy = -1. + 2. * gl_FragCoord.xy / RENDERSIZE.xy;
+    vec2 xy = -1. + 2. * gl_FragCoord.xy / RENDERSIZE;
     vec2 uv = xy * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.);
 
     // Use several forward heights, of decreasing influence with distance from the camera.
