@@ -214,6 +214,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="MattiasCRT.fs">MattiasCRT</a></td>
+    <td><a href="https://github.com/mattiasgustavsson">Mattias Gustavsson</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/Ms23DR">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6aad83ab9fce22001a7c752e">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “MattiasCRT” shader" src="https://github.com/user-attachments/assets/7ac1d83b-5441-4c0e-9f1d-db64304b9be5" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Mountains.fs">Mountains</a></td>
     <td><a href="https://www.shadertoy.com/user/Dave_Hoskins">Dave Hoskins</a></td>
     <td>n/a</td>
