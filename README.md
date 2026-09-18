@@ -253,6 +253,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Palettes.fs">Palettes</a></td>
+    <td><a href="https://iquilezles.org">Inigo Quilez</a></td>
+    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/ll2GD3">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6aad4d4cbca9d5001a9eba5f">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Palettes” shader" src="https://github.com/user-attachments/assets/d898c6a3-8731-4002-8933-b73056a51f81" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="Physarum%20Polycephalum%20Simulation.fs">Physarum Polycephalum Simulation</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>

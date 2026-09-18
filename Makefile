@@ -15,6 +15,7 @@ shaders = \
 	Mountains.fs \
 	notebook\ drawings.fs \
 	oscilloscope\ analysis\ luminance.fs \
+	Palettes.fs \
 	Physarum\ Polycephalum\ Simulation.fs \
 	Rainier\ mood.fs \
 	Random\ slime\ mold\ generator.fs \
@@ -42,14 +43,10 @@ Ether.fs: Ether.glsl
 Everflow.fs: Everflow.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 expansive\ reaction-diffusion.fs: expansive\ reaction-diffusion.glsl
-	cd lygia; \
-	git apply ../gaussianBlur1D.patch;
-	clang --preprocess --comments --no-line-commands --language=c --output="$@" "$<"
-	cd lygia; \
-	git reset --hard
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
-Iterated\ function\ system.fs: Iterated\ function\ system.glsl rand/rand.glsl
+Iterated\ function\ system.fs: Iterated\ function\ system.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Le\ Vortex.fs: Le\ Vortex.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
@@ -60,6 +57,8 @@ Mountains.fs: Mountains.glsl
 notebook\ drawings.fs: notebook\ drawings.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Palettes.fs: Palettes.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
