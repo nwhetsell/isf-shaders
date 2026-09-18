@@ -92,7 +92,6 @@ void main()
 
         color *= 1. + 0.01 * sin(110. * TIME);
 
-        // Vertical scan lines
         color *= 1. - 0.65 * vec3(clamp((mod(gl_FragCoord.x, verticalScanSpacing) - 1.) * 2., 0., 1.));
 
         gl_FragColor = vec4(color, IMG_THIS_PIXEL(inputImage).a);
