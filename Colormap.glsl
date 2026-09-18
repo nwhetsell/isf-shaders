@@ -47,7 +47,6 @@
 }*/
 
 #include "lygia/color/luminance.glsl"
-#include "lygia/color/space/rgb2hsv.glsl"
 #include "lygia/math/cubic.glsl"
 
 
