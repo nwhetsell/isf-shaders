@@ -107,7 +107,6 @@ void main()
         float scans = clamp(0.35 + 0.35 * sin(3.5 * TIME + uv.y * RENDERSIZE.y * horizontalScanDensity), 0., 1.);
         color *= vec3(0.4 + 0.7 * pow(scans, 1.7));
         color *= 1. + 0.01 * sin(110. * TIME);
-        // Vertical scan lines
         color *= 1. - 0.65 * vec3(clamp((mod(gl_FragCoord.x, verticalScanSpacing) - 1.) * 2., 0., 1.));
         gl_FragColor = vec4(color, IMG_THIS_PIXEL(inputImage).a);
     }
