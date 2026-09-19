@@ -123,6 +123,8 @@
     ]
 }*/
 
+// #define ISF_EDITOR_WEBSITE
+
 #include "complex/complex.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/space/polar2cart.glsl"
@@ -163,11 +165,11 @@ float sdf(vec2 position)
         z = ifs(z);
     }
 
-	float distance = complex_magnitude(position - z);
+    float distance = complex_magnitude(position - z);
 
     for (int i = 0; i < IFS_ITERATIONS; i++) {
         z = ifs(z);
-		distance = min(distance, complex_magnitude(position - z));
+        distance = min(distance, complex_magnitude(position - z));
     }
 
     return distance;
@@ -189,6 +191,9 @@ void main()
         }
 
         data = min(1., (2. - decay) * data);
+        #ifdef ISF_EDITOR_WEBSITE
+        data += EPSILON;
+        #endif
 
         gl_FragColor = vec4(data, vec3(0));
     }

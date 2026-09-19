@@ -122,6 +122,7 @@
         }
     ]
 }*/
+// #define ISF_EDITOR_WEBSITE
 
 #define COMPLEX 
 vec2 complex_multiply(in vec2 v1, in vec2 v2)
@@ -260,10 +261,10 @@ float sdf(vec2 position)
     for (int i = 0; i < 32; i++) {
         z = ifs(z);
     }
- float distance = complex_magnitude(position - z);
+    float distance = complex_magnitude(position - z);
     for (int i = 0; i < IFS_ITERATIONS; i++) {
         z = ifs(z);
-  distance = min(distance, complex_magnitude(position - z));
+        distance = min(distance, complex_magnitude(position - z));
     }
     return distance;
 }
