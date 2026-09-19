@@ -111,9 +111,9 @@ void main()
     vec3 last = IMG_PIXEL(lastData, vec2(0)).xyz;
     vec3 next = vec3(0);
 
-#define FLT_MAX 3.402823466e+38
-#define STEPS 96
-#define MODE xz
+    #define FLT_MAX 3.402823466e+38
+    #define STEPS 96
+    #define MODE xz
     float d = FLT_MAX;
     for (int i = 0; i < STEPS; i++) {
         next = Integrate(last, 0.016 * SPEED);

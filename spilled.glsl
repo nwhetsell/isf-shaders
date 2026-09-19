@@ -152,16 +152,16 @@ void main()
 
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-#ifndef ISF_EDITOR_WEBSITE
+        #ifndef ISF_EDITOR_WEBSITE
         int RotNum = 2 * int(agitation) + 1;
-#else
+        #else
         const int RotNum = 5;
-#endif
+        #endif
         float ang = TWO_PI / float(RotNum);
         mat2 m = rotate2d(ang);
-#ifdef SUPPORT_EVEN_ROTNUM
+        #ifdef SUPPORT_EVEN_ROTNUM
         mat2 mh = rotate2d(ang * 0.5);
-#endif
+        #endif
 
         vec2 b = polar2cart(vec2(ang * random(TIME / RENDERSIZE.x), 1));
         vec2 v = vec2(0);
@@ -179,9 +179,9 @@ void main()
             for (int i = 0; i < RotNum; i++) {
                 vec2 pos_plus_p = pos + p;
                 vec2 rotated_b =
-#ifdef SUPPORT_EVEN_ROTNUM
+                #ifdef SUPPORT_EVEN_ROTNUM
                                  -mh *
-#endif
+                #endif
                                        // this is faster but works only for odd RotNum
                                        b;
                 float rotated_b_magnitude_squared = dot(rotated_b, rotated_b);
@@ -225,11 +225,11 @@ void main()
         );
 
         vec3 spread_n = n;
-#ifndef ISF_EDITOR_WEBSITE
+        #ifndef ISF_EDITOR_WEBSITE
         for (int i = 1; i < int(spread); i++) {
             spread_n *= n;
         }
-#endif
+        #endif
 
         n = normalize(spread_n);
 

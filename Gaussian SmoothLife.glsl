@@ -251,11 +251,11 @@ void main()
         // For unclear reasons, FRAMEINDEX must be strictly less than 5, not 1,
         // here.
         if (FRAMEINDEX < 5 || addCells) {
-#ifndef ISF_EDITOR_WEBSITE
+            #ifndef ISF_EDITOR_WEBSITE
             float initialCellCount = min(RENDERSIZE.x, RENDERSIZE.y) / 50.;
-#else
+            #else
             const float initialCellCount = 20.;
-#endif
+            #endif
             for (float i = 0.; i < initialCellCount; i++) {
                 vec2 initialCoordinate = polar2cart(vec2(TWO_PI * i / initialCellCount, 0.25)) + 0.5;
                 addCell(new, initialCoordinate);
@@ -291,9 +291,9 @@ void main()
         gaussianSummation.sum += gaussianSummation.a;
 
         // sum up remaining terms symmetrically
-#ifdef ISF_EDITOR_WEBSITE
+        #ifdef ISF_EDITOR_WEBSITE
         const int oc = 50;
-#endif
+        #endif
         for (int i = 1; i <= oc; i++) {
             float fi = float(i);
             vec2 g = GaussianSummation_computeGaussian(gaussianSummation, fi);
