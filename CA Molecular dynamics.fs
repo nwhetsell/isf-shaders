@@ -91,6 +91,14 @@
             "DEFAULT": 0,
             "MAX": 10,
             "MIN": 0
+        },
+        {
+            "NAME": "h",
+            "LABEL": "Corner size",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 1000,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2",
@@ -411,7 +419,6 @@ void main()
             V += (F + Fa) * dt / M;
             // Wyatt thermostat
             X += cooling * Fa * dt / M;
-#define h 1.
             vec3 r = vec3( 1./h, 0, 0.25) * border(X + vec2( h, 0)) +
                      vec3(-1./h, 0, 0.25) * border(X + vec2(-h, 0)) +
                      vec3( 0, 1./h, 0.25) * border(X + vec2( 0, h)) +
