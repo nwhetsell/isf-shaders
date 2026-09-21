@@ -337,6 +337,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Strange%20Cloud.fs">Strange Cloud</a></td>
+    <td><a href="https://github.com/loicvdb">loicvdb</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/tsGSDt">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6ab112f66a66b2001aea8570">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt=" of “Strange Cloud” shader" src="https://github.com/user-attachments/assets/6fc6dc76-8c8a-4ff5-b1c7-5d75828947e3" />
+    </td>
+  </tr>
+  <tr>
     <td><a href="spilled.fs">spilled</a></td>
     <td><a href="https://www.flockaroo.at">Florian Berger</a></td>
     <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>

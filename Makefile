@@ -22,6 +22,7 @@ shaders = \
 	Random\ slime\ mold\ generator.fs \
 	Shattered\ Crystal.fs \
 	spilled.fs \
+	Strange\ Cloud.fs \
 	Suture\ Fluid.fs \
 	The\ Weave.fs \
 
@@ -76,6 +77,8 @@ Random\ slime\ mold\ generator.fs: Random\ slime\ mold\ generator.glsl
 Shattered\ Crystal.fs: Shattered\ Crystal.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 spilled.fs: spilled.glsl
+	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+Strange\ Cloud.fs: Strange\ Cloud.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
 Suture\ Fluid.fs: Suture\ Fluid.glsl
 	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
