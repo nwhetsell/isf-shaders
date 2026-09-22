@@ -15,7 +15,7 @@
         },
         {
             "NAME": "powerAmplitude",
-            "LABEL": "power",
+            "LABEL": "Power amplitude",
             "TYPE": "float",
             "DEFAULT": 5,
             "MAX": 20,
