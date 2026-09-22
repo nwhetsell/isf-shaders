@@ -9,13 +9,13 @@
             "NAME": "speed",
             "LABEL": "Speed",
             "TYPE": "float",
-            "DEFAULT": 0.015,
+            "DEFAULT": 0.9,
             "MAX": 10,
             "MIN": 0
         },
         {
-            "NAME": "powerInput",
-            "LABEL": "Power",
+            "NAME": "powerAmplitude",
+            "LABEL": "power",
             "TYPE": "float",
             "DEFAULT": 5,
             "MAX": 20,
@@ -391,33 +391,32 @@ mat3 rotationMatrix(vec3 r)
 {
     return rotate3dZ(-r.z) * rotate3dX(-r.x) * rotate3dY(r.y);
 }
-float Power = powerInput;
-float PhiShift = 0.;
-float ThetaShift = 0.;
-float distanceEstimation(vec3 pos)
+float TIME_SCALED = TIME * speed;
+float distanceEstimation(vec3 position)
 {
     const float maxDistance = 1.5;
-    float r = length(pos);
+    float r = length(position);
     if (r > maxDistance)
         return r - 1.2;
-    vec3 z = pos;
+    float power = powerAmplitude * sin(TIME_SCALED * 0.1);
+    vec3 z = position;
     float dr = 1.;
     for (int i = 0; i < 6; i++) {
         vec3 polar = cart2polar(z.xzy);
         r = polar.x;
         if (r > maxDistance)
             break;
-        z = polar2cart(pow(r, Power), polar.y * Power + ThetaShift, polar.z * Power + PhiShift) + pos;
-        dr = pow(r, Power - 1.) * Power * dr + 1.;
+        z = polar2cart(pow(r, power), polar.y * power - TIME_SCALED, polar.z * power - TIME_SCALED) + position;
+        dr = pow(r, power - 1.) * power * dr + 1.;
     }
     return 0.5 * log(r) * r / dr;
 }
 #define StepSize 0.03
 #define ShadowStepSize 0.2
 #define ShadowRaysPerStep 0.25
-vec3 lightDirection = normalize(vec3(-1, -3, 1));
 vec3 directLight(in vec3 position)
 {
+    const vec3 lightDirection = normalize(vec3(-1, -3, 1));
     vec3 absorption = vec3(1);
     for (int i = 0; i < 7; i++) {
         float distance = distanceEstimation(position);
@@ -442,10 +441,6 @@ vec3 backgroundColor(vec3 direction)
 {
     return vec3(0);
 }
-vec3 randomDir()
-{
-    return vec3(1, 0, 0) * rotationMatrix(vec3(frand() * TWO_PI, 0, frand() * TWO_PI));
-}
 vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
 {
     rayPosition += rayDirection * max(length(rayPosition) - 1.5, 0.);
@@ -467,7 +462,7 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
                 if (mmax(absorption) < 0.05)
                     break;
                 if (frand() > absorbance) {
-                    rayDirection = randomDir();
+                    rayDirection = vec3(1, 0, 0) * rotationMatrix(vec3(frand() * TWO_PI, 0, frand() * TWO_PI)); // random direction
                     absorption *= volumeColor.rgb;
                 }
             }
@@ -489,8 +484,6 @@ vec2 sampleAperture(int nbBlades, float rotation)
     tri.y *= sqrt(1. - side*side);
     return tri * rotate2d(rotation * DEG2RAD + float(blade) / float(nbBlades) * TWO_PI);
 }
-vec3 cameraPosition = vec3(0, 0, -2.5);
-vec3 cameraRotation = vec3(0);
 void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
@@ -499,16 +492,10 @@ void main()
         seed = gl_FragCoord.xy / RENDERSIZE * 1000. + log(vec2(FRAMEINDEX));
         vec3 focalPoint = vec3(uv * cameraFocalDistance / cameraFocalLength, cameraFocalDistance);
         vec3 aperture = cameraAperture * vec3(sampleAperture(6, apertureRotation), 0.);
-        float time = speed * float(FRAMEINDEX);
-        cameraPosition *= rotationMatrix(vec3(0, time * 0.2, 0));
-        cameraRotation.y += time * 0.2;
-        cameraRotation.z = 0.5 * sin(time * 0.3);
-        mat3 cameraMatrix = rotationMatrix(cameraRotation);
+        vec3 cameraPosition = vec3(0, 0, -2.5) * rotationMatrix(vec3(0, TIME_SCALED * 0.2, 0));
+        mat3 cameraMatrix = rotationMatrix(vec3(0, TIME_SCALED * 0.2, 0.5 * sin(TIME_SCALED * 0.3)));
         vec3 rayDirection = normalize(focalPoint - aperture) * cameraMatrix;
-        Power *= sin(time * 0.1);
-        PhiShift -= time;
-        ThetaShift -= time;
-        gl_FragColor = vec4(pathTrace(cameraPosition + aperture * cameraMatrix, rayDirection), 1.);
+        gl_FragColor = vec4(pathTrace(cameraPosition + aperture * cameraMatrix, rayDirection), 1);
         if (FRAMEINDEX > 0)
             gl_FragColor += IMG_THIS_PIXEL(bufferA) * motionBlur;
     }
