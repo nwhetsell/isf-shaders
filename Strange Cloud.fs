@@ -119,7 +119,7 @@
     "ISFVSN": "2",
     "PASSES": [
         {
-            "TARGET": "bufferA",
+            "TARGET": "cloud",
             "PERSISTENT": true,
             "FLOAT": true
         },
@@ -497,16 +497,16 @@ void main()
         vec3 rayDirection = normalize(focalPoint - aperture) * cameraMatrix;
         gl_FragColor = vec4(pathTrace(cameraPosition + aperture * cameraMatrix, rayDirection), 1);
         if (FRAMEINDEX > 0)
-            gl_FragColor += IMG_THIS_PIXEL(bufferA) * motionBlur;
+            gl_FragColor += IMG_THIS_PIXEL(cloud) * motionBlur;
     }
     else // Shadertoy Image
     {
-        vec4 color = IMG_THIS_PIXEL(bufferA);
+        vec4 color = IMG_THIS_PIXEL(cloud);
         vec3 bloom = vec3(0);
         if (enableBloom) {
             for(int y = -1; y <= 1; y++)
             for(int x = -1; x <= 1; x++)
-                bloom += textureLod(bufferA, (gl_FragCoord.xy + vec2(x, y) * bloomDistance) / RENDERSIZE, 7.).rgb / color.a;
+                bloom += textureLod(cloud, (gl_FragCoord.xy + vec2(x, y) * bloomDistance) / RENDERSIZE, 7.).rgb / color.a;
             bloom = max(bloom / 9. - 0.5, vec3(0)) * 0.25;
         }
         color /= color.a;
