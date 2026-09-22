@@ -6,12 +6,12 @@
     "DESCRIPTION": "Fractal cloud, converted from <https://www.shadertoy.com/view/tsGSDt>",
     "INPUTS": [
         {
-            "NAME": "speed",
-            "LABEL": "Speed",
+            "NAME": "formationSpeed",
+            "LABEL": "Formation speed",
             "TYPE": "float",
             "DEFAULT": 0.9,
             "MAX": 10,
-            "MIN": 0
+            "MIN": -10
         },
         {
             "NAME": "powerAmplitude",
@@ -19,7 +19,7 @@
             "TYPE": "float",
             "DEFAULT": 5,
             "MAX": 20,
-            "MIN": 0
+            "MIN": -20
         },
         {
             "NAME": "density",
@@ -28,6 +28,14 @@
             "DEFAULT": 10,
             "MAX": 100,
             "MIN": 0
+        },
+        {
+            "NAME": "rotationSpeed",
+            "LABEL": "Rotation speed",
+            "TYPE": "float",
+            "DEFAULT": 0.2,
+            "MAX": 10,
+            "MIN": -10
         },
         {
             "NAME": "motionBlur",
@@ -391,7 +399,7 @@ mat3 rotationMatrix(vec3 r)
 {
     return rotate3dZ(-r.z) * rotate3dX(-r.x) * rotate3dY(r.y);
 }
-float TIME_SCALED = TIME * speed;
+float TIME_SCALED = TIME * formationSpeed;
 float distanceEstimation(vec3 position)
 {
     const float maxDistance = 1.5;
@@ -492,8 +500,9 @@ void main()
         seed = gl_FragCoord.xy / RENDERSIZE * 1000. + log(vec2(FRAMEINDEX));
         vec3 focalPoint = vec3(uv * cameraFocalDistance / cameraFocalLength, cameraFocalDistance);
         vec3 aperture = cameraAperture * vec3(sampleAperture(6, apertureRotation), 0.);
-        vec3 cameraPosition = vec3(0, 0, -2.5) * rotationMatrix(vec3(0, TIME_SCALED * 0.2, 0));
-        mat3 cameraMatrix = rotationMatrix(vec3(0, TIME_SCALED * 0.2, 0.5 * sin(TIME_SCALED * 0.3)));
+        float rotation = TIME_SCALED * rotationSpeed;
+        vec3 cameraPosition = vec3(0, 0, -2.5) * rotationMatrix(vec3(0, rotation, 0));
+        mat3 cameraMatrix = rotationMatrix(vec3(0, rotation, 0.5 * sin(TIME_SCALED * 0.3)));
         vec3 rayDirection = normalize(focalPoint - aperture) * cameraMatrix;
         gl_FragColor = vec4(pathTrace(cameraPosition + aperture * cameraMatrix, rayDirection), 1);
         if (FRAMEINDEX > 0)
