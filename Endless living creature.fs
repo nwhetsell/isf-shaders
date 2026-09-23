@@ -30,6 +30,14 @@
             "MIN": 0
         },
         {
+            "NAME": "repeatAmount",
+            "LABEL": "Repeat amount",
+            "TYPE": "float",
+            "DEFAULT": 5,
+            "MAX": 50,
+            "MIN": 0
+        },
+        {
             "NAME": "balance",
             "LABEL": "Balance",
             "TYPE": "float",
@@ -89,11 +97,102 @@
             "DEFAULT": 1,
             "MAX": 10,
             "MIN": 1
+        },
+        {
+            "NAME": "mainColor",
+            "LABEL": "Main color",
+            "TYPE": "color",
+            "DEFAULT": [0.7, 0.8, 0.9, 1]
+        },
+        {
+            "NAME": "highlightColor",
+            "LABEL": "Highlight color",
+            "TYPE": "color",
+            "DEFAULT": [0.8, 0.6, 0.5, 1]
         }
     ],
     "ISFVSN": "2"
 }*/
 // #define ISF_EDITOR_WEBSITE
+// #define RANDOM_HIGHER_RANGE
+/*
+contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
+description: Pass a value and get some random normalize value between 0 and 1
+use: float random[2|3](<float|vec2|vec3> value)
+options:
+    - RANDOM_HIGHER_RANGE: for working with a range over 0 and 1
+    - RANDOM_SINLESS: Use sin-less random, which tolerates bigger values before producing pattern. From https://www.shadertoy.com/view/4djSRW
+    - RANDOM_SCALE: by default this scale if for number with a big range. For producing good random between 0 and 1 use bigger range
+examples:
+    - /shaders/generative_random.frag
+license:
+    - MIT License (MIT) Copyright 2014, David Hoskins
+*/
+#define RANDOM_SCALE vec4(443.897, 441.423, .0973, .1099)
+#define FNC_RANDOM 
+float random(in float x) {
+    return fract(sin(x) * 43758.5453);
+}
+float random(in vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+float random(in vec3 pos) {
+    return fract(sin(dot(pos.xyz, vec3(70.9898, 78.233, 32.4355))) * 43758.5453123);
+}
+float random(in vec4 pos) {
+    float dot_product = dot(pos, vec4(12.9898,78.233,45.164,94.673));
+    return fract(sin(dot_product) * 43758.5453);
+}
+vec2 random2(float p) {
+    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec2 random2(vec2 p) {
+    vec3 p3 = fract(p.xyx * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec2 random2(vec3 p3) {
+    p3 = fract(p3 * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec3 random3(float p) {
+    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+vec3 random3(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yxz + 19.19);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+vec3 random3(vec3 p) {
+    p = fract(p * RANDOM_SCALE.xyz);
+    p += dot(p, p.yxz + 19.19);
+    return fract((p.xxy + p.yzz) * p.zyx);
+}
+vec4 random4(float p) {
+    vec4 p4 = fract(p * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec2 p) {
+    vec4 p4 = fract(p.xyxy * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec3 p) {
+    vec4 p4 = fract(p.xyzx * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec4 p4) {
+    p4 = fract(p4 * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -130,6 +229,403 @@ mat2 rotate2d(const in float r){
     float c = cos(r);
     float s = sin(r);
     return mat2(c, s, -s, c);
+}
+/*
+contributors:  Inigo Quiles
+description: repeat operation for 2D/3D SDFs 
+use: <vec4> opElongate( in <vec3> p, in <vec3> h )
+*/
+#define FNC_OPREPEAT 
+vec2 opRepeat( in vec2 p, in float s ) {
+    return mod(p+s*0.5,s)-s*0.5;
+}
+vec3 opRepeat( in vec3 p, in vec3 c ) {
+    return mod(p+0.5*c,c)-0.5*c;
+}
+vec2 opRepeat( in vec2 p, in vec2 lima, in vec2 limb, in float s ) {
+    return p-s*clamp(floor(p/s),lima,limb);
+}
+vec3 opRepeat( in vec3 p, in vec3 lima, in vec3 limb, in float s ) {
+    return p-s*clamp(floor(p/s),lima,limb);
+}
+#define SAMPLER_FNC texture(TEX, UV)
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_SATURATE 
+#define saturate(V) clamp(V, 0.0, 1.0)
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define GAMMA 2.2
+#define FNC_GAMMA2LINEAR 
+float gamma2linear(const in float v) {
+    return pow(v, GAMMA);
+}
+vec3 gamma2linear(const in vec3 v) {
+    return pow(v, vec3(GAMMA));
+}
+vec4 gamma2linear(const in vec4 v) {
+    return vec4(gamma2linear(v.rgb), v.a);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define SAMPLER_TYPE sampler2D
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_ALBEDO 
+vec4 materialAlbedo() {
+    vec4 albedo = vec4(0.5, 0.5, 0.5, 1.0);
+    return albedo;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_SPECULAR 
+vec3 materialSpecular() {
+    vec3 spec = vec3(0.04);
+    return spec;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material emissive property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialEmissive()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_EMISSIVE 
+vec3 materialEmissive() {
+    vec3 emission = vec3(0.0);
+    return emission;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialOcclusion()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_OCCLUSION 
+float materialOcclusion() {
+    float occlusion = 1.0;
+    return occlusion;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialNormal()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_NORMAL 
+vec3 materialNormal() {
+    vec3 normal = vec3(0.0, 0.0, 1.0);
+    return normal;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert diffuse/specular/glossiness workflow to PBR metallic factor
+use: <float> toMetallic(<vec3> diffuse, <vec3> specular, <float> maxSpecular)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define TOMETALLIC_MIN_REFLECTANCE 0.04
+#define FNC_TOMETALLIC 
+float toMetallic(const in vec3 diffuse, const in vec3 specular, const in float maxSpecular) {
+    float perceivedDiffuse = sqrt(0.299 * diffuse.r * diffuse.r + 0.587 * diffuse.g * diffuse.g + 0.114 * diffuse.b * diffuse.b);
+    float perceivedSpecular = sqrt(0.299 * specular.r * specular.r + 0.587 * specular.g * specular.g + 0.114 * specular.b * specular.b);
+    if (perceivedSpecular < TOMETALLIC_MIN_REFLECTANCE) {
+        return 0.0;
+    }
+    float a = TOMETALLIC_MIN_REFLECTANCE;
+    float b = perceivedDiffuse * (1.0 - maxSpecular) / (1.0 - TOMETALLIC_MIN_REFLECTANCE) + perceivedSpecular - 2.0 * TOMETALLIC_MIN_REFLECTANCE;
+    float c = TOMETALLIC_MIN_REFLECTANCE - perceivedSpecular;
+    float D = max(b * b - 4.0 * a * c, 0.0);
+    return saturate((-b + sqrt(D)) / (2.0 * a));
+}
+float toMetallic(const in vec3 diffuse, const in vec3 specular) {
+    float maxSpecula = max(max(specular.r, specular.g), specular.b);
+    return toMetallic(diffuse, specular, maxSpecula);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material metallic property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_METALLIC 
+float materialMetallic() {
+    float metallic = 0.0;
+    vec3 diffuse = materialAlbedo().rgb;
+    vec3 specular = materialSpecular();
+    metallic = toMetallic(diffuse, specular);
+    return metallic;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material roughness property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialRoughness()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_ROUGHNESS 
+float materialRoughness() {
+    float roughness = 0.05;
+    return roughness;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convertes from PBR roughness/metallic to a shininess factor (typaclly use on diffuse/specular/ambient workflow)
+use: float toShininess(<float> roughness, <float> metallic)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_TOSHININESS 
+float toShininess(const in float roughness, const in float metallic) {
+    float s = .95 - roughness * 0.5;
+    s *= s;
+    s *= s;
+    return s * (80.0 + 160.0 * (1.0-metallic));
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material shininess property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialShininess()
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_SHININESS 
+float materialShininess() {
+    float shininess = 15.0;
+    return shininess;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Generic Material Structure
+options:
+    - SCENE_BACK_SURFACE
+    - SHADING_MODEL_CLEAR_COAT
+    - MATERIAL_HAS_CLEAR_COAT_NORMAL
+    - SHADING_MODEL_IRIDESCENCE
+    - SHADING_MODEL_SUBSURFACE
+    - SHADING_MODEL_CLOTH
+    - SHADING_MODEL_SPECULAR_GLOSSINESS
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define RENDER_RAYMARCHING 
+#define SHADING_MODEL_CLEAR_COAT 
+#define STR_MATERIAL 
+struct Material {
+    vec4 albedo;
+    vec3 emissive;
+    vec3 position; // world position of the surface
+    vec3 normal; // world normal of the surface
+    float sdf;
+    bool valid;
+    vec3 ior; // Index of Refraction
+    float roughness;
+    float metallic;
+    float reflectance;
+    float ambientOcclusion; // default 1.0
+    float clearCoat;
+    float clearCoatRoughness;
+};
+
+/*
+contributors:  Inigo Quiles
+description: Union operation of two SDFs 
+use: <float> opUnion( in <float|vec4> d1, in <float|vec4> d2 [, <float> smooth_factor] ) 
+*/
+#define FNC_OPUNION 
+float opUnion( float d1, float d2 ) { return min(d1, d2); }
+Material opUnion( Material d1, Material d2 ) {
+    if (d1.sdf < d2.sdf) {
+        return d1;
+    } else {
+        return d2;
+    }
+}
+// Soft union
+float opUnion( float d1, float d2, float k ) {
+    float h = saturate( 0.5 + 0.5*(d2-d1)/k );
+    return mix( d2, d1, h ) - k*h*(1.0-h);
+}
+vec4 opUnion( vec4 d1, vec4 d2, float k ) {
+    float h = saturate( 0.5 + 0.5*(d2.a - d1.a)/k );
+    vec4 result = mix(d2, d1, h);
+    result.a -= k * h * (1.0 - h);
+    return result;
 }
 /*
 contributors:  Inigo Quiles
@@ -172,6 +668,22 @@ mat3 lookAt(vec3 eye, vec3 target, float roll) {
 mat3 lookAt(vec3 forward) {
     return lookAt(forward, vec3(0.0, 1.0, 0.0));
 }
+/*
+contributors: [Ivan Dianov, Shadi El Hajj]
+description: polar to cartesian conversion.
+use: polar2cart(<vec2> polar)
+*/
+#define FNC_POLAR2CART 
+vec2 polar2cart(in vec2 polar) {
+    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
+}
+// https://mathworld.wolfram.com/SphericalCoordinates.html
+vec3 polar2cart( in float r, in float phi, in float theta) {
+    float x = r * cos(theta) * sin(phi);
+    float y = r * sin(theta) * sin(phi);
+    float z = r * cos(phi);
+    return vec3(x, y, z);
+}
 // Weird endless living creature
 // inspired by Inigo Quilez live stream shader deconstruction
 // Leon Denise (ponk) 2019.08.28
@@ -179,65 +691,62 @@ mat3 lookAt(vec3 forward) {
 // Using code from
 // Inigo Quilez
 // Morgan McGuire
-// toolbox
-#define repeat(p,r) (mod(p,r)-r/2.)
-float random(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
-mat2 rotate2dCounterclockwise(const in float r) {
-    return rotate2d(-r);
-}
-float smoothmin (float a, float b, float r) { float h = clamp(.5+.5*(b-a)/r, 0., 1.); return mix(b, a, h)-r*h*(1.-h); }
-float geometry (vec3 pos, float time) {
-    float scene = 1., a = 1.;
-    float t = time * .5 + pos.x / 30.;
-    t = floor(t)+smoothstep(0.0,.9,pow(fract(t),2.));
-    pos.x = repeat(pos.x+TIME*scrollSpeed, 5.);
+float geometry(vec3 pos, float time)
+{
+    float scene = 1.;
+    float a = 1.;
+    float t = time * 0.5 + pos.x / 30.;
+    t = floor(t) + smoothstep(0., 0.9, pow(fract(t), 2.));
+    pos.x = opRepeat(pos.xy + TIME * scrollSpeed, repeatAmount).x;
     for (int i = int(sphereCount); i > 0; --i) {
-        pos.x = abs(pos.x)-range*a;
-        pos.xy *= rotate2dCounterclockwise(cos(t)*balance/a+a*2.);
-        pos.zy *= rotate2dCounterclockwise(sin(t)*balance/a+a*2.);
-        scene = smoothmin(scene, sphereSDF(pos,(radius*a)), blend*a);
+        pos.x = abs(pos.x) - range * a;
+        vec2 angles = polar2cart(vec2(t, balance / a)) + a * 2.;
+        pos.xy *= rotate2d(-angles.x);
+        pos.zy *= rotate2d(-angles.y);
+        scene = opUnion(scene, sphereSDF(pos, radius * a), blend * a);
         a /= falloff;
     }
     return scene;
 }
-float raymarch ( vec3 eye, vec3 ray, float time, out float total ) {
-    float dither = random(ray.xy+fract(time));
-    total = 0.0;
+float raymarch(vec3 eye, vec3 ray, float time, out float total)
+{
+    float dither = random(ray.xy + fract(time));
+    total = 0.;
     const int count = 20;
-    for (int index = count; index > 0; --index) {
-        float dist = geometry(eye+total*ray,time);
-        dist *= 0.9+0.1*dither;
+    for (int index = count; index > 0; index--) {
+        float dist = geometry(eye + total * ray, time);
+        dist *= 0.9 + 0.1 * dither;
         total += dist;
         if (dist < 0.001 * total) {
-            return float(index)/float(count);
+            return float(index) / float(count);
         }
     }
     return 0.;
 }
-vec3 camera (vec3 eye) {
+vec3 camera(vec3 eye)
+{
     if (enableMouse) {
-        eye.yz *= rotate2dCounterclockwise(mouse.y*PI);
-        eye.xz *= rotate2dCounterclockwise(mouse.x*PI);
+        eye.yz *= rotate2d(-mouse.y * PI);
+        eye.xz *= rotate2d(-mouse.x * PI);
     }
     return eye;
 }
 void main()
 {
-    vec2 uv = 2.*(gl_FragCoord.xy-0.5*RENDERSIZE)/RENDERSIZE.y;
-    vec3 eye = camera(vec3(0,0,4));
+    vec2 uv = 2. * (gl_FragCoord.xy - 0.5 * RENDERSIZE) / RENDERSIZE.y;
+    vec3 eye = camera(vec3(0, 0, 4));
     mat3 lookMatrix = lookAt(eye, vec3(0), vec3(0, 1, 0));
-    vec3 ray = normalize(lookMatrix[2] + lookMatrix[0] * uv.x + lookMatrix[1] * uv.y);
-    float total = 0.0;
+    vec3 ray = normalize(lookMatrix[0] * uv.x + lookMatrix[1] * uv.y + lookMatrix[2]);
+    float total = 0.;
     gl_FragColor = vec4(0);
-    for (float index = motion_frames; index > 0.; --index) {
-        float dither = random(ray.xy+fract(TIME+index));
-        float time = TIME*speed+(dither+index)/10./motion_frames;
-        gl_FragColor += vec4(raymarch(eye, ray, time, total))/motion_frames;
+    for (float index = motion_frames; index > 0.; index--) {
+        float dither = random(ray.xy + fract(TIME + index));
+        float time = TIME * speed + (dither + index) / (10. * motion_frames);
+        gl_FragColor += vec4(raymarch(eye, ray, time, total)) / motion_frames;
     }
     // extra color
-    gl_FragColor.rgb *= vec3(.7,.8,.9);
-    float d = smoothstep(7.,0.,total);
-    gl_FragColor.rgb += vec3(0.8,.6,.5) * d;
+    gl_FragColor *= mainColor;
+    gl_FragColor += highlightColor * smoothstep(7., 0., total);
     if (any(greaterThan(gl_FragColor.rgb, vec3(0)))) {
         gl_FragColor.a = 1.;
     }
