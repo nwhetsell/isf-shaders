@@ -478,7 +478,7 @@ void main()
             P.X = position;
             vec3 rand = random3(position);
             if (rand.z < 0.2) {
-                P.V = 0.5 * (rand.xy - 0.5) + vec2(sin(2. * position.x / RENDERSIZE.x), cos(2. * position.x / RENDERSIZE.x));
+                P.V = 0.5 * (rand.xy - 0.5) + polar2cart(vec2(2. * position.x / RENDERSIZE.x, 1)).yx;
                 P.M = vec2(mass, 0.5 - 0.5 * sin(10. * position.x / RENDERSIZE.x));
             } else {
                 P.V = vec2(0);
