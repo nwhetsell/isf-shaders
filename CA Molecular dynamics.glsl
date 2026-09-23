@@ -135,12 +135,12 @@
 #include "lygia/math/gaussian.glsl"
 #define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/sdf/rectSDF.glsl"
-#include "lygia/space/center.glsl"
-#include "lygia/space/uncenter.glsl"
 float rectSDF_without_transform(vec2 p, vec2 b) {
     // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
     return rectSDF((p + 0.5) / 4.2, b, 0.);
 }
+#include "lygia/space/center.glsl"
+#include "lygia/space/uncenter.glsl"
 
 
 //

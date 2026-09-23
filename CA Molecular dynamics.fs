@@ -260,6 +260,10 @@ float rectSDF(in vec2 st, in float s) {
 float rectSDF(in vec2 st) {
     return rectSDF(st, vec2(1.0));
 }
+float rectSDF_without_transform(vec2 p, vec2 b) {
+    // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
+    return rectSDF((p + 0.5) / 4.2, b, 0.);
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
@@ -289,10 +293,6 @@ license:
 float uncenter(float v) { return v * 0.5 + 0.5; }
 vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
 vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
-float rectSDF_without_transform(vec2 p, vec2 b) {
-    // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
-    return rectSDF((p + 0.5) / 4.2, b, 0.);
-}
 //
 // Shadertoy Common
 //
