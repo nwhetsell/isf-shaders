@@ -592,7 +592,7 @@ void main()
         float a = pow(smoothstep(fluid_rho * 0., fluid_rho * 2., rho.z), 0.1);
         float b = exp(-1.7 * smoothstep(fluid_rho * 1., fluid_rho * 7.5, rho.z));
         // Output to screen
-        float c = tanh(3. * (rho.w - 1.)) * 0.5 + 0.5;
+        float c = uncenter(tanh(3. * (rho.w - 1.)));
         gl_FragColor = mix(col0, col1, c) * (1.5 * b + specularb * specularAmount) * a;
         gl_FragColor.rgb = tanh(gl_FragColor.rgb * gl_FragColor.rgb);
         gl_FragColor.a = 1.;
