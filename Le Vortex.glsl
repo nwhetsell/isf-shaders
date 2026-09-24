@@ -268,10 +268,10 @@ vec2 getCellIndexes(inout vec3 p)
 
 float map(vec3 pos)
 {
-    vec3 camOffset = vec3(-4, 0, 0);
+    vec3 cameraOffset = vec3(-4, 0, 0);
 
     // donut distortion
-    vec3 pDonut = pos + camOffset;
+    vec3 pDonut = pos + cameraOffset;
     pDonut.xy += vec2(donut, radius);
     pDonut.xz = cart2polar(pDonut.xz);
     pDonut.x *= donut;
