@@ -135,12 +135,16 @@
     "ISFVSN": "2"
 }*/
 
+// #define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/boxSDF.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/cart2polar.glsl"
 #include "lygia/space/polar2cart.glsl"
+#include "lygia-additions/opRepeat.glsl"
 
 
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
@@ -150,27 +154,17 @@
 #define STEPS 250.
 #define VOLUME 0.001
 
-// raymarching toolbox
-float rng(vec2 seed) {
-    return fract(sin(dot(seed * 0.1684, vec2(54.649, 321.547))) * 450315.);
-}
-
-float quantizeAngleOfCartesianPoint(inout vec2 p, float count)
+vec2 pointWithQuantizedAngle(in vec2 p, in float count, out float angleIndex)
 {
-    vec2 polar = cart2polar(p);
+    p = cart2polar(p);
     float angleIncrement = TWO_PI / count;
-    float angle = polar.x + angleIncrement * 0.5;
-    float angleIndex = floor(angle / angleIncrement);
+    float angle = p.x + angleIncrement * 0.5;
+    angleIndex = floor(angle / angleIncrement);
     if (abs(angleIndex) < count * 0.5)
         angleIndex = abs(angleIndex);
     angle = mod(angle, angleIncrement) - angleIncrement * 0.5;
-    p = polar2cart(vec2(angle, polar.y));
-    return angleIndex;
+    return polar2cart(vec2(angle, p.y));
 }
-
-float repeat(float v, float c) { return mod(v, c) - c / 2.; }
-vec2  repeat(vec2 v,  vec2 c)  { return mod(v, c) - c / 2.; }
-vec3  repeat(vec3 v,  float c) { return mod(v, c) - c / 2.; }
 
 float map(vec3);
 float getShadow(vec3 pos, vec3 at, float k)
@@ -195,11 +189,10 @@ float getShadow(vec3 pos, vec3 at, float k)
 
 vec3 getNormal(vec3 p)
 {
-    vec2 e = vec2(EPSILON, 0);
     return normalize(vec3(
-        map(p + e.xyy) - map(p - e.xyy),
-        map(p + e.yxy) - map(p - e.yxy),
-        map(p + e.yyx) - map(p - e.yyx)
+        map(p + vec3(EPSILON,0,0)) - map(p - vec3(EPSILON,0,0)),
+        map(p + vec3(0,EPSILON,0)) - map(p - vec3(0,EPSILON,0)),
+        map(p + vec3(0,0,EPSILON)) - map(p - vec3(0,0,EPSILON))
     ));
 }
 
@@ -215,7 +208,7 @@ float windowCross(vec3 pos, vec4 size, float salt)
     float sx = size.x * (0.6 + salt * 0.4);
     float sy = size.y * (0.3 + salt * 0.7);
     vec2 sxy = vec2(sx, sy);
-    p.xy = repeat(p.xy + sxy / 2., sxy);
+    p.xy = opRepeat(p.xy, sxy);
     float scene = boxSDF(p, size.zyw * 2.);
     scene = min(scene, boxSDF(p, size.xzw * 2.));
     scene = max(scene, boxSDF(pos, size.xyw));
@@ -240,9 +233,9 @@ float boxes(vec3 pos, float salt)
     vec3 p = pos;
     float ry = cell * boxToroidalSeparation * (0.3 + salt);
     float rz = cell * boxPoloidalSeparation * (0.5 + salt);
-    float salty = rng(vec2(floor(pos.y / ry), floor(pos.z / rz)));
-    pos.y = repeat(pos.y, ry);
-    pos.z = repeat(pos.z, rz);
+    float salty = random(vec2(floor(pos.y / ry), floor(pos.z / rz)));
+    pos.y = opRepeat(pos.y - ry * 0.5, ry);
+    pos.z = opRepeat(pos.z - rz * 0.5, rz);
     float height = boxHeight + 0.8 * salt + salty;
     float scene = boxSDF(pos, vec3(height, 0.1 + 0.2 * salt, 0.1 + 0.2 * salty));
     scene = max(scene, boxSDF(p, vec3(height + cell * boxProportion, cell * boxProportion, cell * boxProportion)));
@@ -274,9 +267,10 @@ float map(vec3 pos)
     // walls
     p = pDonut;
     float py = p.y + TIME * speed;
-    p.y = repeat(py, cell + thin);
+    float cellPlusThin = cell + thin;
+    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
     scene = min(scene, max(abs(p.y) - thin, sphereSDF(vec3(p.x, 0, p.z), radius)));
-    quantizeAngleOfCartesianPoint(p.xz, segments);
+    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
     p.x -= radius;
     scene = min(scene, max(abs(p.z) - thin, p.x));
 
@@ -284,36 +278,36 @@ float map(vec3 pos)
     p = pDonut;
     p.xz *= rotate2d(-PI / segments);
     py = p.y + TIME * speed;
-    indexY = floor(py / (cell + thin));
-    p.y = repeat(py, cell + thin);
-    indexX = quantizeAngleOfCartesianPoint(p.xz, segments);
+    indexY = floor(py / cellPlusThin);
+    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
+    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
     p.x -= radius;
     vec2 dimension = vec2(0.75, 0.5);
     p.x += dimension.x * 1.5;
     scene = max(scene, -boxSDF(p, vec3(dimension.x, 0.1, dimension.y)));
-    scene = min(scene, window(p.xzy, dimension, rng(vec2(indexX, indexY))));
+    scene = min(scene, window(p.xzy, dimension, random(vec2(indexX, indexY))));
 
     // vertical window
     p = pDonut;
     py = p.y + cell / 2. + TIME * speed;
-    indexY = floor(py / (cell + thin));
-    p.y = repeat(py, cell + thin);
-    indexX = quantizeAngleOfCartesianPoint(p.xz, segments);
+    indexY = floor(py / cellPlusThin);
+    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
+    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
     p.x -= radius;
     dimension.y = 1.5;
     p.x += dimension.x * 1.25;
     scene = max(scene, -boxSDF(p, vec3(dimension, 0.1)));
-    scene = min(scene, window(p, dimension, rng(vec2(indexX, indexY))));
+    scene = min(scene, window(p, dimension, random(vec2(indexX, indexY))));
 
     // elements
     p = pDonut;
     p.xz *= rotate2d(-PI / segments);
     py = p.y + cell / 2. + TIME * speed;
-    indexY = floor(py / (cell + thin));
-    p.y = repeat(py, cell + thin);
-    indexX = quantizeAngleOfCartesianPoint(p.xz, segments);
+    indexY = floor(py / cellPlusThin);
+    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
+    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
     p.x -= radius - height;
-    scene = min(scene, boxes(p, rng(vec2(indexX, indexY))));
+    scene = min(scene, boxes(p, random(vec2(indexX, indexY))));
 
     return scene;
 }
@@ -325,7 +319,7 @@ void main()
     vec3 ray = normalize(vec3(uv, 1.3));
     camera(eye);
     camera(ray);
-    float dither = rng(uv + fract(TIME));
+    float dither = random(uv + fract(TIME));
     vec3 pos = eye;
     float shade = 0.;
     bool isTorus = false;
