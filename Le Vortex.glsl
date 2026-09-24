@@ -139,6 +139,7 @@
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/boxSDF.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
+#include "lygia/space/cart2polar.glsl"
 #include "lygia/space/polar2cart.glsl"
 
 
@@ -154,48 +155,26 @@ float rng(vec2 seed) {
     return fract(sin(dot(seed * 0.1684, vec2(54.649, 321.547))) * 450315.);
 }
 
-mat2 rotate2dCounterclockwise(const in float r) {
-    return rotate2d(-r);
-}
-
-float amod(inout vec2 p, float count) {
-    float an = TWO_PI / count;
-    float a = atan(p.y, p.x) + an / 2.;
-    float c = floor(a / an);
-    c = mix(c, abs(c), step(count * 0.5, abs(c)));
-    a = mod(a, an) - an / 2.;
-    p.xy = polar2cart(vec2(a, length(p)));
-    return c;
-}
-
-float amodIndex(vec2 p, float count) {
-    float an = TWO_PI / count;
-    float a = atan(p.y, p.x) + an / 2.;
-    float c = floor(a / an);
-    c = mix(c, abs(c), step(count * 0.5, abs(c)));
-    return c;
+float quantizeAngleOfCartesianPoint(inout vec2 p, float count)
+{
+    vec2 polar = cart2polar(p);
+    float angleIncrement = TWO_PI / count;
+    float angle = polar.x + angleIncrement * 0.5;
+    float angleIndex = floor(angle / angleIncrement);
+    if (abs(angleIndex) < count * 0.5)
+        angleIndex = abs(angleIndex);
+    angle = mod(angle, angleIncrement) - angleIncrement * 0.5;
+    p = polar2cart(vec2(angle, polar.y));
+    return angleIndex;
 }
 
 float repeat(float v, float c) { return mod(v, c) - c / 2.; }
 vec2  repeat(vec2 v,  vec2 c)  { return mod(v, c) - c / 2.; }
 vec3  repeat(vec3 v,  float c) { return mod(v, c) - c / 2.; }
 
-float smoo(float a, float b, float r) { return clamp(0.5 + 0.5 * (b - a) / r, 0., 1.); }
-float smin(float a, float b, float r) {
-    float h = smoo(a, b, r);
-    return mix(b, a, h) - r * h * (1. - h);
-}
-float smax(float a, float b, float r) {
-    float h = smoo(a, b, r);
-    return mix(a, b, h) + r * h * (1. - h);
-}
-
-vec2 displaceLoop(vec2 p, float r) {
-    return vec2(length(p) - r, atan(p.y, p.x));
-}
-
 float map(vec3);
-float getShadow(vec3 pos, vec3 at, float k) {
+float getShadow(vec3 pos, vec3 at, float k)
+{
     vec3 dir = normalize(at - pos);
     float maxt = length(at - pos);
     float f = 1.;
@@ -214,8 +193,9 @@ float getShadow(vec3 pos, vec3 at, float k) {
     return f;
 }
 
-vec3 getNormal(vec3 p) {
-    vec2 e = vec2(0.01, 0);
+vec3 getNormal(vec3 p)
+{
+    vec2 e = vec2(EPSILON, 0);
     return normalize(vec3(
         map(p + e.xyy) - map(p - e.xyy),
         map(p + e.yxy) - map(p - e.yxy),
@@ -223,12 +203,14 @@ vec3 getNormal(vec3 p) {
     ));
 }
 
-void camera(inout vec3 p) {
-    p.xz *= rotate2dCounterclockwise(yAxisRotation * DEG2RAD);
-    p.yz *= rotate2dCounterclockwise(xAxisRotation * DEG2RAD);
+void camera(inout vec3 p)
+{
+    p.xz *= rotate2d(-yAxisRotation * DEG2RAD);
+    p.yz *= rotate2d(-xAxisRotation * DEG2RAD);
 }
 
-float windowCross(vec3 pos, vec4 size, float salt) {
+float windowCross(vec3 pos, vec4 size, float salt)
+{
     vec3 p = pos;
     float sx = size.x * (0.6 + salt * 0.4);
     float sy = size.y * (0.3 + salt * 0.7);
@@ -240,7 +222,8 @@ float windowCross(vec3 pos, vec4 size, float salt) {
     return scene;
 }
 
-float window(vec3 pos, vec2 dimension, float salt) {
+float window(vec3 pos, vec2 dimension, float salt)
+{
     float thinn = 0.008;
     float depth = 0.04;
     float depthCadre = 0.006;
@@ -252,7 +235,8 @@ float window(vec3 pos, vec2 dimension, float salt) {
     return scene;
 }
 
-float boxes(vec3 pos, float salt) {
+float boxes(vec3 pos, float salt)
+{
     vec3 p = pos;
     float ry = cell * boxToroidalSeparation * (0.3 + salt);
     float rz = cell * boxPoloidalSeparation * (0.5 + salt);
@@ -265,81 +249,71 @@ float boxes(vec3 pos, float salt) {
     return scene;
 }
 
-float map(vec3 pos) {
+float map(vec3 pos)
+{
     vec3 camOffset = vec3(-4, 0, 0);
 
     float scene = 1000.;
     vec3 p = pos + camOffset;
     float segments = PI * radius;
     float indexX, indexY, salt;
-    vec2 seed;
 
     // donut distortion
     vec3 pDonut = p;
-    pDonut.x += donut;
-    pDonut.y += radius;
-    pDonut.xz = displaceLoop(pDonut.xz, donut);
-    pDonut.z *= donut;
-    pDonut.xzy = pDonut.xyz;
-    pDonut.xz *= rotate2dCounterclockwise(TIME * 0.05 * speed);
+    pDonut.xy += vec2(donut, radius);
+    pDonut.xz = cart2polar(pDonut.xz);
+    pDonut.x *= donut;
+    pDonut.z -= donut;
+    pDonut.zy *= rotate2d(-TIME * 0.05 * speed);
+    pDonut.xyz = pDonut.zxy;
 
     // ground
     p = pDonut;
-    scene = min(scene, sphereSDF(vec3(p.x, 0, p.z), radius-height));
+    scene = min(scene, sphereSDF(vec3(p.x, 0, p.z), radius - height));
 
     // walls
     p = pDonut;
     float py = p.y + TIME * speed;
-    indexY = floor(py / (cell + thin));
     p.y = repeat(py, cell + thin);
     scene = min(scene, max(abs(p.y) - thin, sphereSDF(vec3(p.x, 0, p.z), radius)));
-    amod(p.xz, segments);
+    quantizeAngleOfCartesianPoint(p.xz, segments);
     p.x -= radius;
     scene = min(scene, max(abs(p.z) - thin, p.x));
 
     // horizontal window
     p = pDonut;
-    p.xz *= rotate2dCounterclockwise(PI / segments);
+    p.xz *= rotate2d(-PI / segments);
     py = p.y + TIME * speed;
     indexY = floor(py / (cell + thin));
     p.y = repeat(py, cell + thin);
-    indexX = amodIndex(p.xz, segments);
-    amod(p.xz, segments);
-    seed = vec2(indexX, indexY);
-    salt = rng(seed);
+    indexX = quantizeAngleOfCartesianPoint(p.xz, segments);
     p.x -= radius;
     vec2 dimension = vec2(0.75, 0.5);
     p.x += dimension.x * 1.5;
     scene = max(scene, -boxSDF(p, vec3(dimension.x, 0.1, dimension.y)));
-    scene = min(scene, window(p.xzy, dimension, salt));
+    scene = min(scene, window(p.xzy, dimension, rng(vec2(indexX, indexY))));
 
     // vertical window
     p = pDonut;
     py = p.y + cell / 2. + TIME * speed;
     indexY = floor(py / (cell + thin));
     p.y = repeat(py, cell + thin);
-    indexX = amodIndex(p.xz, segments);
-    amod(p.xz, segments);
-    seed = vec2(indexX, indexY);
-    salt = rng(seed);
+    indexX = quantizeAngleOfCartesianPoint(p.xz, segments);
     p.x -= radius;
     dimension.y = 1.5;
     p.x += dimension.x * 1.25;
     scene = max(scene, -boxSDF(p, vec3(dimension, 0.1)));
-    scene = min(scene, window(p, dimension, salt));
+    scene = min(scene, window(p, dimension, rng(vec2(indexX, indexY))));
 
     // elements
     p = pDonut;
-    p.xz *= rotate2dCounterclockwise(PI / segments);
+    p.xz *= rotate2d(-PI / segments);
     py = p.y + cell / 2. + TIME * speed;
     indexY = floor(py / (cell + thin));
     p.y = repeat(py, cell + thin);
-    indexX = amodIndex(p.xz, segments);
-    amod(p.xz, segments);
-    seed = vec2(indexX, indexY);
-    salt = rng(seed);
+    indexX = quantizeAngleOfCartesianPoint(p.xz, segments);
     p.x -= radius - height;
-    scene = min(scene, boxes(p, salt));
+    scene = min(scene, boxes(p, rng(vec2(indexX, indexY))));
 
     return scene;
 }
