@@ -407,15 +407,31 @@ float boxes(vec3 pos, float salt)
     scene = max(scene, boxSDF(p, vec3(height + cell * boxProportion, cell * boxProportion, cell * boxProportion)));
     return scene;
 }
+float segments = PI * radius;
+float getCellIndexX(inout vec3 p)
+{
+    float x;
+    p.xz = pointWithQuantizedAngle(p.xz, segments, x);
+    p.x -= radius;
+    return x;
+}
+float getCellIndexY(inout vec3 p)
+{
+    p.y += TIME * speed;
+    float cellSize = cell + thin;
+    float y = floor(p.y / cellSize);
+    p.y = opRepeat(p.y - cellSize * 0.5, cellSize);
+    return y;
+}
+vec2 getCellIndexes(inout vec3 p)
+{
+    return vec2(getCellIndexX(p), getCellIndexY(p));
+}
 float map(vec3 pos)
 {
     vec3 camOffset = vec3(-4, 0, 0);
-    float scene = 1000.;
-    vec3 p = pos + camOffset;
-    float segments = PI * radius;
-    float indexX, indexY, salt;
     // donut distortion
-    vec3 pDonut = p;
+    vec3 pDonut = pos + camOffset;
     pDonut.xy += vec2(donut, radius);
     pDonut.xz = cart2polar(pDonut.xz);
     pDonut.x *= donut;
@@ -423,49 +439,37 @@ float map(vec3 pos)
     pDonut.zy *= rotate2d(-TIME * 0.05 * speed);
     pDonut.xyz = pDonut.zxy;
     // ground
-    p = pDonut;
-    scene = min(scene, sphereSDF(vec3(p.x, 0, p.z), radius - height));
+    vec3 p = pDonut;
+    float scene = sphereSDF(vec3(p.x, 0, p.z), radius - height);
     // walls
     p = pDonut;
-    float py = p.y + TIME * speed;
-    float cellPlusThin = cell + thin;
-    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
+    getCellIndexY(p);
     scene = min(scene, max(abs(p.y) - thin, sphereSDF(vec3(p.x, 0, p.z), radius)));
-    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
-    p.x -= radius;
+    getCellIndexX(p);
     scene = min(scene, max(abs(p.z) - thin, p.x));
     // horizontal window
     p = pDonut;
     p.xz *= rotate2d(-PI / segments);
-    py = p.y + TIME * speed;
-    indexY = floor(py / cellPlusThin);
-    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
-    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
-    p.x -= radius;
+    vec2 indexes = getCellIndexes(p);
     vec2 dimension = vec2(0.75, 0.5);
     p.x += dimension.x * 1.5;
     scene = max(scene, -boxSDF(p, vec3(dimension.x, 0.1, dimension.y)));
-    scene = min(scene, window(p.xzy, dimension, random(vec2(indexX, indexY))));
+    scene = min(scene, window(p.xzy, dimension, random(indexes)));
     // vertical window
     p = pDonut;
-    py = p.y + cell / 2. + TIME * speed;
-    indexY = floor(py / cellPlusThin);
-    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
-    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
-    p.x -= radius;
-    dimension.y = 1.5;
+    p.y += cell * 0.5;
+    indexes = getCellIndexes(p);
     p.x += dimension.x * 1.25;
+    dimension.y = 1.5;
     scene = max(scene, -boxSDF(p, vec3(dimension, 0.1)));
-    scene = min(scene, window(p, dimension, random(vec2(indexX, indexY))));
+    scene = min(scene, window(p, dimension, random(indexes)));
     // elements
     p = pDonut;
     p.xz *= rotate2d(-PI / segments);
-    py = p.y + cell / 2. + TIME * speed;
-    indexY = floor(py / cellPlusThin);
-    p.y = opRepeat(py - cellPlusThin * 0.5, cellPlusThin);
-    p.xz = pointWithQuantizedAngle(p.xz, segments, indexX);
-    p.x -= radius - height;
-    scene = min(scene, boxes(p, random(vec2(indexX, indexY))));
+    p.y += cell * 0.5;
+    indexes = getCellIndexes(p);
+    p.x += height;
+    scene = min(scene, boxes(p, random(indexes)));
     return scene;
 }
 void main()
