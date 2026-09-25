@@ -126,6 +126,38 @@
             "MIN": 0
         },
         {
+            "NAME": "windowGrilleThickness",
+            "LABEL": "Window grille thickness",
+            "TYPE": "float",
+            "DEFAULT": 0.008,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "windowGrilleDepth",
+            "LABEL": "Window grille depth",
+            "TYPE": "float",
+            "DEFAULT": 0.04,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "windowFrameArea",
+            "LABEL": "Window frame area",
+            "TYPE": "float",
+            "DEFAULT": 0.08,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "windowFrameDepth",
+            "LABEL": "Window frame depth",
+            "TYPE": "float",
+            "DEFAULT": 0.006,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "backgroundColor",
             "LABEL": "Background color",
             "TYPE": "color",
@@ -359,41 +391,38 @@ void camera(inout vec3 p)
     p.xz *= rotate2d(-yAxisRotation * DEG2RAD);
     p.yz *= rotate2d(-xAxisRotation * DEG2RAD);
 }
-float windowCross(vec3 pos, vec4 size, float salt)
+float windowGrille(vec3 pos, float height, float width, vec2 indexes)
 {
+    float randomness = random(indexes);
     vec3 p = pos;
-    float sx = size.x * (0.6 + salt * 0.4);
-    float sy = size.y * (0.3 + salt * 0.7);
-    vec2 sxy = vec2(sx, sy);
-    p.xy = opRepeat(p.xy, sxy);
-    float scene = boxSDF(p, size.zyw * 2.);
-    scene = min(scene, boxSDF(p, size.xzw * 2.));
-    scene = max(scene, boxSDF(pos, size.xyw));
+    p.xy = opRepeat(p.xy, vec2(height * (0.6 + randomness * 0.4), width * (0.3 + randomness * 0.7)));
+    float scene = boxSDF(p, vec3(windowGrilleThickness, width, windowGrilleDepth) * 2.);
+    scene = min(scene, boxSDF(p, vec3(height, windowGrilleThickness, windowGrilleDepth) * 2.));
+    scene = max(scene, boxSDF(pos, vec3(height, width, windowGrilleDepth)));
     return scene;
 }
-float window(vec3 pos, vec2 dimension, float salt)
+float window(vec3 pos, float height, float width, vec2 indexes)
 {
-    float thinn = 0.008;
-    float depth = 0.04;
-    float depthCadre = 0.006;
-    float padding = 0.08;
-    float scene = windowCross(pos, vec4(dimension, thinn, depth), salt);
-    float cadre = boxSDF(pos, vec3(dimension, depthCadre));
-    cadre = max(cadre, -boxSDF(pos, vec3(dimension - padding, depthCadre * 2.)));
-    scene = min(scene, cadre);
+    float frame = boxSDF(pos, vec3(height, width, windowFrameDepth));
+    frame = max(frame, -boxSDF(pos, vec3(height - windowFrameArea, width - windowFrameArea, windowFrameDepth * 2.)));
+    float scene = windowGrille(pos, height, width, indexes);
+    scene = min(scene, frame);
     return scene;
 }
-float boxes(vec3 pos, float salt)
+float boxes(vec3 pos, vec2 indexes)
 {
+    float randomness1 = random(indexes);
+    vec2 separation = vec2(
+        cell * boxToroidalSeparation * (0.3 + randomness1),
+        cell * boxPoloidalSeparation * (0.5 + randomness1)
+    );
+    float randomness2 = random(vec2(floor(pos.y / separation.x), floor(pos.z / separation.y)));
     vec3 p = pos;
-    float ry = cell * boxToroidalSeparation * (0.3 + salt);
-    float rz = cell * boxPoloidalSeparation * (0.5 + salt);
-    float salty = random(vec2(floor(pos.y / ry), floor(pos.z / rz)));
-    pos.y = opRepeat(pos.y - ry * 0.5, ry);
-    pos.z = opRepeat(pos.z - rz * 0.5, rz);
-    float height = boxHeight + 0.8 * salt + salty;
-    float scene = boxSDF(pos, vec3(height, 0.1 + 0.2 * salt, 0.1 + 0.2 * salty));
-    scene = max(scene, boxSDF(p, vec3(height + cell * boxProportion, cell * boxProportion, cell * boxProportion)));
+    p.y = opRepeat(p.y - separation.x * 0.5, separation.x);
+    p.z = opRepeat(p.z - separation.y * 0.5, separation.y);
+    float randomizedHeight = boxHeight + 0.8 * randomness1 + randomness2;
+    float scene = boxSDF(p, vec3(randomizedHeight, 0.1 + 0.2 * vec2(randomness1, randomness2)));
+    scene = max(scene, boxSDF(pos, vec3(randomizedHeight, 0, 0) + cell * boxProportion));
     return scene;
 }
 float getCellIndexX(inout vec3 p)
@@ -445,25 +474,27 @@ float map(vec3 pos)
     p = pDonut;
     p.xz *= rotate2d(-1. / radius);
     vec2 indexes = getCellIndexes(p);
-    vec2 dimension = vec2(0.75, 0.5);
-    p.x += dimension.x * 1.5;
-    scene = max(scene, -boxSDF(p, vec3(dimension.x, 0.1, dimension.y)));
-    scene = min(scene, window(p.xzy, dimension, random(indexes)));
+    float windowHeight = 0.75;
+    p.x += windowHeight * 1.5;
+    float windowWidth = 0.5;
+    scene = max(scene, -boxSDF(p, vec3(windowHeight, thin + 0.01, windowWidth)));
+    scene = min(scene, window(p.xzy, windowHeight, windowWidth, indexes));
     // vertical window
     p = pDonut;
     p.y += cell * 0.5;
     indexes = getCellIndexes(p);
-    p.x += dimension.x * 1.25;
-    dimension.y = 1.5;
-    scene = max(scene, -boxSDF(p, vec3(dimension, 0.1)));
-    scene = min(scene, window(p, dimension, random(indexes)));
-    // elements
+    windowHeight = 0.75;
+    p.x += windowHeight * 1.25;
+    windowWidth = 1.5;
+    scene = max(scene, -boxSDF(p, vec3(windowHeight, windowWidth, thin + 0.01)));
+    scene = min(scene, window(p, windowHeight, windowWidth, indexes));
+    // boxes
     p = pDonut;
     p.xz *= rotate2d(-1. / radius);
     p.y += cell * 0.5;
     indexes = getCellIndexes(p);
     p.x += height;
-    scene = min(scene, boxes(p, random(indexes)));
+    scene = min(scene, boxes(p, indexes));
     return scene;
 }
 void main()
