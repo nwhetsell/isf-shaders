@@ -309,7 +309,7 @@ float map(vec3 pos)
 
     // ground
     vec3 p = pDonut;
-    float scene = sphereSDF(vec3(p.x, 0, p.z), radius - height);
+    float scene = min(1000., sphereSDF(vec3(p.x, 0, p.z), radius - height));
 
     // walls
     p = pDonut;
