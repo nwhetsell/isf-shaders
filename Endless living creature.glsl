@@ -124,12 +124,12 @@
 #include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
-#include "lygia/sdf/opRepeat.glsl"
 #define SAMPLER_FNC texture(TEX, UV)
 #include "lygia/sdf/opUnion.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/lookAt.glsl"
 #include "lygia/space/polar2cart.glsl"
+#include "lygia-additions/opRepeat.glsl"
 
 
 // Weird endless living creature
@@ -147,7 +147,7 @@ float geometry(vec3 pos, float time)
     float a = 1.;
     float t = time * 0.5 + pos.x / 30.;
     t = floor(t) + smoothstep(0., 0.9, pow(fract(t), 2.));
-    pos.x = opRepeat(pos.xy + TIME * scrollSpeed, repeatAmount).x;
+    pos.x = opRepeat(pos.x + TIME * scrollSpeed, repeatAmount);
     for (int i = int(sphereCount); i > 0; --i) {
         pos.x = abs(pos.x) - range * a;
         vec2 angles = polar2cart(vec2(t, balance / a)) + a * 2.;

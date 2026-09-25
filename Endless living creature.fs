@@ -230,24 +230,6 @@ mat2 rotate2d(const in float r){
     float s = sin(r);
     return mat2(c, s, -s, c);
 }
-/*
-contributors:  Inigo Quiles
-description: repeat operation for 2D/3D SDFs 
-use: <vec4> opElongate( in <vec3> p, in <vec3> h )
-*/
-#define FNC_OPREPEAT 
-vec2 opRepeat( in vec2 p, in float s ) {
-    return mod(p+s*0.5,s)-s*0.5;
-}
-vec3 opRepeat( in vec3 p, in vec3 c ) {
-    return mod(p+0.5*c,c)-0.5*c;
-}
-vec2 opRepeat( in vec2 p, in vec2 lima, in vec2 limb, in float s ) {
-    return p-s*clamp(floor(p/s),lima,limb);
-}
-vec3 opRepeat( in vec3 p, in vec3 lima, in vec3 limb, in float s ) {
-    return p-s*clamp(floor(p/s),lima,limb);
-}
 #define SAMPLER_FNC texture(TEX, UV)
 /*
 contributors: Patricio Gonzalez Vivo
@@ -684,6 +666,14 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
+
+#define FNC_OPREPEAT_ADDITIONS 
+float opRepeat( in float p, in float s ) {
+    return mod(p+s*0.5,s)-s*0.5;
+}
+vec2 opRepeat( in vec2 p, in vec2 s ) {
+    return mod(p+s*0.5,s)-s*0.5;
+}
 // Weird endless living creature
 // inspired by Inigo Quilez live stream shader deconstruction
 // Leon Denise (ponk) 2019.08.28
@@ -697,7 +687,7 @@ float geometry(vec3 pos, float time)
     float a = 1.;
     float t = time * 0.5 + pos.x / 30.;
     t = floor(t) + smoothstep(0., 0.9, pow(fract(t), 2.));
-    pos.x = opRepeat(pos.xy + TIME * scrollSpeed, repeatAmount).x;
+    pos.x = opRepeat(pos.x + TIME * scrollSpeed, repeatAmount);
     for (int i = int(sphereCount); i > 0; --i) {
         pos.x = abs(pos.x) - range * a;
         vec2 angles = polar2cart(vec2(t, balance / a)) + a * 2.;
