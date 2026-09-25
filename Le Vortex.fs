@@ -326,17 +326,6 @@ vec2 opRepeat( in vec2 p, in vec2 s ) {
 // using code from IQ, Mercury, LJ, Duke, Koltes
 #define STEPS 250.
 #define VOLUME 0.001
-vec2 pointWithQuantizedAngle(in vec2 p, in float count, out float angleIndex)
-{
-    p = cart2polar(p);
-    float angleIncrement = TWO_PI / count;
-    float angle = p.x + angleIncrement * 0.5;
-    angleIndex = floor(angle / angleIncrement);
-    if (abs(angleIndex) < count * 0.5)
-        angleIndex = abs(angleIndex);
-    angle = mod(angle, angleIncrement) - angleIncrement * 0.5;
-    return polar2cart(vec2(angle, p.y));
-}
 float map(vec3);
 float getShadow(vec3 pos, vec3 at, float k)
 {
@@ -407,18 +396,23 @@ float boxes(vec3 pos, float salt)
     scene = max(scene, boxSDF(p, vec3(height + cell * boxProportion, cell * boxProportion, cell * boxProportion)));
     return scene;
 }
-float segments = PI * radius;
 float getCellIndexX(inout vec3 p)
 {
-    float x;
-    p.xz = pointWithQuantizedAngle(p.xz, segments, x);
+    p.xz = cart2polar(p.xz);
+    float angleIncrement = 1. / radius;
+    float angle = p.x + angleIncrement;
+    float x = floor(angle / (2. * angleIncrement));
+    if (abs(x) < HALF_PI * radius)
+        x = abs(x);
+    angle = mod(angle, 2. * angleIncrement) - angleIncrement;
+    p.xz = polar2cart(vec2(angle, p.z));
     p.x -= radius;
     return x;
 }
+float cellSize = cell + thin;
 float getCellIndexY(inout vec3 p)
 {
     p.y += TIME * speed;
-    float cellSize = cell + thin;
     float y = floor(p.y / cellSize);
     p.y = opRepeat(p.y - cellSize * 0.5, cellSize);
     return y;
@@ -449,7 +443,7 @@ float map(vec3 pos)
     scene = min(scene, max(abs(p.z) - thin, p.x));
     // horizontal window
     p = pDonut;
-    p.xz *= rotate2d(-PI / segments);
+    p.xz *= rotate2d(-1. / radius);
     vec2 indexes = getCellIndexes(p);
     vec2 dimension = vec2(0.75, 0.5);
     p.x += dimension.x * 1.5;
@@ -465,7 +459,7 @@ float map(vec3 pos)
     scene = min(scene, window(p, dimension, random(indexes)));
     // elements
     p = pDonut;
-    p.xz *= rotate2d(-PI / segments);
+    p.xz *= rotate2d(-1. / radius);
     p.y += cell * 0.5;
     indexes = getCellIndexes(p);
     p.x += height;
