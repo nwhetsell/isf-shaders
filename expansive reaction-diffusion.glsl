@@ -195,22 +195,23 @@ void main()
         gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x) * vec4(0.7, 1.5, 2.0, 1.0) - vec4(0.3, 1.0, 1.0, 1.0);
 
         // Add the light map.
-        vec2 aspect = vec2(1, RENDERSIZE.y / RENDERSIZE.x);
-        float light = 0.;
-        float lightSize = 1. / inverseLightSize;
+        vec2 lightSize = vec2(1. / inverseLightSize);
         // Use only the red gradient as displacement vector.
         vec2 displacement = vec2(dx.r, dy.r) * lightSize;
+        lightSize = aspect(lightSize.yx, RENDERSIZE.yx).yx;
+
+        float light = 0.;
 
         if (showLightWithMouse) {
             light += pow(
-                max(1. - distance(0.5 + (uv - 0.5) * aspect * lightSize + displacement, 0.5 + (mouse.xy - 0.5) * aspect * lightSize), 0.),
+                max(1. - distance(0.5 + (uv - 0.5) * lightSize + displacement, 0.5 + (mouse.xy - 0.5) * lightSize), 0.),
                 radiance
             );
         }
 
         if (showLightWithInputImage) {
             light += pow(
-                distance(displacement, luminance(IMG_NORM_PIXEL(inputImage, uv)) * aspect * lightSize),
+                distance(displacement, luminance(IMG_NORM_PIXEL(inputImage, uv)) * lightSize),
                 radiance
             );
         }
