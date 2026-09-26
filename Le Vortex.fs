@@ -378,14 +378,6 @@ float getShadow(vec3 pos, vec3 at, float k)
     }
     return f;
 }
-vec3 getNormal(vec3 p)
-{
-    return normalize(vec3(
-        map(p + vec3(EPSILON,0,0)) - map(p - vec3(EPSILON,0,0)),
-        map(p + vec3(0,EPSILON,0)) - map(p - vec3(0,EPSILON,0)),
-        map(p + vec3(0,0,EPSILON)) - map(p - vec3(0,0,EPSILON))
-    ));
-}
 void camera(inout vec3 p)
 {
     p.xz *= rotate2d(-yAxisRotation * DEG2RAD);
