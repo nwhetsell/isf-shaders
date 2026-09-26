@@ -336,7 +336,6 @@ void main()
         vec2 lightSize = vec2(1. / inverseLightSize);
         // Use only the red gradient as displacement vector.
         vec2 displacement = vec2(dx.r, dy.r) * lightSize;
-        // lightSize.y *= RENDERSIZE.y / RENDERSIZE.x;
         lightSize = aspect(lightSize.yx, RENDERSIZE.yx).yx;
         float light = 0.;
         if (showLightWithMouse) {
