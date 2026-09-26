@@ -127,6 +127,8 @@
 #define SAMPLER_FNC texture(TEX, UV)
 #include "lygia/sdf/opUnion.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 #include "lygia/space/lookAt.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia-additions/opRepeat.glsl"
@@ -186,7 +188,7 @@ vec3 camera(vec3 eye)
 
 void main()
 {
-    vec2 uv = 2. * (gl_FragCoord.xy - 0.5 * RENDERSIZE) / RENDERSIZE.y;
+    vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     vec3 eye = camera(vec3(0, 0, 4));
     mat3 lookMatrix = lookAt(eye, vec3(0), vec3(0, 1, 0));
     vec3 ray = normalize(lookMatrix[0] * uv.x + lookMatrix[1] * uv.y + lookMatrix[2]);

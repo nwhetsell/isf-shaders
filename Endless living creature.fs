@@ -619,6 +619,36 @@ float sphereSDF(vec3 p) { return length(p); }
 float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
 /*
 contributors: Patricio Gonzalez Vivo
+description: 'Fix the aspect ratio of a space keeping things squared for you.'
+use: <vec2> aspect(<vec2> st, <vec2> st_size)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ASPECT 
+vec2 aspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.x / s.y);
+    return st;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_CENTER 
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+/*
+contributors: Patricio Gonzalez Vivo
 description: create a look at matrix. Right handed by default.
 use:
     - <mat3> lookAt(<vec3> forward, <vec3> up)
@@ -723,7 +753,7 @@ vec3 camera(vec3 eye)
 }
 void main()
 {
-    vec2 uv = 2. * (gl_FragCoord.xy - 0.5 * RENDERSIZE) / RENDERSIZE.y;
+    vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     vec3 eye = camera(vec3(0, 0, 4));
     mat3 lookMatrix = lookAt(eye, vec3(0), vec3(0, 1, 0));
     vec3 ray = normalize(lookMatrix[0] * uv.x + lookMatrix[1] * uv.y + lookMatrix[2]);

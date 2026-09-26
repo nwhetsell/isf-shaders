@@ -174,7 +174,9 @@
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/boxSDF.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
+#include "lygia/space/aspect.glsl"
 #include "lygia/space/cart2polar.glsl"
+#include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia-additions/opRepeat.glsl"
 
@@ -342,7 +344,7 @@ float map(vec3 pos)
 
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy - 0.5 * RENDERSIZE) / RENDERSIZE.y;
+    vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     vec3 eye = vec3(cameraX, cameraY, cameraZ);
     vec3 ray = normalize(vec3(uv, 1.3));
     camera(eye);
@@ -350,6 +352,7 @@ void main()
     float dither = random(uv + fract(TIME));
     vec3 pos = eye;
     float shade = 0.;
+
     bool isTorus = false;
     for (float i = 0.; i <= 1.; i += 1. / STEPS) {
         float dist = map(pos);
