@@ -70,6 +70,36 @@ float boxSDF( vec3 p, vec3 b ) {
     vec3 d = abs(p) - b;
     return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Fix the aspect ratio of a space keeping things squared for you.'
+use: <vec2> aspect(<vec2> st, <vec2> st_size)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ASPECT 
+vec2 aspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.x / s.y);
+    return st;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_CENTER 
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
 // "shatter" function - subtracts a bunch of semi-random planes from the object
 float sh(vec3 p, float d, float a, float s, float o)
 {
@@ -154,9 +184,7 @@ vec4 px(vec3 currentRayPosition, vec3 currentRayNormal, vec3 currentRayDirection
 void main()
 {
     time = mod(TIME + 19., 120.); // keep time low to reduce issues
-    vec2 uv = vec2(gl_FragCoord.x / RENDERSIZE.x, gl_FragCoord.y / RENDERSIZE.y);
-    uv -= 0.5;
-    uv /= vec2(RENDERSIZE.y / RENDERSIZE.x, 1);
+    vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     // ray origin and direction
     vec3 rayOrigin = vec3(0, 0 , -8);
     vec3 originalRayDirection = normalize(vec3(uv, 1));

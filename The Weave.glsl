@@ -43,6 +43,8 @@
 
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 
 
 vec3 cmap(float x)
@@ -52,7 +54,7 @@ vec3 cmap(float x)
 
 void main()
 {
-    vec2 uv = (2. * gl_FragCoord.xy - RENDERSIZE) / RENDERSIZE.y;
+    vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     vec3 ro = vec3(0, 0, TIME);
     vec3 rd = normalize(vec3(uv, -focal));
     vec3 color = vec3(0);

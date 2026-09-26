@@ -80,6 +80,10 @@
     ]
 }*/
 
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
+
+
 // Calculate the next position
 vec3 Integrate(vec3 cur, float dt)
 {
@@ -103,9 +107,7 @@ float dfLine(vec2 start, vec2 end, vec2 uv)
 
 void main()
 {
-    vec2 res = RENDERSIZE / RENDERSIZE.y;
-    vec2 uv = gl_FragCoord.xy / RENDERSIZE.y;
-    uv -= 0.5 * res;
+    vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     uv.y += 0.375;
 
     vec3 last = IMG_PIXEL(lastData, vec2(0)).xyz;

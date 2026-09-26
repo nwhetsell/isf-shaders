@@ -45,6 +45,8 @@
 
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/boxSDF.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 
 
 // "shatter" function - subtracts a bunch of semi-random planes from the object
@@ -137,9 +139,7 @@ void main()
 {
     time = mod(TIME + 19., 120.); // keep time low to reduce issues
 
-    vec2 uv = vec2(gl_FragCoord.x / RENDERSIZE.x, gl_FragCoord.y / RENDERSIZE.y);
-    uv -= 0.5;
-    uv /= vec2(RENDERSIZE.y / RENDERSIZE.x, 1);
+    vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
     // ray origin and direction
     vec3 rayOrigin = vec3(0, 0 , -8);

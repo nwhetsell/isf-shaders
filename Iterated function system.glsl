@@ -127,6 +127,8 @@
 
 #include "complex/complex.glsl"
 #include "lygia/math/const.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "rand/rand.glsl"
 
@@ -157,7 +159,7 @@ vec2 ifs(in vec2 z)
     return z;
 }
 
-float sdf(vec2 position)
+float sdf(vec2 uv)
 {
     vec2 z = vec2(0);
 
@@ -165,11 +167,11 @@ float sdf(vec2 position)
         z = ifs(z);
     }
 
-    float distance = complex_magnitude(position - z);
+    float distance = complex_magnitude(uv - z);
 
     for (int i = 0; i < IFS_ITERATIONS; i++) {
         z = ifs(z);
-        distance = min(distance, complex_magnitude(position - z));
+        distance = min(distance, complex_magnitude(uv - z));
     }
 
     return distance;
@@ -181,10 +183,10 @@ void main()
     {
         srand(hash(FRAMEINDEX + hash(int(gl_FragCoord.x) + hash(int(gl_FragCoord.y)))));
 
-        vec2 position = (2. * gl_FragCoord.xy - RENDERSIZE) / RENDERSIZE.y;
-        position = axesLimit * (position - normalizedCenter);
+        vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
+        uv = axesLimit * (uv - normalizedCenter);
 
-        float data = sdf(position);
+        float data = sdf(uv);
 
         if (FRAMEINDEX > 0) {
             data = min(data, IMG_THIS_PIXEL(lastData).x);

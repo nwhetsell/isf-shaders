@@ -80,6 +80,8 @@ float gnoise1WithShift(inout vec2);
 #include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 
 // The Shadertoy shader includes rotate and shift operations in the FBM noise
 // generator. LYGIA doesn’t support this directly, but we can use a noise
@@ -115,7 +117,7 @@ float pattern(vec2 uv, float time, inout vec2 q, inout vec2 r)
 
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy - 0.5 * RENDERSIZE) / min(RENDERSIZE.y, RENDERSIZE.x);
+    vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
     float time = TIME * frequency;
     uv = rotate2d(time * 0.1) * uv;

@@ -161,6 +161,8 @@ float random_slow(vec2);
 #include "lygia/generative/gnoise.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia-additions/gnoise.glsl"
 #include "lygia/generative/random.glsl"
@@ -476,8 +478,7 @@ vec3 PostEffects(vec3 rgb, vec2 uv)
 
 void main()
 {
-    vec2 xy = -1. + 2. * gl_FragCoord.xy / RENDERSIZE;
-    vec2 uv = xy * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.);
+    vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
     // Use several forward heights, of decreasing influence with distance from the camera.
     float h = 0.;

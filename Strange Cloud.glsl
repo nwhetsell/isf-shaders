@@ -149,7 +149,9 @@
 #include "lygia/math/rotate3dX.glsl"
 #include "lygia/math/rotate3dY.glsl"
 #include "lygia/math/rotate3dZ.glsl"
+#include "lygia/space/aspect.glsl"
 #include "lygia/space/cart2polar.glsl"
+#include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 
 
@@ -294,7 +296,7 @@ void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        vec2 uv = (gl_FragCoord.xy + vec2(frand(), frand()) - RENDERSIZE * 0.5) / RENDERSIZE.y;
+        vec2 uv = 0.5 * aspect(center((gl_FragCoord.xy + vec2(frand(), frand())) / RENDERSIZE), RENDERSIZE);
 
         seed = gl_FragCoord.xy / RENDERSIZE * 1000. + log(vec2(FRAMEINDEX));
 

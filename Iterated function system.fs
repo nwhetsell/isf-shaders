@@ -177,6 +177,36 @@ license:
 #define DEG2RAD (PI / 180.0)
 #define RAD2DEG (180.0 / PI)
 /*
+contributors: Patricio Gonzalez Vivo
+description: 'Fix the aspect ratio of a space keeping things squared for you.'
+use: <vec2> aspect(<vec2> st, <vec2> st_size)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ASPECT 
+vec2 aspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.x / s.y);
+    return st;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_CENTER 
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+/*
 contributors: [Ivan Dianov, Shadi El Hajj]
 description: polar to cartesian conversion.
 use: polar2cart(<vec2> polar)
@@ -255,16 +285,16 @@ vec2 ifs(in vec2 z)
     }
     return z;
 }
-float sdf(vec2 position)
+float sdf(vec2 uv)
 {
     vec2 z = vec2(0);
     for (int i = 0; i < 32; i++) {
         z = ifs(z);
     }
-    float distance = complex_magnitude(position - z);
+    float distance = complex_magnitude(uv - z);
     for (int i = 0; i < IFS_ITERATIONS; i++) {
         z = ifs(z);
-        distance = min(distance, complex_magnitude(position - z));
+        distance = min(distance, complex_magnitude(uv - z));
     }
     return distance;
 }
@@ -273,9 +303,8 @@ void main()
     if (PASSINDEX == 0)
     {
         srand(hash(FRAMEINDEX + hash(int(gl_FragCoord.x) + hash(int(gl_FragCoord.y)))));
-        vec2 position = (2. * gl_FragCoord.xy - RENDERSIZE) / RENDERSIZE.y;
-        position = axesLimit * (position - normalizedCenter);
-        float data = sdf(position);
+        vec2 uv = axesLimit * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE) - normalizedCenter;
+        float data = sdf(uv);
         if (FRAMEINDEX > 0) {
             data = min(data, IMG_THIS_PIXEL(lastData).x);
         }

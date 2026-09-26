@@ -79,6 +79,36 @@
         }
     ]
 }*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Fix the aspect ratio of a space keeping things squared for you.'
+use: <vec2> aspect(<vec2> st, <vec2> st_size)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ASPECT 
+vec2 aspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.x / s.y);
+    return st;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_CENTER 
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
 // Calculate the next position
 vec3 Integrate(vec3 cur, float dt)
 {
@@ -97,9 +127,7 @@ float dfLine(vec2 start, vec2 end, vec2 uv)
 }
 void main()
 {
-    vec2 res = RENDERSIZE / RENDERSIZE.y;
-    vec2 uv = gl_FragCoord.xy / RENDERSIZE.y;
-    uv -= 0.5 * res;
+    vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     uv.y += 0.375;
     vec3 last = IMG_PIXEL(lastData, vec2(0)).xyz;
     vec3 next = vec3(0);
