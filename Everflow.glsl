@@ -159,8 +159,6 @@
 #define RANDOM_SINLESS
 #include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
 #include "lygia/math/const.glsl"
-#include "lygia/math/gaussian.glsl"
-#define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/sdf/rectSDF.glsl"
 float rectSDF_without_transform(vec2 p, vec2 b) {
     // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
@@ -169,6 +167,7 @@ float rectSDF_without_transform(vec2 p, vec2 b) {
 #include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia/space/uncenter.glsl"
+#include "lygia-additions/gaussian.glsl"
 
 
 //
@@ -339,8 +338,8 @@ void main()
                 );
                 vec2 dx = P0.X - P.X;
                 float avgP = 0.5 * P0.M.x * (Pf(P.M) + Pf(P0.M));
-                F -= 0.5 * gaussian(dx, INV_SQRT_2) * avgP * dx;
-                avgV += P0.M.x * gaussian(dx, INV_SQRT_2) * vec3(P0.V, 1);
+                F -= 0.5 * gaussian(dx) * avgP * dx;
+                avgV += P0.M.x * gaussian(dx) * vec3(P0.V, 1);
             }
             avgV.xy /= avgV.z;
 
@@ -398,7 +397,7 @@ void main()
             );
 
             // how much mass falls into this pixel
-            rho += vec4(P.V, P.M) * gaussian(position - P0.X, INV_SQRT_2);
+            rho += vec4(P.V, P.M) * gaussian(position - P0.X);
         }
 
         gl_FragColor = rho;
@@ -423,7 +422,7 @@ void main()
         vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + EPSILON);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0, 0, 1), n);
-        float specularb = gaussian(0.4 * (Nb.zz - border_h), INV_SQRT_2) *
+        float specularb = gaussian(0.4 * (Nb.zz - border_h)) *
                           pow(max(dot(Nb.xy, polar2cart(vec2(1.4, 1))), 0.), 3.);
 
         float a = pow(smoothstep(fluid_rho * 0., fluid_rho * 2., rho.z), 0.1);

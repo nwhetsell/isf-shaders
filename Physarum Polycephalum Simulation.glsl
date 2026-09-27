@@ -196,8 +196,8 @@
 #include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
 #include "lygia/math/const.glsl"
 #include "lygia/math/gaussian.glsl"
-#define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/space/polar2cart.glsl"
+#include "lygia-additions/const.glsl"
 
 // In the Shadertoy shader, values less than 0 and greater than 1 are written to
 // an image buffer. This is impossible without floating-point buffers; ISF
@@ -338,7 +338,7 @@ void main()
         UNSCALE_PARTICLE(particle);
 
         // Pheromone depositing
-        float depositRate = gaussian(position - particle.xy, trailSize * INV_SQRT_2);
+        float depositRate = gaussian(position - particle.xy, trailSize * SQRT1_2);
         if (decayInputImage) {
             depositRate += inputImageAmount * length(IMG_PIXEL(inputImage, position).rgb);
         }

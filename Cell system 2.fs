@@ -365,22 +365,6 @@ license:
 #define RAD2DEG (180.0 / PI)
 /*
 contributors: Patricio Gonzalez Vivo
-description: gaussian coefficient
-use: <vec4|vec3|vec2|float> gaussian(<float> sigma, <vec4|vec3|vec2|float> d)
-examples:
-    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_gaussian.frag
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-#define FNC_GAUSSIAN 
-float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
-float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
-float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
-float gaussian( vec4 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z + d.w*d.w ) / (2.0 * s*s)); }
-#define INV_SQRT_2 0.7071067811865475244008443621048
-/*
-contributors: Patricio Gonzalez Vivo
 description: returns a 2x2 rotation matrix
 use: <mat2> rotate2d(<float> radians)
 license:
@@ -438,6 +422,28 @@ license:
 float uncenter(float v) { return v * 0.5 + 0.5; }
 vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
 vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
+/*
+contributors: Patricio Gonzalez Vivo
+description: gaussian coefficient
+use: <vec4|vec3|vec2|float> gaussian(<float> sigma, <vec4|vec3|vec2|float> d)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_gaussian.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_GAUSSIAN 
+float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
+float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
+float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
+float gaussian( vec4 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z + d.w*d.w ) / (2.0 * s*s)); }
+
+#define SQRT1_2 0.7071067811865475244008443621048
+#define FNC_GAUSSIAN_ADDITIONS 
+float gaussian(float d) { return gaussian(d, SQRT1_2); }
+float gaussian( vec2 d) { return gaussian(d, SQRT1_2); }
+float gaussian( vec3 d) { return gaussian(d, SQRT1_2); }
+float gaussian( vec4 d) { return gaussian(d, SQRT1_2); }
 //
 // Shadertoy Common
 //
@@ -505,7 +511,7 @@ void main()
             X = position;
             vec2 dx0 = position - 0.3 * RENDERSIZE;
             vec2 dx1 = position - 0.7 * RENDERSIZE;
-            V = 0.5 * rotate2d(HALF_PI) * (dx0 * gaussian(dx0 / 30., INV_SQRT_2) - dx1 * gaussian(dx1 / 30., INV_SQRT_2));
+            V = 0.5 * rotate2d(HALF_PI) * (dx0 * gaussian(dx0 / 30.) - dx1 * gaussian(dx1 / 30.));
             V += polar2cart(vec2(
                 TWO_PI * random(floor(position.x / 10.) + RENDERSIZE.x * floor(position.y / 20.)),
                 1
@@ -565,7 +571,7 @@ void main()
             F += slimeF / float(2 * HALF_SENSOR_COUNT_MINUS_1);
             if (enableMouse) {
                 vec2 dx = position - mouse * RENDERSIZE;
-                F += 0.1 * rotate2d(HALF_PI) * dx * gaussian(dx / 30., INV_SQRT_2);
+                F += 0.1 * rotate2d(HALF_PI) * dx * gaussian(dx / 30.);
             }
             // Integrate velocity
             V += rotate2d(-vorticity_confinement * curl) * F * dt / M;
@@ -593,7 +599,7 @@ void main()
             vec2 V0 = POST_UNPACK(IMG_PIXEL(bufferB, wrappedPosition).xy);
             float M0 = data.z;
             vec2 dx = X0 - position;
-            float K = gaussian(dx, radius * INV_SQRT_2) / radius;
+            float K = gaussian(dx, radius * SQRT1_2) / radius;
             rho += M0 * K;
             vel += M0 * K * V0;
         }

@@ -163,12 +163,11 @@
 
 #include "lygia/color/luminance.glsl"
 #include "lygia/math/const.glsl"
-#include "lygia/math/gaussian.glsl"
-#define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia/space/uncenter.glsl"
+#include "lygia-additions/gaussian.glsl"
 
 
 //
@@ -247,14 +246,14 @@ void main()
 
         // Input
         if (enableMouse) {
-            M = mix(M, 0.5, gaussian((position - mouse * RENDERSIZE) / 13., INV_SQRT_2));
+            M = mix(M, 0.5, gaussian((position - mouse * RENDERSIZE) / 13.));
         }
 
         // Initial condition
         if (FRAMEINDEX < 1 || restart) {
             X = position;
             V = vec2(0);
-            M = 0.07 * gaussian(-position / RENDERSIZE, INV_SQRT_2);
+            M = 0.07 * gaussian(-position / RENDERSIZE);
         }
 
         if (PASSINDEX == 0) {
@@ -290,7 +289,7 @@ void main()
                 vec2 dx = X0 - X;
 
                 float avgP = 0.5 * M0 * (0.5 * (M + M0));
-                float positionChangeDistribution = gaussian(dx, INV_SQRT_2);
+                float positionChangeDistribution = gaussian(dx);
                 F -= 0.5 * positionChangeDistribution * avgP * dx;
                 avgV += M0 * positionChangeDistribution * vec3(V0, 1);
             }
@@ -315,7 +314,7 @@ void main()
 
             if (enableMouse) {
                 vec2 dx = position - mouse * RENDERSIZE;
-                F += 0.6 * dx * gaussian(dx / 20., INV_SQRT_2);
+                F += 0.6 * dx * gaussian(dx / 20.);
             }
 
             // Integrate velocity
@@ -350,7 +349,7 @@ void main()
             float M0 = data.z;
             vec2 dx = X0 - position;
 
-            float K = gaussian(dx / radius, radius * INV_SQRT_2);
+            float K = gaussian(dx / radius, radius * SQRT1_2);
             rho += M0 * K;
             vel += M0 * K * V0;
         }

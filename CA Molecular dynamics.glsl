@@ -132,8 +132,6 @@
 #include "lygia/color/space/hsv2rgb.glsl"
 #include "lygia/color/luminance.glsl"
 #include "lygia/math/const.glsl"
-#include "lygia/math/gaussian.glsl"
-#define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/sdf/rectSDF.glsl"
 float rectSDF_without_transform(vec2 p, vec2 b) {
     // For unclear reasons, the LYGIA function shifts by 0.5 and scales by 4.2.
@@ -141,6 +139,7 @@ float rectSDF_without_transform(vec2 p, vec2 b) {
 }
 #include "lygia/space/center.glsl"
 #include "lygia/space/uncenter.glsl"
+#include "lygia-additions/gaussian.glsl"
 
 
 //
@@ -279,13 +278,13 @@ void main()
                 float M0 = data.z;
                 vec2 dx = X0 - X;
 
-                Fa += M0 * (-gaussian(0.75 * dx, INV_SQRT_2) + 0.13 * gaussian(0.4 * dx, INV_SQRT_2)) * dx;
+                Fa += M0 * (-gaussian(0.75 * dx) + 0.13 * gaussian(0.4 * dx)) * dx;
             }
 
             vec2 F = vec2(0);
             if (enableMouse) {
                 vec2 dx = position - mouse * RENDERSIZE;
-                F -= 0.003 * dx * gaussian(dx / 30., INV_SQRT_2);
+                F -= 0.003 * dx * gaussian(dx / 30.);
             }
 
             // Gravity
@@ -335,7 +334,7 @@ void main()
             float M0 = data.z;
             vec2 dx = X0 - position;
 
-            float K = gaussian(dx / radius, radius * INV_SQRT_2);
+            float K = gaussian(dx / radius, radius * SQRT1_2);
             rho += M0 * K;
             vel += M0 * K * V0;
         }

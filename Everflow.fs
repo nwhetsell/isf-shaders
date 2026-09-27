@@ -275,22 +275,6 @@ license:
 #define RAD2DEG (180.0 / PI)
 /*
 contributors: Patricio Gonzalez Vivo
-description: gaussian coefficient
-use: <vec4|vec3|vec2|float> gaussian(<float> sigma, <vec4|vec3|vec2|float> d)
-examples:
-    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_gaussian.frag
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-#define FNC_GAUSSIAN 
-float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
-float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
-float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
-float gaussian( vec4 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z + d.w*d.w ) / (2.0 * s*s)); }
-#define INV_SQRT_2 0.7071067811865475244008443621048
-/*
-contributors: Patricio Gonzalez Vivo
 description: Returns a rectangular SDF
 use:
     - rectSDF(<vec2> st [, <vec2|float> size])
@@ -371,6 +355,28 @@ license:
 float uncenter(float v) { return v * 0.5 + 0.5; }
 vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
 vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
+/*
+contributors: Patricio Gonzalez Vivo
+description: gaussian coefficient
+use: <vec4|vec3|vec2|float> gaussian(<float> sigma, <vec4|vec3|vec2|float> d)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_gaussian.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_GAUSSIAN 
+float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
+float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
+float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
+float gaussian( vec4 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z + d.w*d.w ) / (2.0 * s*s)); }
+
+#define SQRT1_2 0.7071067811865475244008443621048
+#define FNC_GAUSSIAN_ADDITIONS 
+float gaussian(float d) { return gaussian(d, SQRT1_2); }
+float gaussian( vec2 d) { return gaussian(d, SQRT1_2); }
+float gaussian( vec3 d) { return gaussian(d, SQRT1_2); }
+float gaussian( vec4 d) { return gaussian(d, SQRT1_2); }
 //
 // Shadertoy Common
 //
@@ -516,8 +522,8 @@ void main()
                 );
                 vec2 dx = P0.X - P.X;
                 float avgP = 0.5 * P0.M.x * (Pf(P.M) + Pf(P0.M));
-                F -= 0.5 * gaussian(dx, INV_SQRT_2) * avgP * dx;
-                avgV += P0.M.x * gaussian(dx, INV_SQRT_2) * vec3(P0.V, 1);
+                F -= 0.5 * gaussian(dx) * avgP * dx;
+                avgV += P0.M.x * gaussian(dx) * vec3(P0.V, 1);
             }
             avgV.xy /= avgV.z;
             // viscosity
@@ -565,7 +571,7 @@ void main()
                 translatedPosition
             );
             // how much mass falls into this pixel
-            rho += vec4(P.V, P.M) * gaussian(position - P0.X, INV_SQRT_2);
+            rho += vec4(P.V, P.M) * gaussian(position - P0.X);
         }
         gl_FragColor = rho;
     }
@@ -587,7 +593,7 @@ void main()
         vec2 N = pow(length(grad.xz), 0.2) * normalize(grad.xz + EPSILON);
         vec3 n = normalize(vec3(N, 1));
         vec3 r = reflect(vec3(0, 0, 1), n);
-        float specularb = gaussian(0.4 * (Nb.zz - border_h), INV_SQRT_2) *
+        float specularb = gaussian(0.4 * (Nb.zz - border_h)) *
                           pow(max(dot(Nb.xy, polar2cart(vec2(1.4, 1))), 0.), 3.);
         float a = pow(smoothstep(fluid_rho * 0., fluid_rho * 2., rho.z), 0.1);
         float b = exp(-1.7 * smoothstep(fluid_rho * 1., fluid_rho * 7.5, rho.z));

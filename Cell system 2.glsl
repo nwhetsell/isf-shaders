@@ -199,12 +199,11 @@
 #define RANDOM_SINLESS
 #include "lygia/generative/random.glsl"
 #include "lygia/math/const.glsl"
-#include "lygia/math/gaussian.glsl"
-#define INV_SQRT_2 0.7071067811865475244008443621048
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia/space/uncenter.glsl"
+#include "lygia-additions/gaussian.glsl"
 
 
 //
@@ -292,7 +291,7 @@ void main()
 
             vec2 dx0 = position - 0.3 * RENDERSIZE;
             vec2 dx1 = position - 0.7 * RENDERSIZE;
-            V = 0.5 * rotate2d(HALF_PI) * (dx0 * gaussian(dx0 / 30., INV_SQRT_2) - dx1 * gaussian(dx1 / 30., INV_SQRT_2));
+            V = 0.5 * rotate2d(HALF_PI) * (dx0 * gaussian(dx0 / 30.) - dx1 * gaussian(dx1 / 30.));
             V += polar2cart(vec2(
                 TWO_PI * random(floor(position.x / 10.) + RENDERSIZE.x * floor(position.y / 20.)),
                 1
@@ -363,7 +362,7 @@ void main()
 
             if (enableMouse) {
                 vec2 dx = position - mouse * RENDERSIZE;
-                F += 0.1 * rotate2d(HALF_PI) * dx * gaussian(dx / 30., INV_SQRT_2);
+                F += 0.1 * rotate2d(HALF_PI) * dx * gaussian(dx / 30.);
             }
 
             // Integrate velocity
@@ -398,7 +397,7 @@ void main()
             float M0 = data.z;
             vec2 dx = X0 - position;
 
-            float K = gaussian(dx, radius * INV_SQRT_2) / radius;
+            float K = gaussian(dx, radius * SQRT1_2) / radius;
             rho += M0 * K;
             vel += M0 * K * V0;
         }

@@ -309,7 +309,6 @@ float gaussian(float d, float s) { return exp(-(d*d) / (2.0 * s*s)); }
 float gaussian( vec2 d, float s) { return exp(-( d.x*d.x + d.y*d.y) / (2.0 * s*s)); }
 float gaussian( vec3 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z ) / (2.0 * s*s)); }
 float gaussian( vec4 d, float s) { return exp(-( d.x*d.x + d.y*d.y + d.z*d.z + d.w*d.w ) / (2.0 * s*s)); }
-#define INV_SQRT_2 0.7071067811865475244008443621048
 /*
 contributors: [Ivan Dianov, Shadi El Hajj]
 description: polar to cartesian conversion.
@@ -326,6 +325,8 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
+
+#define SQRT1_2 0.7071067811865475244008443621048
 
 // In the Shadertoy shader, values less than 0 and greater than 1 are written to
 // an image buffer. This is impossible without floating-point buffers; ISF
@@ -436,7 +437,7 @@ void main()
         vec4 particle = IMG_PIXEL(particles, position);
         UNSCALE_PARTICLE(particle);
         // Pheromone depositing
-        float depositRate = gaussian(position - particle.xy, trailSize * INV_SQRT_2);
+        float depositRate = gaussian(position - particle.xy, trailSize * SQRT1_2);
         if (decayInputImage) {
             depositRate += inputImageAmount * length(IMG_PIXEL(inputImage, position).rgb);
         }
