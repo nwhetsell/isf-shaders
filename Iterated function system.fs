@@ -2,8 +2,7 @@
     "CATEGORIES": [
         "Generator"
     ],
-    "CREDIT": "",
-    "DESCRIPTION": "",
+    "DESCRIPTION": "Iterated function system, using concepts from https://www.shadertoy.com/view/lst3zf and https://github.com/profConradi/Fractals",
     "INPUTS": [
         {
             "NAME": "decay",
@@ -303,7 +302,8 @@ void main()
     if (PASSINDEX == 0)
     {
         srand(hash(FRAMEINDEX + hash(int(gl_FragCoord.x) + hash(int(gl_FragCoord.y)))));
-        vec2 uv = axesLimit * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE) - normalizedCenter;
+        vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
+        uv = axesLimit * (uv - normalizedCenter);
         float data = sdf(uv);
         if (FRAMEINDEX > 0) {
             data = min(data, IMG_THIS_PIXEL(lastData).x);

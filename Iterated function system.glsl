@@ -2,8 +2,7 @@
     "CATEGORIES": [
         "Generator"
     ],
-    "CREDIT": "",
-    "DESCRIPTION": "",
+    "DESCRIPTION": "Iterated function system, using concepts from https://www.shadertoy.com/view/lst3zf and https://github.com/profConradi/Fractals",
     "INPUTS": [
         {
             "NAME": "decay",
