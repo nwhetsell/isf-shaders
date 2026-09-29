@@ -1111,7 +1111,7 @@ vec3 CameraPath(float t)
 // Some would say, most of the magic is done in post! :D
 vec3 PostEffects(vec3 rgb, vec2 uv)
 {
-    return (1. - exp(-rgb * 6.)) * 1.0024;
+    return 1. - exp(-rgb * 6.);
 }
 void main()
 {
