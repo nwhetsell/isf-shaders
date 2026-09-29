@@ -122,6 +122,14 @@
             "LABEL": "Enable tonemap",
             "TYPE": "bool",
             "DEFAULT": true
+        },
+        {
+            "NAME": "positionRandomness",
+            "LABEL": "Position randomness",
+            "TYPE": "float",
+            "DEFAULT": 0,
+            "MAX": 1,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2",
@@ -296,9 +304,12 @@ void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        vec2 uv = 0.5 * aspect(center((gl_FragCoord.xy + vec2(frand(), frand())) / RENDERSIZE), RENDERSIZE);
+        vec2 uv = gl_FragCoord.xy / RENDERSIZE;
 
-        seed = gl_FragCoord.xy / RENDERSIZE * 1000. + log(vec2(FRAMEINDEX));
+        seed = uv * 1000. + log(vec2(FRAMEINDEX));
+
+        uv += positionRandomness * vec2(frand(), frand()) / RENDERSIZE;
+        uv = 0.5 * aspect(center(uv), RENDERSIZE);
 
         vec3 focalPoint = vec3(uv * cameraFocalDistance / cameraFocalLength, cameraFocalDistance);
         vec3 aperture = cameraAperture * vec3(sampleAperture(6, apertureRotation), 0.);
