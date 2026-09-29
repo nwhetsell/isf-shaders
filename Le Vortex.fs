@@ -166,6 +166,10 @@
     ],
     "ISFVSN": "2"
 }*/
+// https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
+#define FLT_MAX 3.402823466e+38
+#define SQRT1_2 0.7071067811865475244008443621048
+
 // #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS 
 /*
@@ -253,6 +257,1220 @@ vec4 random4(vec4 p4) {
     p4 = fract(p4 * RANDOM_SCALE);
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+#define RAYMARCH_SAMPLES 251
+#define RAYMARCH_MIN_DIST 0.
+#define RAYMARCH_MAX_DIST FLT_MAX
+#define RAYMARCH_MIN_HIT_DIST 0.001
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define GAMMA 2.2
+#define FNC_GAMMA2LINEAR 
+float gamma2linear(const in float v) {
+    return pow(v, GAMMA);
+}
+vec3 gamma2linear(const in vec3 v) {
+    return pow(v, vec3(GAMMA));
+}
+vec4 gamma2linear(const in vec4 v) {
+    return vec4(gamma2linear(v.rgb), v.a);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define SAMPLER_FNC(TEX,UV) texture(TEX, UV)
+#define SAMPLER_TYPE sampler2D
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_ALBEDO 
+vec4 materialAlbedo() {
+    vec4 albedo = vec4(0.5, 0.5, 0.5, 1.0);
+    return albedo;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_SPECULAR 
+vec3 materialSpecular() {
+    vec3 spec = vec3(0.04);
+    return spec;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material emissive property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialEmissive()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_EMISSIVE 
+vec3 materialEmissive() {
+    vec3 emission = vec3(0.0);
+    return emission;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialOcclusion()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_OCCLUSION 
+float materialOcclusion() {
+    float occlusion = 1.0;
+    return occlusion;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialNormal()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_NORMAL 
+vec3 materialNormal() {
+    vec3 normal = vec3(0.0, 0.0, 1.0);
+    return normal;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_SATURATE 
+#define saturate(V) clamp(V, 0.0, 1.0)
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert diffuse/specular/glossiness workflow to PBR metallic factor
+use: <float> toMetallic(<vec3> diffuse, <vec3> specular, <float> maxSpecular)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define TOMETALLIC_MIN_REFLECTANCE 0.04
+#define FNC_TOMETALLIC 
+float toMetallic(const in vec3 diffuse, const in vec3 specular, const in float maxSpecular) {
+    float perceivedDiffuse = sqrt(0.299 * diffuse.r * diffuse.r + 0.587 * diffuse.g * diffuse.g + 0.114 * diffuse.b * diffuse.b);
+    float perceivedSpecular = sqrt(0.299 * specular.r * specular.r + 0.587 * specular.g * specular.g + 0.114 * specular.b * specular.b);
+    if (perceivedSpecular < TOMETALLIC_MIN_REFLECTANCE) {
+        return 0.0;
+    }
+    float a = TOMETALLIC_MIN_REFLECTANCE;
+    float b = perceivedDiffuse * (1.0 - maxSpecular) / (1.0 - TOMETALLIC_MIN_REFLECTANCE) + perceivedSpecular - 2.0 * TOMETALLIC_MIN_REFLECTANCE;
+    float c = TOMETALLIC_MIN_REFLECTANCE - perceivedSpecular;
+    float D = max(b * b - 4.0 * a * c, 0.0);
+    return saturate((-b + sqrt(D)) / (2.0 * a));
+}
+float toMetallic(const in vec3 diffuse, const in vec3 specular) {
+    float maxSpecula = max(max(specular.r, specular.g), specular.b);
+    return toMetallic(diffuse, specular, maxSpecula);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material metallic property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_METALLIC 
+float materialMetallic() {
+    float metallic = 0.0;
+    vec3 diffuse = materialAlbedo().rgb;
+    vec3 specular = materialSpecular();
+    metallic = toMetallic(diffuse, specular);
+    return metallic;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material roughness property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialRoughness()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_ROUGHNESS 
+float materialRoughness() {
+    float roughness = 0.05;
+    return roughness;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convertes from PBR roughness/metallic to a shininess factor (typaclly use on diffuse/specular/ambient workflow)
+use: float toShininess(<float> roughness, <float> metallic)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_TOSHININESS 
+float toShininess(const in float roughness, const in float metallic) {
+    float s = .95 - roughness * 0.5;
+    s *= s;
+    s *= s;
+    return s * (80.0 + 160.0 * (1.0-metallic));
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material shininess property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialShininess()
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MATERIAL_SHININESS 
+float materialShininess() {
+    float shininess = 15.0;
+    return shininess;
+}
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Generic Material Structure
+options:
+    - SCENE_BACK_SURFACE
+    - SHADING_MODEL_CLEAR_COAT
+    - MATERIAL_HAS_CLEAR_COAT_NORMAL
+    - SHADING_MODEL_IRIDESCENCE
+    - SHADING_MODEL_SUBSURFACE
+    - SHADING_MODEL_CLOTH
+    - SHADING_MODEL_SPECULAR_GLOSSINESS
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define RENDER_RAYMARCHING 
+#define SHADING_MODEL_CLEAR_COAT 
+#define STR_MATERIAL 
+struct Material {
+    vec4 albedo;
+    vec3 emissive;
+    vec3 position; // world position of the surface
+    vec3 normal; // world normal of the surface
+    float sdf;
+    bool valid;
+    vec3 ior; // Index of Refraction
+    float roughness;
+    float metallic;
+    float reflectance;
+    float ambientOcclusion; // default 1.0
+    float clearCoat;
+    float clearCoatRoughness;
+};
+/*
+contributors: Shadi El Hajj
+description: Medium Structure
+license: MIT License (MIT) Copyright (c) 2024 Shadi EL Hajj
+*/
+#define STR_MEDIUM 
+struct Medium {
+    vec3 scattering;
+    vec3 absorption;
+    float sdf;
+};
+
+/*
+contributors:  Inigo Quiles
+description: Map of SDF functions to be declare
+use: <vec4> raymarchMap( in <vec3> pos ) 
+examples:
+    - /shaders/lighting_raymarching.frag
+*/
+#define RAYMARCH_MAP_FNC raymarchMap
+#define RAYMARCH_VOLUME_MAP_FNC raymarchVolumeMap
+#define FNC_RAYMARCH_MAP 
+Material RAYMARCH_MAP_FNC( in vec3 pos );
+Medium RAYMARCH_VOLUME_MAP_FNC( in vec3 pos );
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material emissive property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialEmissive()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialOcclusion()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialNormal()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert diffuse/specular/glossiness workflow to PBR metallic factor
+use: <float> toMetallic(<vec3> diffuse, <vec3> specular, <float> maxSpecular)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material metallic property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material roughness property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialRoughness()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material shininess property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialShininess()
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material emissive property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialEmissive()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialOcclusion()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialNormal()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert diffuse/specular/glossiness workflow to PBR metallic factor
+use: <float> toMetallic(<vec3> diffuse, <vec3> specular, <float> maxSpecular)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material metallic property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material roughness property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialRoughness()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material shininess property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialShininess()
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Generic Material Structure
+options:
+    - SCENE_BACK_SURFACE
+    - SHADING_MODEL_CLEAR_COAT
+    - MATERIAL_HAS_CLEAR_COAT_NORMAL
+    - SHADING_MODEL_IRIDESCENCE
+    - SHADING_MODEL_SUBSURFACE
+    - SHADING_MODEL_CLOTH
+    - SHADING_MODEL_SPECULAR_GLOSSINESS
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define RENDER_RAYMARCHING 
+#define SHADING_MODEL_CLEAR_COAT 
+/*
+contributors: Patricio Gonzalez Vivo
+description: Refractive index of different materials based on https://en.wikipedia.org/wiki/Refractive_index
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define IOR_AIR 1.000293
+#define IOR_ICE 1.31
+#define IOR_WATER 1.333
+#define IOR_WATER_RGB vec3(1.337, 1.333, 1.331)
+#define IOR_GLYCERING 1.473
+#define IOR_OIL 1.515
+#define IOR_OIL_RGB vec3(1.530, 1.520, 1.516)
+#define IOR_GLASS 1.5168
+#define IOR_GLASS_RGB vec3(1.524, 1.517, 1.515)
+#define IOR_GLASS_FLINT 1.69
+#define IOR_GLASS_FLINT_RGB vec3(1.639, 1.627, 1.622)
+#define IOR_SAPPHIRE 1.77
+#define IOR_DIAMONG 2.42
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: |
+    Material Constructor. Designed to integrate with GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use:
+    - void materialNew(out <material> _mat)
+    - <material> materialNew()
+options:
+    - SURFACE_POSITION
+    - SCENE_BACK_SURFACE
+    - SHADING_MODEL_CLEAR_COAT
+    - MATERIAL_HAS_CLEAR_COAT_NORMAL
+    - SHADING_MODEL_IRIDESCENCE
+    - SHADING_MODEL_SUBSURFACE
+    - SHADING_MODEL_CLOTH
+    - SHADING_MODEL_SPECULAR_GLOSSINESS
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define SURFACE_POSITION vec3(0.0, 0.0, 0.0)
+#define FNC_MATERIAL_NEW 
+void materialNew(out Material _mat) {
+    // Surface data
+    _mat.position = (SURFACE_POSITION).xyz;
+    _mat.normal = materialNormal();
+    _mat.sdf = RAYMARCH_MAX_DIST;
+    _mat.valid = true;
+    // PBR Properties
+    _mat.albedo = materialAlbedo();
+    _mat.emissive = materialEmissive();
+    _mat.roughness = materialRoughness();
+    _mat.metallic = materialMetallic();
+    _mat.reflectance = 0.5;
+    _mat.ior = vec3(IOR_GLASS_RGB); // Index of Refraction
+    _mat.ambientOcclusion = materialOcclusion();
+    _mat.clearCoat = 0.0;
+    _mat.clearCoatRoughness = 0.01;
+}
+Material materialNew() {
+    Material mat;
+    materialNew(mat);
+    return mat;
+}
+Material materialNew(vec3 albedo, float sdf) {
+    Material mat = materialNew();
+    mat.albedo.rgb = albedo;
+    mat.sdf = sdf;
+    return mat;
+}
+Material materialNew(vec3 albedo, float roughness, float metallic, float sdf) {
+    Material mat = materialNew();
+    mat.albedo.rgb = albedo;
+    mat.metallic = metallic;
+    mat.roughness = roughness;
+    mat.sdf = sdf;
+    return mat;
+}
+
+/*
+contributors:  Inigo Quiles
+description: Cast a ray
+use: <float> castRay( in <vec3> pos, in <vec3> nor ) 
+*/
+#define FNC_RAYMARCH_CAST 
+Material raymarchCast( in vec3 ro, in vec3 rd ) {
+    float tmin = RAYMARCH_MIN_DIST;
+    float tmax = RAYMARCH_MAX_DIST;
+    float dither = random(rd + fract(TIME)); // Not standard, added for “Le Vortex” shader
+    float t = tmin;
+    Material m = materialNew();
+    m.valid = false;
+    for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
+        Material res = RAYMARCH_MAP_FNC(ro + rd * t);
+        res.albedo.r = 1. - float(i) / RAYMARCH_SAMPLES; // Not standard, added for “Le Vortex” shader
+        float dist = res.sdf;
+        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax)
+            break;
+        m = res;
+        res.sdf *= 0.5 + 0.1 * dither; // Not standard, added for “Le Vortex” shader
+        t += res.sdf;
+    }
+    m.sdf = t;
+    return m;
+}
+#define RAYMARCH_SOFTSHADOW_ITERATIONS 16
+#define RAYMARCH_SHADOW_MIN_DIST RAYMARCH_MIN_HIT_DIST * 50.
+#define RAYMARCH_SHADOW_SOLID_ANGLE 0.25
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material emissive property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialEmissive()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialOcclusion()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material normal property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialNormal()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert diffuse/specular/glossiness workflow to PBR metallic factor
+use: <float> toMetallic(<vec3> diffuse, <vec3> specular, <float> maxSpecular)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: Convert from gamma to linear color space.
+use: gamma2linear(<float|vec3|vec4> color)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material BaseColor from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialAlbedo()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material specular property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+    - MATERIAL_SPECULARMAP
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material metallic property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialMetallic()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: It defines the default sampler type and function for the shader based on the version of GLSL.
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material roughness property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialRoughness()
+options:
+    - SAMPLER_FNC(TEX, UV): optional depending the target version of GLSL (texture2D(...) or texture(...))
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Get material shininess property from GlslViewer's defines https://github.com/patriciogonzalezvivo/glslViewer/wiki/GlslViewer-DEFINES#material-defines
+use: vec4 materialShininess()
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Patricio Gonzalez Vivo
+description: Generic Material Structure
+options:
+    - SCENE_BACK_SURFACE
+    - SHADING_MODEL_CLEAR_COAT
+    - MATERIAL_HAS_CLEAR_COAT_NORMAL
+    - SHADING_MODEL_IRIDESCENCE
+    - SHADING_MODEL_SUBSURFACE
+    - SHADING_MODEL_CLOTH
+    - SHADING_MODEL_SPECULAR_GLOSSINESS
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define RENDER_RAYMARCHING 
+#define SHADING_MODEL_CLEAR_COAT 
+/*
+contributors:  Inigo Quiles
+description: Map of SDF functions to be declare
+use: <vec4> raymarchMap( in <vec3> pos ) 
+examples:
+    - /shaders/lighting_raymarching.frag
+*/
+
+/*
+contributors:  Inigo Quiles
+description: Calculate soft shadows http://iquilezles.org/www/articles/rmshadows/rmshadows.htm
+use: <float> raymarchSoftshadow( in <vec3> ro, in <vec3> rd ) 
+options:
+    - RAYMARCHSOFTSHADOW_ITERATIONS: shadow quality
+    - RAYMARCH_SHADOW_MIN_DIST: minimum shadow distance
+    - RAYMARCH_SHADOW_MAX_DIST: maximum shadow distance
+    - RAYMARCH_SHADOW_SOLID_ANGLE: light size
+examples:
+    - /shaders/lighting_raymarching.frag
+*/
+#define RAYMARCH_SHADOW_MAX_DIST RAYMARCH_MAX_DIST
+#define FNC_RAYMARCH_SOFTSHADOW 
+float raymarchSoftShadow(vec3 ro, vec3 rd) {
+    const float mint = RAYMARCH_SHADOW_MIN_DIST;
+    const float maxt = RAYMARCH_SHADOW_MAX_DIST; // “Le Vortex” uses length(vec3(lightPositionX, lightPositionY, lightPositionZ) - ro)
+    const float w = RAYMARCH_SHADOW_SOLID_ANGLE;
+    float res = 1.0;
+    float t = mint;
+    for (int i = 0; i < RAYMARCH_SOFTSHADOW_ITERATIONS; i++) {
+        if (t >= maxt)
+            break;
+        float h = RAYMARCH_MAP_FNC(ro + t * rd).sdf;
+        if (h < RAYMARCH_MIN_HIT_DIST) return 0.; // Not standard, added for “Le Vortex” shader
+        res = min(res, h / (w * t));
+        t += clamp(h, RAYMARCH_SHADOW_MIN_DIST, RAYMARCH_SHADOW_MAX_DIST);
+        if (res < -1.0 || t > maxt)
+            break;
+    }
+    res = max(res, -1.0);
+    return res; // Not standard, added for “Le Vortex” shader
+    // return 0.25 * (1.0 + res) * (1.0 + res) * (2.0 - res);
 }
 /*
 contributors: Patricio Gonzalez Vivo
@@ -386,28 +1604,6 @@ vec2 opRepeat( in vec2 p, in vec2 s ) {
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
 // Leon 2017-11-21
 // using code from IQ, Mercury, LJ, Duke, Koltes
-#define STEPS 250.
-#define VOLUME 0.001
-float map(vec3);
-float getShadow(vec3 pos, vec3 at, float k)
-{
-    vec3 dir = normalize(at - pos);
-    float maxt = length(at - pos);
-    float f = 1.;
-    float t = VOLUME * 50.;
-    for (float i = 0.; i <= 1.; i += 1. / 15.) {
-        float dist = map(pos + dir * t);
-        if (dist < VOLUME) {
-            return 0.;
-        }
-        f = min(f, k * dist / t);
-        t += dist;
-        if (t >= maxt) {
-            break;
-        }
-    }
-    return f;
-}
 void camera(inout vec3 p)
 {
     p.xz *= rotate2d(-yAxisRotation * DEG2RAD);
@@ -472,7 +1668,7 @@ vec2 getCellIndexes(inout vec3 p)
 {
     return vec2(getCellIndexX(p), getCellIndexY(p));
 }
-float map(vec3 pos)
+Material raymarchMap(vec3 pos)
 {
     vec3 cameraOffset = vec3(-4, 0, 0);
     // donut distortion
@@ -517,33 +1713,23 @@ float map(vec3 pos)
     indexes = getCellIndexes(p);
     p.x += height;
     scene = min(scene, boxes(p, indexes));
-    return scene;
+    Material mat = materialNew();
+    mat.position = pos;
+    mat.sdf = scene;
+    return mat;
 }
 void main()
 {
     vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-    vec3 eye = vec3(cameraX, cameraY, cameraZ);
-    vec3 ray = normalize(vec3(uv, 1.3));
-    camera(eye);
-    camera(ray);
-    float dither = random(uv + fract(TIME));
-    vec3 pos = eye;
-    float shade = 0.;
-    bool isTorus = false;
-    for (float i = 0.; i <= 1.; i += 1. / STEPS) {
-        float dist = map(pos);
-        if (dist < VOLUME) {
-            shade = 1. - i;
-            isTorus = true;
-            break;
-        }
-        dist *= 0.5 + 0.1 * dither;
-        pos += ray * dist;
-    }
-    if (isTorus) {
+    vec3 ro = vec3(cameraX, cameraY, cameraZ);
+    vec3 rd = normalize(vec3(uv, 1.3));
+    camera(ro);
+    camera(rd);
+    Material res = raymarchCast(ro, rd);
+    if (res.valid) {
         vec3 light = vec3(40, 100, -10);
-        float shadow = getShadow(pos, light, 4.);
-        gl_FragColor.rgb = vec3(sqrt(smoothstep(0., 0.5, shade * shadow)));
+        float shadow = raymarchSoftShadow(res.position, normalize(light - res.position));
+        gl_FragColor.rgb = vec3(sqrt(smoothstep(0., 0.5, res.albedo.r * shadow)));
         gl_FragColor.a = 1.;
     } else {
         gl_FragColor = backgroundColor;

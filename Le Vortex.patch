@@ -1,0 +1,58 @@
+diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
+index bfe1629d..e0cec0bd 100644
+--- a/lighting/raymarch/cast.glsl
++++ b/lighting/raymarch/cast.glsl
+@@ -30,11 +30,13 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+     float tmin = RAYMARCH_MIN_DIST;
+     float tmax = RAYMARCH_MAX_DIST;
+    
++    float dither = random(rd + fract(TIME)); // Not standard, added for “Le Vortex” shader
+     float t = tmin;
+     Material m = materialNew();
+     m.valid = false;
+     for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
+         Material res = RAYMARCH_MAP_FNC(ro + rd * t);
++        res.albedo.r = 1. - float(i) / RAYMARCH_SAMPLES; // Not standard, added for “Le Vortex” shader
+ #ifdef RAYMARCH_ABS_DIST
+         float dist = abs(res.sdf);
+ #else
+@@ -43,6 +45,7 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+         if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
+             break;
+         m = res;
++        res.sdf *= 0.5 + 0.1 * dither; // Not standard, added for “Le Vortex” shader
+         t += res.sdf;
+     }
+ 
+diff --git a/lighting/raymarch/softShadow.glsl b/lighting/raymarch/softShadow.glsl
+index 72b8d757..a972046a 100644
+--- a/lighting/raymarch/softShadow.glsl
++++ b/lighting/raymarch/softShadow.glsl
+@@ -38,7 +38,7 @@ examples:
+ 
+ float raymarchSoftShadow(vec3 ro, vec3 rd) {
+     const float mint = RAYMARCH_SHADOW_MIN_DIST;
+-    const float maxt = RAYMARCH_SHADOW_MAX_DIST;
++    const float maxt = RAYMARCH_SHADOW_MAX_DIST; // “Le Vortex” uses length(vec3(lightPositionX, lightPositionY, lightPositionZ) - ro)
+     const float w = RAYMARCH_SHADOW_SOLID_ANGLE;
+ 
+     float res = 1.0;
+@@ -47,6 +47,7 @@ float raymarchSoftShadow(vec3 ro, vec3 rd) {
+         if (t >= maxt)
+             break;
+         float h = RAYMARCH_MAP_FNC(ro + t * rd).sdf;
++        if (h < RAYMARCH_MIN_HIT_DIST) return 0.; // Not standard, added for “Le Vortex” shader
+         res = min(res, h / (w * t));
+ 
+         t += clamp(h, RAYMARCH_SHADOW_MIN_DIST, RAYMARCH_SHADOW_MAX_DIST);
+@@ -54,7 +55,8 @@ float raymarchSoftShadow(vec3 ro, vec3 rd) {
+             break;
+     }
+     res = max(res, -1.0);
+-    return 0.25 * (1.0 + res) * (1.0 + res) * (2.0 - res);
++    return res; // Not standard, added for “Le Vortex” shader
++    // return 0.25 * (1.0 + res) * (1.0 + res) * (2.0 - res);
+ }
+ 
+ #endif
+\ No newline at end of file

@@ -167,9 +167,20 @@
     "ISFVSN": "2"
 }*/
 
+#include "lygia-additions/const.glsl"
+
 // #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
 #include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
+#define RAYMARCH_SAMPLES 251
+#define RAYMARCH_MIN_DIST 0.
+#define RAYMARCH_MAX_DIST FLT_MAX
+#define RAYMARCH_MIN_HIT_DIST 0.001
+#include "lygia/lighting/raymarch/cast.glsl"
+#define RAYMARCH_SOFTSHADOW_ITERATIONS 16
+#define RAYMARCH_SHADOW_MIN_DIST RAYMARCH_MIN_HIT_DIST * 50.
+#define RAYMARCH_SHADOW_SOLID_ANGLE 0.25
+#include "lygia/lighting/raymarch/softShadow.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/sdf/boxSDF.glsl"
@@ -184,30 +195,6 @@
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
 // Leon 2017-11-21
 // using code from IQ, Mercury, LJ, Duke, Koltes
-
-#define STEPS 250.
-#define VOLUME 0.001
-
-float map(vec3);
-float getShadow(vec3 pos, vec3 at, float k)
-{
-    vec3 dir = normalize(at - pos);
-    float maxt = length(at - pos);
-    float f = 1.;
-    float t = VOLUME * 50.;
-    for (float i = 0.; i <= 1.; i += 1. / 15.) {
-        float dist = map(pos + dir * t);
-        if (dist < VOLUME) {
-            return 0.;
-        }
-        f = min(f, k * dist / t);
-        t += dist;
-        if (t >= maxt) {
-            break;
-        }
-    }
-    return f;
-}
 
 void camera(inout vec3 p)
 {
@@ -287,7 +274,7 @@ vec2 getCellIndexes(inout vec3 p)
     return vec2(getCellIndexX(p), getCellIndexY(p));
 }
 
-float map(vec3 pos)
+Material raymarchMap(vec3 pos)
 {
     vec3 cameraOffset = vec3(-4, 0, 0);
 
@@ -339,36 +326,26 @@ float map(vec3 pos)
     p.x += height;
     scene = min(scene, boxes(p, indexes));
 
-    return scene;
+    Material mat = materialNew();
+    mat.position = pos;
+    mat.sdf = scene;
+    return mat;
 }
 
 void main()
 {
     vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-    vec3 eye = vec3(cameraX, cameraY, cameraZ);
-    vec3 ray = normalize(vec3(uv, 1.3));
-    camera(eye);
-    camera(ray);
-    float dither = random(uv + fract(TIME));
-    vec3 pos = eye;
-    float shade = 0.;
+    vec3 ro = vec3(cameraX, cameraY, cameraZ);
+    vec3 rd = normalize(vec3(uv, 1.3));
+    camera(ro);
+    camera(rd);
 
-    bool isTorus = false;
-    for (float i = 0.; i <= 1.; i += 1. / STEPS) {
-        float dist = map(pos);
-        if (dist < VOLUME) {
-            shade = 1. - i;
-            isTorus = true;
-            break;
-        }
-        dist *= 0.5 + 0.1 * dither;
-        pos += ray * dist;
-    }
+    Material res = raymarchCast(ro, rd);
 
-    if (isTorus) {
+    if (res.valid) {
         vec3 light = vec3(40, 100, -10);
-        float shadow = getShadow(pos, light, 4.);
-        gl_FragColor.rgb = vec3(sqrt(smoothstep(0., 0.5, shade * shadow)));
+        float shadow = raymarchSoftShadow(res.position, normalize(light - res.position));
+        gl_FragColor.rgb = vec3(sqrt(smoothstep(0., 0.5, res.albedo.r * shadow)));
         gl_FragColor.a = 1.;
     } else {
         gl_FragColor = backgroundColor;
