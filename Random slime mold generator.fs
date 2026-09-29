@@ -433,7 +433,7 @@ void main()
     else // Shadertoy Image
     {
         vec2 wrappedPosition = mod(position, RENDERSIZE);
-        float rho = IMG_NORM_PIXEL(bufferC, wrappedPosition / RENDERSIZE).z;
+        float rho = IMG_PIXEL(bufferC, wrappedPosition).z;
         gl_FragColor = vec4(3. * sin(rho * 0.2 * vec3(1, 2, 3)), 1);
     }
 }
