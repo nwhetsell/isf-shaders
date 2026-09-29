@@ -230,7 +230,6 @@ mat2 rotate2d(const in float r){
     float s = sin(r);
     return mat2(c, s, -s, c);
 }
-#define SAMPLER_FNC texture(TEX, UV)
 /*
 contributors: Patricio Gonzalez Vivo
 description: clamp a value between 0 and 1
@@ -269,6 +268,7 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
+#define SAMPLER_FNC(TEX,UV) texture(TEX, UV)
 #define SAMPLER_TYPE sampler2D
 
 /*

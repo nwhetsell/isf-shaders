@@ -124,7 +124,6 @@
 #include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
-#define SAMPLER_FNC texture(TEX, UV)
 #include "lygia/sdf/opUnion.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/aspect.glsl"

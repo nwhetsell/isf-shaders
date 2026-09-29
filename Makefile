@@ -28,59 +28,61 @@ shaders = \
 
 all: $(shaders)
 
+clang_options = --preprocess --comments --no-line-commands -fdirectives-only --language=c
+
 CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Cell\ system\ 2.fs: Cell\ system\ 2.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 circle\ dithering.fs: circle\ dithering.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Colormap.fs: Colormap.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Domain-warped\ FBM\ noise.fs: Domain-warped\ FBM\ noise.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Endless\ living\ creature.fs: Endless\ living\ creature.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 Ether.fs: Ether.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Everflow.fs: Everflow.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 expansive\ reaction-diffusion.fs: expansive\ reaction-diffusion.glsl
-	cd lygia; \
-	git apply ../gaussianBlur1D.patch;
-	clang --preprocess --comments --no-line-commands --language=c --output="$@" "$<"
-	cd lygia; \
-	git reset --hard
+	cd lygia; git apply ../'expansive reaction-diffusion.patch';
+	clang $(clang_options) -fno-directives-only -D__VERSION__=300 --output="$@" "$<"
+	cd lygia; git reset --hard
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Iterated\ function\ system.fs: Iterated\ function\ system.glsl rand/rand.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Le\ Vortex.fs: Le\ Vortex.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	cd lygia; git apply ../'Le Vortex.patch';
+	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
+	cd lygia; git reset --hard
 Lorenz\ system.fs: Lorenz\ system.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 MattiasCRT.fs: MattiasCRT.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Mountains.fs: Mountains.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 notebook\ drawings.fs: notebook\ drawings.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Palettes.fs: Palettes.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Rainier\ mood.fs: Rainier\ mood.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Random\ slime\ mold\ generator.fs: Random\ slime\ mold\ generator.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Shattered\ Crystal.fs: Shattered\ Crystal.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 spilled.fs: spilled.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Strange\ Cloud.fs: Strange\ Cloud.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 Suture\ Fluid.fs: Suture\ Fluid.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"
 The\ Weave.fs: The\ Weave.glsl
-	clang --preprocess --comments --no-line-commands -fdirectives-only --language=c --output="$@" "$<"
+	clang $(clang_options) --output="$@" "$<"

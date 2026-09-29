@@ -124,7 +124,6 @@ vec4 texture(sampler2D, vec2);
 
 #include "lygia/color/luminance.glsl"
 #include "lygia/generative/random.glsl"
-#define SAMPLER_FNC(TEX, UV) texture(TEX, UV)
 #define GAUSSIANBLUR1D_SAMPLER_FNC(TEX, UV) IMG_NORM_PIXEL(TEX, UV)
 #define HORIZONTAL_COORDINATE_FNC(UV, SHIFT) fract(vec2(UV.x + (SHIFT), UV.y))
 #define VERTICAL_COORDINATE_FNC(UV, SHIFT) fract(vec2(UV.x, UV.y + (SHIFT)))
