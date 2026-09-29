@@ -19,7 +19,7 @@ but https://editor.isf.video does not.
 If floating-point buffers are not available, most of these shaders will look very different (if they run at all).
 
 The [Mountains](Mountains.fs) shader can optionally import an image file that can be downloaded from
-https://www.shadertoy.com/media/a/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png.
+https://github.com/patriciogonzalezvivo/lygia_examples/blob/main/assets/rocks.png.
 
 <!--
 For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
