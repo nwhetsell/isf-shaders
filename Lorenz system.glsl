@@ -80,28 +80,21 @@
     ]
 }*/
 
+#include "lygia/sdf/lineSDF.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
+#include "lygia-additions/const.glsl"
 
 
 // Calculate the next position
 vec3 Integrate(vec3 cur, float dt)
 {
-    vec3 next = vec3(0);
-
-    next.x = O * (cur.y - cur.x);
-    next.y = cur.x * (P - cur.z) - cur.y;
-    next.z = cur.x * cur.y - B * cur.z;
-
+    vec3 next = vec3(
+        O * (cur.y - cur.x),
+        cur.x * (P - cur.z) - cur.y,
+        cur.x * cur.y - B * cur.z
+    );
     return cur + next * dt;
-}
-
-// Distance to a line segment
-float dfLine(vec2 start, vec2 end, vec2 uv)
-{
-    vec2 line = end - start;
-    float frac = dot(uv - start, line) / dot(line, line);
-    return distance(start + line * clamp(frac, 0., 1.), uv);
 }
 
 
@@ -113,19 +106,18 @@ void main()
     vec3 last = IMG_PIXEL(lastData, vec2(0)).xyz;
     vec3 next = vec3(0);
 
-    #define FLT_MAX 3.402823466e+38
     #define STEPS 96
     #define MODE xz
-    float d = FLT_MAX;
+    float dist = FLT_MAX;
     for (int i = 0; i < STEPS; i++) {
         next = Integrate(last, 0.016 * SPEED);
-        d = min(d, dfLine(last.MODE * VIEW_SCALE, next.MODE * VIEW_SCALE, uv));
+        dist = min(dist, lineSDF(uv, last.MODE * VIEW_SCALE, next.MODE * VIEW_SCALE));
         last = next;
     }
 
-    float c = smoothstep(FOCUS / RENDERSIZE.y, 0., d);
+    float c = smoothstep(FOCUS / RENDERSIZE.y, 0., dist);
 
-    c += (INTENSITY / 8.5) * exp(-1000. * d*d);
+    c += (INTENSITY / 8.5) * exp(-1000. * dist*dist);
 
     // Pixel (0,0) saves the current position.
     if (floor(gl_FragCoord.xy) == vec2(0)) {

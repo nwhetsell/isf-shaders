@@ -81,6 +81,35 @@
 }*/
 /*
 contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_SATURATE 
+#define saturate(V) clamp(V, 0.0, 1.0)
+
+/*
+contributors: Inigo Quiles
+description: Segment SDF
+use: lineSDF(<vec2> st, <vec2> A, <vec2> B)
+*/
+#define FNC_LINESDF 
+float lineSDF( in vec2 st, in vec2 a, in vec2 b ) {
+    vec2 b_to_a = b - a;
+    vec2 to_a = st - a;
+    float h = saturate(dot(to_a, b_to_a)/dot(b_to_a, b_to_a));
+    return length(to_a - h * b_to_a );
+}
+float lineSDF(vec3 p, vec3 a, vec3 b) {
+    //https://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+    return length(cross(p - a, p - b))/length(b - a);
+}
+/*
+contributors: Patricio Gonzalez Vivo
 description: 'Fix the aspect ratio of a space keeping things squared for you.'
 use: <vec2> aspect(<vec2> st, <vec2> st_size)
 examples:
@@ -109,21 +138,18 @@ license:
 float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+// https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
+#define FLT_MAX 3.402823466e+38
+#define SQRT1_2 0.7071067811865475244008443621048
 // Calculate the next position
 vec3 Integrate(vec3 cur, float dt)
 {
-    vec3 next = vec3(0);
-    next.x = O * (cur.y - cur.x);
-    next.y = cur.x * (P - cur.z) - cur.y;
-    next.z = cur.x * cur.y - B * cur.z;
+    vec3 next = vec3(
+        O * (cur.y - cur.x),
+        cur.x * (P - cur.z) - cur.y,
+        cur.x * cur.y - B * cur.z
+    );
     return cur + next * dt;
-}
-// Distance to a line segment
-float dfLine(vec2 start, vec2 end, vec2 uv)
-{
-    vec2 line = end - start;
-    float frac = dot(uv - start, line) / dot(line, line);
-    return distance(start + line * clamp(frac, 0., 1.), uv);
 }
 void main()
 {
@@ -131,17 +157,16 @@ void main()
     uv.y += 0.375;
     vec3 last = IMG_PIXEL(lastData, vec2(0)).xyz;
     vec3 next = vec3(0);
-#define FLT_MAX 3.402823466e+38
 #define STEPS 96
 #define MODE xz
-    float d = FLT_MAX;
+    float dist = FLT_MAX;
     for (int i = 0; i < STEPS; i++) {
         next = Integrate(last, 0.016 * SPEED);
-        d = min(d, dfLine(last.MODE * VIEW_SCALE, next.MODE * VIEW_SCALE, uv));
+        dist = min(dist, lineSDF(uv, last.MODE * VIEW_SCALE, next.MODE * VIEW_SCALE));
         last = next;
     }
-    float c = smoothstep(FOCUS / RENDERSIZE.y, 0., d);
-    c += (INTENSITY / 8.5) * exp(-1000. * d*d);
+    float c = smoothstep(FOCUS / RENDERSIZE.y, 0., dist);
+    c += (INTENSITY / 8.5) * exp(-1000. * dist*dist);
     // Pixel (0,0) saves the current position.
     if (floor(gl_FragCoord.xy) == vec2(0)) {
         if (FRAMEINDEX == 0) {
