@@ -36,7 +36,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <th>Videosync Screenshot</th>
   </tr>
   <tr>
-    <td><a href="CA%20Molecular%20dynamics.fs">CA Molecular dynamics</a></td>
+    <td><a href="CA%20Molecular%20dynamics.glsl">CA Molecular dynamics</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
     <td>
@@ -50,7 +50,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Cell%20system%202.fs">Cell system 2</a></td>
+    <td><a href="Cell%20system%202.glsl">Cell system 2</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
     <td>
@@ -64,7 +64,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="circle%20dithering.fs">circle dithering</a></td>
+    <td><a href="circle%20dithering.glsl">circle dithering</a></td>
     <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
     <td>n/a</td>
     <td>
@@ -78,7 +78,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Colormap.fs">Colormap</a></td>
+    <td><a href="Colormap.glsl">Colormap</a></td>
     <td><a href="https://www.shadertoy.com/user/gehtsiegarnixan">GehtSieGarNixAn</a></td>
     <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
     <td>
@@ -92,7 +92,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Domain-warped%20FBM%20noise.fs">Domain-warped FBM noise</a></td>
+    <td><a href="Domain-warped%20FBM%20noise.glsl">Domain-warped FBM noise</a></td>
     <td><a href="https://www.shadertoy.com/user/liamegan">liamegan</a></td>
     <td>n/a</td>
     <td>
@@ -106,7 +106,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Endless%20living%20creature.fs">Endless living creature</a></td>
+    <td><a href="Endless%20living%20creature.glsl">Endless living creature</a></td>
     <td><a href="https://www.shadertoy.com/user/leon">Leon Denise</a></td>
     <td>n/a</td>
     <td>
@@ -120,7 +120,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Ether.fs">Ether</a></td>
+    <td><a href="Ether.glsl">Ether</a></td>
     <td><a href="https://www.shadertoy.com/user/nimitz">nimitz</a> and <a href="https://www.shadertoy.com/user/GPT4POWERUSER">GPT4POWERUSER</a></td>
     <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>
     <td>
@@ -135,7 +135,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Everflow.fs">Everflow</a></td>
+    <td><a href="Everflow.glsl">Everflow</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
     <td>
@@ -149,7 +149,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="expansive%20reaction-diffusion.fs">expansive reaction-diffusion</a></td>
+    <td><a href="expansive%20reaction-diffusion.glsl">expansive reaction-diffusion</a></td>
     <td><a href="https://www.shadertoy.com/user/Flexi">Flexi</a></td>
     <td>n/a</td>
     <td>
@@ -160,7 +160,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Gaussian%20SmoothLife.fs">Gaussian SmoothLife</a></td>
+    <td><a href="Gaussian%20SmoothLife.glsl">Gaussian SmoothLife</a></td>
     <td><a href="https://www.shadertoy.com/user/cornusammonis">cornusammonis</a></td>
     <td>n/a</td>
     <td>
@@ -185,7 +185,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Le%20Vortex.fs">Le Vortex</a></td>
+    <td><a href="Le%20Vortex.glsl">Le Vortex</a></td>
     <td><a href="https://www.shadertoy.com/user/leon">Leon Denise</a></td>
     <!-- Based on page 34 or 36 of Le Processus (1993) <https://fr.wikipedia.org/wiki/Le_Processus> by Marc-Antoine Mathieu <https://fr.wikipedia.org/wiki/Marc-Antoine_Mathieu> -->
     <td>n/a</td>
@@ -200,7 +200,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Lorenz%20system.fs">Lorenz system</a></td>
+    <td><a href="Lorenz%20system.glsl">Lorenz system</a></td>
     <td><a href="https://www.shadertoy.com/user/Flyguy">Flyguy</a></td>
     <td>n/a</td>
     <td>
@@ -214,7 +214,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="MattiasCRT.fs">MattiasCRT</a></td>
+    <td><a href="MattiasCRT.glsl">MattiasCRT</a></td>
     <td><a href="https://github.com/mattiasgustavsson">Mattias Gustavsson</a></td>
     <td>n/a</td>
     <td>
@@ -228,7 +228,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Mountains.fs">Mountains</a></td>
+    <td><a href="Mountains.glsl">Mountains</a></td>
     <td><a href="https://www.shadertoy.com/user/Dave_Hoskins">Dave Hoskins</a></td>
     <td>n/a</td>
     <td>
@@ -242,7 +242,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="notebook%20drawings.fs">notebook drawings</a></td>
+    <td><a href="notebook%20drawings.glsl">notebook drawings</a></td>
     <td><a href="https://www.flockaroo.at">Florian Berger</a></td>
     <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>
     <td>
@@ -256,7 +256,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="oscilloscope%20analysis%20luminance.fs">oscilloscope analysis luminance</a></td>
+    <td><a href="oscilloscope%20analysis%20luminance.glsl">oscilloscope analysis luminance</a></td>
     <td><a href="https://www.shadertoy.com/user/FabriceNeyret2">Fabrice Neyret</a></td>
     <td>n/a</td>
     <td>
@@ -267,7 +267,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Palettes.fs">Palettes</a></td>
+    <td><a href="Palettes.glsl">Palettes</a></td>
     <td><a href="https://iquilezles.org">Inigo Quilez</a></td>
     <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
     <td>
@@ -281,7 +281,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Physarum%20Polycephalum%20Simulation.fs">Physarum Polycephalum Simulation</a></td>
+    <td><a href="Physarum%20Polycephalum%20Simulation.glsl">Physarum Polycephalum Simulation</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
     <td>
@@ -295,7 +295,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Rainier%20mood.fs">Rainier mood</a></td>
+    <td><a href="Rainier%20mood.glsl">Rainier mood</a></td>
     <td><a href="https://www.shadertoy.com/user/Zavie">Zavie</a></td>
     <td>n/a</td>
     <td>
@@ -309,7 +309,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Random%20slime%20mold%20generator.fs">Random slime mold generator</a></td>
+    <td><a href="Random%20slime%20mold%20generator.glsl">Random slime mold generator</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
     <td>
@@ -323,7 +323,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Shattered%20Crystal.fs">Shattered Crystal</a></td>
+    <td><a href="Shattered%20Crystal.glsl">Shattered Crystal</a></td>
     <td><a href="https://www.shadertoy.com/user/Hyeve">Hyeve</a></td>
     <td>n/a</td>
     <td>
@@ -337,7 +337,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Strange%20Cloud.fs">Strange Cloud</a></td>
+    <td><a href="Strange%20Cloud.glsl">Strange Cloud</a></td>
     <td><a href="https://github.com/loicvdb">loicvdb</a></td>
     <td>n/a</td>
     <td>
@@ -351,7 +351,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="spilled.fs">spilled</a></td>
+    <td><a href="spilled.glsl">spilled</a></td>
     <td><a href="https://www.flockaroo.at">Florian Berger</a></td>
     <td><a href="https://spdx.org/licenses/CC-BY-NC-SA-3.0.html">CC-BY-NC-SA-3.0</a></td>
     <td>
@@ -365,7 +365,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="Suture%20Fluid.fs">Suture Fluid</a></td>
+    <td><a href="Suture%20Fluid.glsl">Suture Fluid</a></td>
     <td><a href="https://www.shadertoy.com/user/cornusammonis">cornusammonis</a></td>
     <td>n/a</td>
     <td>
@@ -379,7 +379,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
-    <td><a href="The Weave.fs">The Weave</a></td>
+    <td><a href="The%20Weave.glsl">The Weave</a></td>
     <td><a href="https://www.shadertoy.com/user/chronos">chronos</a></td>
     <td>n/a</td>
     <td>
