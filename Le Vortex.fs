@@ -78,6 +78,14 @@
             "MIN": -100
         },
         {
+            "NAME": "fieldOfView",
+            "LABEL": "Camera field of view",
+            "TYPE": "float",
+            "DEFAULT": 75.1371840577,
+            "MAX": 180,
+            "MIN": 0
+        },
+        {
             "NAME": "yAxisRotation",
             "LABEL": "y-axis rotation",
             "TYPE": "float",
@@ -166,6 +174,8 @@
     ],
     "ISFVSN": "2"
 }*/
+// The default camera field of view is
+//    2 × atan(1 / 1.3) = 75.1371840577°
 // https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
 #define FLT_MAX 3.402823466e+38
 #define SQRT1_2 0.7071067811865475244008443621048
@@ -258,6 +268,7 @@ vec4 random4(vec4 p4) {
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
+#define RAYMARCH_CAMERA_FOV fieldOfView
 #define RAYMARCH_SAMPLES 251
 #define RAYMARCH_MIN_DIST 0.
 #define RAYMARCH_MAX_DIST FLT_MAX
@@ -1731,7 +1742,8 @@ void main()
     // ray direction into a typical view matrix, but it’s not clear how to do
     // this rigorously.
     vec3 ro = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
-    vec3 rd = rotationMatrix * normalize(vec3(uv, 1.3));
+    float fov = 1.0 / tan(RAYMARCH_CAMERA_FOV * DEG2RAD * 0.5);
+    vec3 rd = rotationMatrix * normalize(vec3(uv, fov));
     Material res = raymarchCast(ro, rd);
     if (res.valid) {
         vec3 light = vec3(40, 100, -10);

@@ -78,6 +78,14 @@
             "MIN": -100
         },
         {
+            "NAME": "fieldOfView",
+            "LABEL": "Camera field of view",
+            "TYPE": "float",
+            "DEFAULT": 75.1371840577,
+            "MAX": 180,
+            "MIN": 0
+        },
+        {
             "NAME": "yAxisRotation",
             "LABEL": "y-axis rotation",
             "TYPE": "float",
@@ -167,11 +175,15 @@
     "ISFVSN": "2"
 }*/
 
+// The default camera field of view is
+//    2 × atan(1 / 1.3) = 75.1371840577°
+
 #include "lygia-additions/const.glsl"
 
 // #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
 #include "lygia/generative/random.glsl" // LYGIA’s random2 isn’t exactly the same as the RNG in the Shadertoy shader.
+#define RAYMARCH_CAMERA_FOV fieldOfView
 #define RAYMARCH_SAMPLES 251
 #define RAYMARCH_MIN_DIST 0.
 #define RAYMARCH_MAX_DIST FLT_MAX
@@ -347,7 +359,9 @@ void main()
     // this rigorously.
 
     vec3 ro = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
-    vec3 rd = rotationMatrix * normalize(vec3(uv, 1.3));
+
+    float fov = 1.0 / tan(RAYMARCH_CAMERA_FOV * DEG2RAD * 0.5);
+    vec3 rd = rotationMatrix * normalize(vec3(uv, fov));
 
     Material res = raymarchCast(ro, rd);
 
