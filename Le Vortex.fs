@@ -1604,11 +1604,6 @@ vec2 opRepeat( in vec2 p, in vec2 s ) {
 // Raymarching sketch inspired by the work of Marc-Antoine Mathieu
 // Leon 2017-11-21
 // using code from IQ, Mercury, LJ, Duke, Koltes
-void camera(inout vec3 p)
-{
-    p.xz *= rotate2d(-yAxisRotation * DEG2RAD);
-    p.yz *= rotate2d(-xAxisRotation * DEG2RAD);
-}
 float windowGrille(vec3 pos, float height, float width, vec2 indexes)
 {
     float randomness = random(indexes);
@@ -1721,10 +1716,19 @@ Material raymarchMap(vec3 pos)
 void main()
 {
     vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-    vec3 ro = vec3(cameraX, cameraY, cameraZ);
-    vec3 rd = normalize(vec3(uv, 1.3));
-    camera(ro);
-    camera(rd);
+    float rx = -xAxisRotation * DEG2RAD;
+    float cx = cos(rx);
+    float sx = sin(rx);
+    float ry = -yAxisRotation * DEG2RAD;
+    float cy = cos(ry);
+    float sy = sin(ry);
+    mat3 rotationMatrix = mat3(
+        cy, -sy * sx, -sy * cx,
+        0., cx, -sx,
+        sy, cy * sx, cy * cx
+    );
+    vec3 ro = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
+    vec3 rd = rotationMatrix * normalize(vec3(uv, 1.3));
     Material res = raymarchCast(ro, rd);
     if (res.valid) {
         vec3 light = vec3(40, 100, -10);
