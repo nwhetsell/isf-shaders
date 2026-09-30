@@ -342,6 +342,10 @@ void main()
         sy,  cy * sx,  cy * cx
     );
 
+    // In theory, it should be possible to separate the camera position and
+    // ray direction into a typical view matrix, but it’s not clear how to do
+    // this rigorously.
+
     vec3 ro = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
     vec3 rd = rotationMatrix * normalize(vec3(uv, 1.3));
 
