@@ -145,7 +145,7 @@
     "ISFVSN": "2",
     "IMPORTED":
     {
-        "pebbles": { "PATH": "rocks.png" }
+        "rocks": { "PATH": "rocks.png" }
     }
 }*/
 #define RANDOM_HIGHER_RANGE 
@@ -1044,7 +1044,7 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
         mat = mix(mat, GetClouds(GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
         // Add some extra water glint...
         if (addShore)
-            mat += vec3(0.1) * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(pebbles, watPos.xz * 0.1).x, 0., 1.);
+            mat += 0.1 * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(rocks, watPos.xz * 0.1).x, 0., 1.);
         float sunAmount = max(dot(nor, sunLight), 0.);
         mat = mat + sunColour * pow(sunAmount, 228.5) * 0.6;
         vec3 temp = (watPos - cameraPos * 2.) * 0.5;
