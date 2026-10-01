@@ -166,6 +166,30 @@
             "MIN": 0
         },
         {
+            "NAME": "lightRadius",
+            "LABEL": "Light distance",
+            "TYPE": "float",
+            "DEFAULT": 108.1665382639,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "lightPhi",
+            "LABEL": "Light phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 95.3045714391,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "lightTheta",
+            "LABEL": "Light theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 68.1985905136,
+            "MIN": 0,
+            "MAX": 360
+        },
+        {
             "NAME": "backgroundColor",
             "LABEL": "Background color",
             "TYPE": "color",
@@ -175,8 +199,14 @@
     "ISFVSN": "2"
 }*/
 
-// The default camera field of view is
+// The default camera field of view is:
 //    2 × atan(1 / 1.3) = 75.1371840577°
+// The default light parameters are:
+//   lightRadius = length(vec3(40, 100, -10))
+//               = sqrt(40 * 40 + 100 * 100 + -10 * -10)
+//               = sqrt(11700) ≈ 108.1665382639
+//   lightPhi = acos(-10 / lightRadius) ≈ 95.3045714391°
+//   lightTheta = atan(100 / 40) = atan(2.5) = 68.1985905136°
 
 #include "lygia-additions/const.glsl"
 
@@ -366,7 +396,7 @@ void main()
     Material res = raymarchCast(ro, rd);
 
     if (res.valid) {
-        vec3 light = vec3(40, 100, -10);
+        vec3 light = polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD);
         float shadow = raymarchSoftShadow(res.position, normalize(light - res.position));
         gl_FragColor.rgb = vec3(sqrt(smoothstep(0., 0.5, res.albedo.r * shadow)));
         gl_FragColor.a = 1.;
