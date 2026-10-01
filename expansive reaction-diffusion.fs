@@ -331,7 +331,7 @@ void main()
         vec4 dx = IMG_NORM_PIXEL(bufferA, uv + vec2(1, 0) * d) - IMG_NORM_PIXEL(bufferA, uv - vec2(1, 0) * d);
         vec4 dy = IMG_NORM_PIXEL(bufferA, uv + vec2(0, 1) * d) - IMG_NORM_PIXEL(bufferA, uv - vec2(0, 1) * d);
         // Recolor the red channel.
-        gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x) * vec4(0.7, 1.5, 2.0, 1.0) - vec4(0.3, 1.0, 1.0, 1.0);
+        gl_FragColor = vec4(IMG_NORM_PIXEL(bufferA, uv + vec2(dx.x, dy.x) * pixelSize * 8.).x) * vec4(0.7, 1.5, 2, 1) - vec4(0.3, 1, 1, 1);
         // Add the light map.
         vec2 lightSize = vec2(1. / inverseLightSize);
         // Use only the red gradient as displacement vector.
