@@ -1495,7 +1495,7 @@ examples:
 #define FNC_RAYMARCH_SOFTSHADOW 
 float raymarchSoftShadow(vec3 ro, vec3 rd) {
     const float mint = RAYMARCH_SHADOW_MIN_DIST;
-    const float maxt = RAYMARCH_SHADOW_MAX_DIST; // “Le Vortex” uses length(vec3(lightPositionX, lightPositionY, lightPositionZ) - ro)
+    const float maxt = RAYMARCH_SHADOW_MAX_DIST; // “Le Vortex” uses length(vec3(light.x, light.y, light.z) - ro)
     const float w = RAYMARCH_SHADOW_SOLID_ANGLE;
     float res = 1.0;
     float t = mint;
