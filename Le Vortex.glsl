@@ -388,12 +388,12 @@ void main()
     // ray direction into a typical view matrix, but it’s not clear how to do
     // this rigorously.
 
-    vec3 ro = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
+    vec3 rayOrigin = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
 
     float fov = 1.0 / tan(RAYMARCH_CAMERA_FOV * DEG2RAD * 0.5);
-    vec3 rd = rotationMatrix * normalize(vec3(uv, fov));
+    vec3 rayDirection = rotationMatrix * normalize(vec3(uv, fov));
 
-    Material res = raymarchCast(ro, rd);
+    Material res = raymarchCast(rayOrigin, rayDirection);
 
     if (res.valid) {
         vec3 light = polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD);
