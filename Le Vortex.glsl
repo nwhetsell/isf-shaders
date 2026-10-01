@@ -225,6 +225,8 @@
 #include "lygia/lighting/raymarch/softShadow.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
+#include "lygia/math/rotate3dX.glsl"
+#include "lygia/math/rotate3dY.glsl"
 #include "lygia/sdf/boxSDF.glsl"
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/aspect.glsl"
@@ -372,26 +374,16 @@ void main()
 {
     vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
-    float rx = -xAxisRotation * DEG2RAD;
-    float cx = cos(rx);
-    float sx = sin(rx);
-    float ry = -yAxisRotation * DEG2RAD;
-    float cy = cos(ry);
-    float sy = sin(ry);
-    mat3 rotationMatrix = mat3(
-        cy, -sy * sx, -sy * cx,
-        0.,  cx,      -sx,
-        sy,  cy * sx,  cy * cx
-    );
+    mat3 rotationMatrix = rotate3dY(yAxisRotation * DEG2RAD) * rotate3dX(-xAxisRotation * DEG2RAD);
 
     // In theory, it should be possible to separate the camera position and
     // ray direction into a typical view matrix, but it’s not clear how to do
     // this rigorously.
 
-    vec3 rayOrigin = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
+    vec3 rayOrigin = vec3(cameraX, cameraY, cameraZ) * rotationMatrix;
 
     float fov = 1.0 / tan(RAYMARCH_CAMERA_FOV * DEG2RAD * 0.5);
-    vec3 rayDirection = rotationMatrix * normalize(vec3(uv, fov));
+    vec3 rayDirection = normalize(vec3(uv, fov)) * rotationMatrix;
 
     Material res = raymarchCast(rayOrigin, rayDirection);
 

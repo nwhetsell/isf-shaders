@@ -1551,6 +1551,38 @@ mat2 rotate2d(const in float r){
     return mat2(c, s, -s, c);
 }
 /*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dX(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE3DX 
+mat3 rotate3dX(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(1.0,0.0,0.0),
+                vec3(0.0,c,s),
+                vec3(0.0,-s,c));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dY(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE3DY 
+mat3 rotate3dY(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(c,0.,-s),
+                vec3(0.,1.,0.),
+                vec3(s,0.,c));
+}
+/*
 contributors:  Inigo Quiles
 description: generate the SDF of a box
 use: <float> boxSDF( in <vec3> pos [, in <vec3> borders ] ) 
@@ -1757,23 +1789,13 @@ Material raymarchMap(vec3 pos)
 void main()
 {
     vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-    float rx = -xAxisRotation * DEG2RAD;
-    float cx = cos(rx);
-    float sx = sin(rx);
-    float ry = -yAxisRotation * DEG2RAD;
-    float cy = cos(ry);
-    float sy = sin(ry);
-    mat3 rotationMatrix = mat3(
-        cy, -sy * sx, -sy * cx,
-        0., cx, -sx,
-        sy, cy * sx, cy * cx
-    );
+    mat3 rotationMatrix = rotate3dY(yAxisRotation * DEG2RAD) * rotate3dX(-xAxisRotation * DEG2RAD);
     // In theory, it should be possible to separate the camera position and
     // ray direction into a typical view matrix, but it’s not clear how to do
     // this rigorously.
-    vec3 rayOrigin = rotationMatrix * vec3(cameraX, cameraY, cameraZ);
+    vec3 rayOrigin = vec3(cameraX, cameraY, cameraZ) * rotationMatrix;
     float fov = 1.0 / tan(RAYMARCH_CAMERA_FOV * DEG2RAD * 0.5);
-    vec3 rayDirection = rotationMatrix * normalize(vec3(uv, fov));
+    vec3 rayDirection = normalize(vec3(uv, fov)) * rotationMatrix;
     Material res = raymarchCast(rayOrigin, rayDirection);
     if (res.valid) {
         vec3 light = polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD);
