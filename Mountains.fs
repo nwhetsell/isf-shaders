@@ -1100,7 +1100,7 @@ float BinarySubdivision(in vec3 rO, in vec3 rD, vec2 t)
 }
 bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
 {
-    float t = 1. + random_slow(fragCoord.xy) * 1.;
+    float t = 1. + random_slow(fragCoord) * 1.;
     float oldT = 0.;
     float delta = 0.;
     bool fin = false;
