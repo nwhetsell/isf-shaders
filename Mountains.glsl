@@ -163,6 +163,8 @@ float random_slow(vec2);
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
+#define LOOK_AT_RIGHT_HANDED
+#include "lygia/space/lookAt.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia-additions/gnoise.glsl"
 #include "lygia/generative/random.glsl"
@@ -498,16 +500,14 @@ void main()
         cameraTarget.y -= smoothstep(60., 300., cameraPos.y) * 150.;
 
     float roll = cameraRollAmplitude * sin(TIME * 0.2);
-    vec3 cw = normalize(cameraTarget - cameraPos);
-    vec3 cp = vec3(polar2cart(-vec2(roll + 0.5 * PI, 1.)), 0);
-    vec3 cu = normalize(cross(cw, cp));
-    vec3 cv = normalize(cross(cu, cw));
-    vec3 rd = normalize(uv.x * cu + uv.y * cv + 1.5 * cw);
+    mat3 viewMatrix = lookAt(cameraPos, cameraTarget, roll);
+    vec3 xaxis = viewMatrix[0].xyz;
+    vec3 rd = normalize(uv.x * xaxis + uv.y * viewMatrix[1].xyz + 1.5 * viewMatrix[2].xyz);
 
     float isCyan;
     if (anaglyph3D) {
         isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
-        cameraPos += 0.45 * cu * isCyan; // move camera to the right - the rd vector is still good
+        cameraPos += 0.45 * xaxis * isCyan; // move camera to the right - the rd vector is still good
     }
 
     vec3 col;
@@ -535,7 +535,7 @@ void main()
     col = PostEffects(col, uv);
 
     if (anaglyph3D) {
-        col *= vec3(isCyan, 1. - isCyan, 1. - isCyan);
+        col *= vec3(isCyan, vec2(1. - isCyan));
     }
 
     gl_FragColor = vec4(col, 1.);

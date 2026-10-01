@@ -793,6 +793,40 @@ license:
 float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+#define LOOK_AT_RIGHT_HANDED 
+/*
+contributors: Patricio Gonzalez Vivo
+description: create a look at matrix. Right handed by default.
+use:
+    - <mat3> lookAt(<vec3> forward, <vec3> up)
+    - <mat3> lookAt(<vec3> eye, <vec3> target, <vec3> up)
+    - <mat3> lookAt(<vec3> eye, <vec3> target, <float> roll)
+    - <mat3> lookAt(<vec3> forward)
+options:
+    - LOOK_AT_LEFT_HANDED: assume a left-handed coordinate system
+    - LOOK_AT_RIGHT_HANDED: assume a right-handed coordinate system
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_LOOKAT 
+mat3 lookAt(vec3 forward, vec3 up) {
+    vec3 zaxis = normalize(forward);
+    vec3 xaxis = normalize(cross(zaxis, up));
+    vec3 yaxis = cross(xaxis, zaxis);
+    return mat3(xaxis, yaxis, zaxis);
+}
+mat3 lookAt(vec3 eye, vec3 target, vec3 up) {
+    vec3 forward = normalize(target - eye);
+    return lookAt(forward, up);
+}
+mat3 lookAt(vec3 eye, vec3 target, float roll) {
+    vec3 up = vec3(sin(roll), cos(roll), 0.0);
+    return lookAt(eye, target, up);
+}
+mat3 lookAt(vec3 forward) {
+    return lookAt(forward, vec3(0.0, 1.0, 0.0));
+}
 /*
 contributors: [Ivan Dianov, Shadi El Hajj]
 description: polar to cartesian conversion.
@@ -1131,15 +1165,13 @@ void main()
     if (autoCameraPitch)
         cameraTarget.y -= smoothstep(60., 300., cameraPos.y) * 150.;
     float roll = cameraRollAmplitude * sin(TIME * 0.2);
-    vec3 cw = normalize(cameraTarget - cameraPos);
-    vec3 cp = vec3(polar2cart(-vec2(roll + 0.5 * PI, 1.)), 0);
-    vec3 cu = normalize(cross(cw, cp));
-    vec3 cv = normalize(cross(cu, cw));
-    vec3 rd = normalize(uv.x * cu + uv.y * cv + 1.5 * cw);
+    mat3 viewMatrix = lookAt(cameraPos, cameraTarget, roll);
+    vec3 xaxis = viewMatrix[0].xyz;
+    vec3 rd = normalize(uv.x * xaxis + uv.y * viewMatrix[1].xyz + 1.5 * viewMatrix[2].xyz);
     float isCyan;
     if (anaglyph3D) {
         isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
-        cameraPos += 0.45 * cu * isCyan; // move camera to the right - the rd vector is still good
+        cameraPos += 0.45 * xaxis * isCyan; // move camera to the right - the rd vector is still good
     }
     vec3 col;
     float distance;
