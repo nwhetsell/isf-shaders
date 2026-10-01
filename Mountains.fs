@@ -1195,7 +1195,7 @@ void main()
     }
     col = PostEffects(col, uv);
     if (anaglyph3D) {
-        col *= vec3(isCyan, 1. - isCyan, 1. - isCyan);
+        col *= vec3(isCyan, vec2(1. - isCyan));
     }
     gl_FragColor = vec4(col, 1.);
 }
