@@ -63,7 +63,9 @@ Lorenz\ system.fs: Lorenz\ system.glsl
 MattiasCRT.fs: MattiasCRT.glsl
 	clang $(clang_options) --output="$@" "$<"
 Mountains.fs: Mountains.glsl
-	clang $(clang_options) --output="$@" "$<"
+	cd lygia; git apply ../Mountains.patch;
+	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
+	cd lygia; git reset --hard
 notebook\ drawings.fs: notebook\ drawings.glsl
 	clang $(clang_options) --output="$@" "$<"
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl

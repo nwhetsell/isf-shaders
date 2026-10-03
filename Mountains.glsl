@@ -34,6 +34,14 @@
             "DEFAULT": true
         },
         {
+            "NAME": "cameraOffset",
+            "LABEL": "Camera offset",
+            "TYPE": "float",
+            "DEFAULT": 658,
+            "MAX": 10000,
+            "MIN": 0
+        },
+        {
             "NAME": "mountainHeight",
             "LABEL": "Mountain height",
             "TYPE": "float",
@@ -159,18 +167,24 @@ float random_slow(vec2);
 #define GNOISE_NOISE2_FNC(UV) random_slow(UV)
 #include "lygia/generative/fbm.glsl"
 #include "lygia/generative/gnoise.glsl"
+#include "lygia/generative/random.glsl"
+float random_slow(in vec2 p) {
+    return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
+}
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate2d.glsl"
+#define RAYMARCH_BACKGROUND vec3(0)
+#define RAYMARCH_SAMPLES 150
+#define RAYMARCH_MIN_DIST 1. + random_slow(gl_FragCoord.xy)
+#define RAYMARCH_MAX_DIST 240.
+#define RAYMARCH_MIN_HIT_DIST 0.5
+#include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
 #define LOOK_AT_RIGHT_HANDED
 #include "lygia/space/lookAt.glsl"
 #include "lygia/space/polar2cart.glsl"
 #include "lygia-additions/gnoise.glsl"
-#include "lygia/generative/random.glsl"
-float random_slow(in vec2 p) {
-    return random2(vec3(p.x, RANDOM_SCALE.x * p.yx / RANDOM_SCALE.yz)).x;
-}
 
 
 float treeLine = 0.;
@@ -220,17 +234,20 @@ float Terrain(in vec2 p)
     return Terrain(p, pos, w);
 }
 
-// Map to lower resolution for height field mapping for Scene function...
-float Map(in vec3 p)
+// Map to lower resolution for height field mapping for raymarchCast function...
+Material raymarchMap(in vec3 pos)
 {
-    float h = Terrain(p.xz);
+    float h = Terrain(pos.xz);
 
-    float ff = gnoise(p.xz * 0.3) + gnoise(p.xz * 3.3) * 0.5;
+    float ff = gnoise(pos.xz * 0.3) + gnoise(pos.xz * 3.3) * 0.5;
     treeLine = smoothstep(ff, 0. + ff * 2., h) * smoothstep(1. + ff * 3., 0.4 + ff, h);
-    treeCol = Trees(p.xz);
+    treeCol = Trees(pos.xz);
     h += treeCol;
 
-    return p.y - h;
+    Material mat = materialNew();
+    mat.position = pos;
+    mat.sdf = pos.y - h;
+    return mat;
 }
 
 // High def version only used for grabbing normal information.
@@ -409,57 +426,9 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
     return mat;
 }
 
-float BinarySubdivision(in vec3 rO, in vec3 rD, vec2 t)
-{
-    // Home in on the surface by dividing by two and split...
-    float halfwayT;
-
-    for (int i = 0; i < 5; i++) {
-        halfwayT = dot(t, vec2(0.5));
-        float d = Map(rO + halfwayT * rD);
-        t = mix(vec2(t.x, halfwayT), vec2(halfwayT, t.y), step(0.5, d));
-    }
-    return halfwayT;
-}
-
-bool Scene(in vec3 rO, in vec3 rD, out float resT, in vec2 fragCoord)
-{
-    float t = 1. + random_slow(fragCoord) * 1.;
-    float oldT = 0.;
-    float delta = 0.;
-    bool fin = false;
-    bool res = false;
-    vec2 distances;
-    for(int j = 0; j < 150; j++) {
-        if (fin || t > 240.)
-            break;
-
-        vec3 p = rO + t * rD;
-        float h = Map(p); // ...Get this positions height mapping.
-        // Are we inside, and close enough to fudge a hit?...
-        if (h < 0.5) {
-            fin = true;
-            distances = vec2(oldT, t);
-            break;
-        }
-        // Delta ray advance - a fudge between the height returned
-        // and the distance already travelled.
-        // It's a really fiddly compromise between speed and accuracy
-        // Too large a step and the tops of ridges get missed.
-        delta = max(0.01, 0.3 * h) + t * 0.0065;
-        oldT = t;
-        t += delta;
-    }
-
-    if (fin)
-        resT = BinarySubdivision(rO, rD, distances);
-
-    return fin;
-}
-
 vec3 CameraPath(float t)
 {
-    t += (TIME * cameraSpeed + 658.) * 0.006;
+    t += (TIME * cameraSpeed + cameraOffset) * 0.006;
 
     vec3 path = vec3(35., 0.6, 4108.);
     if (circuitousCameraPath) {
@@ -502,23 +471,24 @@ void main()
     float roll = cameraRollAmplitude * sin(TIME * 0.2);
     mat3 viewMatrix = lookAt(cameraPos, cameraTarget, roll);
     vec3 xaxis = viewMatrix[0].xyz;
-    vec3 rd = normalize(uv.x * xaxis + uv.y * viewMatrix[1].xyz + 1.5 * viewMatrix[2].xyz);
+    vec3 rayDirection = normalize(uv.x * xaxis + uv.y * viewMatrix[1].xyz + 1.5 * viewMatrix[2].xyz);
 
     float isCyan;
     if (anaglyph3D) {
         isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
-        cameraPos += 0.45 * xaxis * isCyan; // move camera to the right - the rd vector is still good
+        cameraPos += 0.45 * xaxis * isCyan; // move camera to the right - the rayDirection is still good
     }
 
     vec3 col;
-    float distance;
-    if (!Scene(cameraPos, rd, distance, gl_FragCoord.xy)) {
+    Material res = raymarchCast(cameraPos, rayDirection);
+    if (!res.valid) {
         // Missed scene, now just get the sky value...
-        col = GetSky(rd);
-        col = GetClouds(col, rd);
+        col = GetSky(rayDirection);
+        col = GetClouds(col, rayDirection);
     } else {
+        float distance = res.sdf;
         // Get world coordinate of landscape...
-        vec3 pos = cameraPos + distance * rd;
+        vec3 pos = cameraPos + rayDirection * distance;
         // Get normal from sampling the high definition height map
         // Use the distance to sample larger gaps to help stop aliasing...
         float p = 0.02 + 0.00005 * distance*distance;

@@ -1,0 +1,68 @@
+diff --git a/lighting/material.glsl b/lighting/material.glsl
+index ad2423ad..73600eef 100644
+--- a/lighting/material.glsl
++++ b/lighting/material.glsl
+@@ -42,6 +42,7 @@ struct Material {
+ 
+ #if defined(RENDER_RAYMARCHING)
+     float   sdf;
++    vec2    distances;
+     bool    valid;
+ #endif
+ 
+diff --git a/lighting/material/new.glsl b/lighting/material/new.glsl
+index d8f3a992..28a9a3d9 100644
+--- a/lighting/material/new.glsl
++++ b/lighting/material/new.glsl
+@@ -50,6 +50,7 @@ void materialNew(out Material _mat) {
+ 
+ #if defined(RENDER_RAYMARCHING)
+     _mat.sdf                = RAYMARCH_MAX_DIST;
++    _mat.distances          = vec2(0);
+     _mat.valid              = true;
+ #endif
+ 
+diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
+index bfe1629d..de41e5ff 100644
+--- a/lighting/raymarch/cast.glsl
++++ b/lighting/raymarch/cast.glsl
+@@ -40,10 +40,18 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+ #else
+         float dist = res.sdf;
+ #endif
+-        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
++        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) {
++            m.valid = true;
++            m.distances.y = t;
+             break;
++        }
+         m = res;
+-        t += res.sdf;
++        m.distances.x = t;
++        // Delta ray advance - a fudge between the height returned
++        // and the distance already travelled.
++        // It's a really fiddly compromise between speed and accuracy
++        // Too large a step and the tops of ridges get missed.
++        t += max(0.01, 0.3 * res.sdf) + t * 0.0065;
+     }
+ 
+     #if defined(RAYMARCH_BACKGROUND) || defined(RAYMARCH_FLOOR)
+@@ -51,7 +59,17 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+         m.valid = false;
+     #endif
+ 
+-    m.sdf = t;
++    if (m.valid) {
++        // Home in on the surface by dividing by two and split...
++        for (int i = 0; i < 5; i++) {
++            m.sdf = (m.distances.x + m.distances.y) * 0.5;
++            m.distances = mix(
++                vec2(m.distances.x, m.sdf),
++                vec2(m.sdf, m.distances.y),
++                step(0.5, RAYMARCH_MAP_FNC(ro + rd * m.sdf).sdf)
++            );
++        }
++    }
+     return m;
+ }
+ 
