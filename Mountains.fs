@@ -1854,7 +1854,6 @@ float treeCol = 0.;
 vec3 sunLight = normalize(vec3(0.4, 0.4, 0.48));
 vec3 sunColour = vec3(1, 0.9, 0.83);
 float specular = 0.;
-vec3 cameraPos;
 float ambient;
 float Trees(vec2 p)
 {
@@ -1900,7 +1899,7 @@ Material raymarchMap(in vec3 pos)
     return mat;
 }
 // High def version only used for grabbing normal information.
-float Terrain2(in vec2 p)
+float TerrainHiDef(in vec2 p)
 {
     vec2 pos;
     float w;
@@ -1919,18 +1918,18 @@ float Terrain2(in vec2 p)
     return f;
 }
 // Simply Perlin clouds that fade to the horizon...
-vec3 GetClouds(in vec3 sky, in vec3 rd)
+vec3 GetClouds(in vec3 camera, in vec3 color, in vec3 rd)
 {
     if (rd.y < 0.01)
-        return sky;
-    float v = (cloudHeight - cameraPos.y) / rd.y;
+        return color;
+    float v = (cloudHeight - camera.y) / rd.y;
     rd.xz *= v;
-    rd.xz += cameraPos.xz;
+    rd.xz += camera.xz;
     rd.xz *= 0.01;
     float f = (fbm(rd.xz + cloudSpeed * TIME) - 0.55) * 5.;
     // Uses the ray's y component for horizon fade of fixed colour clouds...
-    sky = mix(sky, vec3(0.55, 0.55, 0.52), clamp(f * rd.y - 0.1, 0., 1.));
-    return sky;
+    color = mix(color, vec3(0.55, 0.55, 0.52), clamp(f * rd.y - 0.1, 0., 1.));
+    return color;
 }
 // Grab all sky information for a given ray from camera
 vec3 GetSky(in vec3 rd)
@@ -1964,11 +1963,11 @@ void DoLighting(inout vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in 
     }
 }
 // Hack the height, position, and normal data to create the coloured landscape
-vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
+vec3 TerrainColour(vec3 camera, vec3 pos, vec3 normal, float distance)
 {
     specular = 0.;
     ambient = 0.1;
-    vec3 dir = normalize(pos - cameraPos);
+    vec3 dir = normalize(pos - camera);
     // I had to change scale halfway though, this lazy multiply allows me to
     // keep the graphic scales I had.
     vec3 matPos = pos * 2.;
@@ -2040,13 +2039,13 @@ vec3 TerrainColour(vec3 pos, vec3 normal, float distance)
         nor = normalize(reflect(dir, nor));
         // Mix it in at depth transparancy to give beach cues..
         tx = watPos.y - matPos.y;
-        mat = mix(mat, GetClouds(GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
+        mat = mix(mat, GetClouds(camera, GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
         // Add some extra water glint...
         if (addShore)
             mat += 0.1 * clamp(1. - pow(tx + 0.5, 3.) * IMG_NORM_PIXEL(rocks, watPos.xz * 0.1).x, 0., 1.);
         float sunAmount = max(dot(nor, sunLight), 0.);
         mat = mat + sunColour * pow(sunAmount, 228.5) * 0.6;
-        vec3 temp = (watPos - cameraPos * 2.) * 0.5;
+        vec3 temp = (watPos - camera * 2.) * 0.5;
         distanceSquared = dot(temp, temp);
     }
     mat = ApplyFog(mat, distanceSquared, dir);
@@ -2066,58 +2065,59 @@ vec3 CameraPath(float t)
     return path;
 }
 // Some would say, most of the magic is done in post! :D
-vec3 PostEffects(vec3 rgb, vec2 uv)
+vec3 PostEffects(vec3 rgb)
 {
     return 1. - exp(-rgb * 6.);
 }
 void main()
 {
     vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-    cameraPos.xz = CameraPath(0.).xz;
+    vec3 camera;
+    camera.xz = CameraPath(0.).xz;
     // Use several forward heights, of decreasing influence with distance from the camera.
     float h = 0.;
     for (float f = 1.; f > 0.3; f -= 0.1) {
         h += Terrain(CameraPath((0.6 - f) * 0.008).xz) * f;
     }
-    cameraPos.y = max(h * 0.25 + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
+    camera.y = max(h * 0.25 + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
     vec3 cameraTarget;
     cameraTarget.xz = CameraPath(0.1).xz;
-    cameraTarget.y = cameraPos.y;
+    cameraTarget.y = camera.y;
     if (autoCameraPitch)
-        cameraTarget.y -= smoothstep(60., 300., cameraPos.y) * 150.;
+        cameraTarget.y -= smoothstep(60., 300., camera.y) * 150.;
     float roll = cameraRollAmplitude * sin(TIME * 0.2);
-    mat3 viewMatrix = lookAt(cameraPos, cameraTarget, roll);
+    mat3 viewMatrix = lookAt(camera, cameraTarget, roll);
     vec3 xaxis = viewMatrix[0].xyz;
     vec3 rayDirection = normalize(uv.x * xaxis + uv.y * viewMatrix[1].xyz + 1.5 * viewMatrix[2].xyz);
     float isCyan;
     if (anaglyph3D) {
         isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y, 2.), 2.);
-        cameraPos += 0.45 * xaxis * isCyan; // move camera to the right - the rayDirection is still good
+        camera += 0.45 * xaxis * isCyan; // move camera to the right - the rayDirection is still good
     }
-    vec3 col;
-    Material res = raymarchCast(cameraPos, rayDirection);
+    vec3 color;
+    Material res = raymarchCast(camera, rayDirection);
     if (res.valid) {
-        float distance = res.sdf;
+        float t = res.sdf;
         // Get world coordinate of landscape...
-        vec3 pos = cameraPos + rayDirection * distance;
+        vec3 worldPos = camera + t * rayDirection;
         // Get normal from sampling the high definition height map
         // Use the distance to sample larger gaps to help stop aliasing...
-        float p = 0.02 + 0.00005 * distance*distance;
-        vec3 nor = vec3(0, Terrain2(pos.xz), 0);
-        vec3 v2 = nor - vec3(p, Terrain2(pos.xz + vec2(p, 0)), 0);
-        vec3 v3 = nor - vec3(0, Terrain2(pos.xz + vec2(0, -p)), -p);
-        nor = cross(v2, v3);
-        nor = normalize(nor);
+        float p = 0.02 + 0.00005 * t*t;
+        float terrain = TerrainHiDef(worldPos.xz);
+        vec3 worldNormal = normalize(cross(
+            vec3(-p, terrain - TerrainHiDef(worldPos.xz + vec2(p, 0)), 0),
+            vec3( 0, terrain - TerrainHiDef(worldPos.xz - vec2(0, p)), p)
+        ));
         // Get the colour using all available data...
-        col = TerrainColour(pos, nor, distance);
+        color = TerrainColour(camera, worldPos, worldNormal, t);
     } else {
         // Missed scene, now just get the sky value...
-        col = GetSky(rayDirection);
-        col = GetClouds(col, rayDirection);
+        color = GetSky(rayDirection);
+        color = GetClouds(camera, color, rayDirection);
     }
-    col = PostEffects(col, uv);
+    color = PostEffects(color);
     if (anaglyph3D) {
-        col *= vec3(isCyan, vec2(1. - isCyan));
+        color *= vec3(isCyan, vec2(1. - isCyan));
     }
-    gl_FragColor = vec4(col, 1.);
+    gl_FragColor = vec4(color, 1.);
 }
