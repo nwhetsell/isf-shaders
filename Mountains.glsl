@@ -451,15 +451,13 @@ void main()
 {
     vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
+    cameraPos.xz = CameraPath(0.).xz;
+
     // Use several forward heights, of decreasing influence with distance from the camera.
     float h = 0.;
-    float f = 1.;
-    for (int i = 0; i < 7; i++) {
+    for (float f = 1.; f > 0.3; f -= 0.1) {
         h += Terrain(CameraPath((0.6 - f) * 0.008).xz) * f;
-        f -= 0.1;
     }
-
-    cameraPos.xz = CameraPath(0.).xz;
     cameraPos.y = max(h * 0.25 + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
 
     vec3 cameraTarget;
