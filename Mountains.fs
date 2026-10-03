@@ -2096,11 +2096,7 @@ void main()
     }
     vec3 col;
     Material res = raymarchCast(cameraPos, rayDirection);
-    if (!res.valid) {
-        // Missed scene, now just get the sky value...
-        col = GetSky(rayDirection);
-        col = GetClouds(col, rayDirection);
-    } else {
+    if (res.valid) {
         float distance = res.sdf;
         // Get world coordinate of landscape...
         vec3 pos = cameraPos + rayDirection * distance;
@@ -2114,6 +2110,10 @@ void main()
         nor = normalize(nor);
         // Get the colour using all available data...
         col = TerrainColour(pos, nor, distance);
+    } else {
+        // Missed scene, now just get the sky value...
+        col = GetSky(rayDirection);
+        col = GetClouds(col, rayDirection);
     }
     col = PostEffects(col, uv);
     if (anaglyph3D) {
