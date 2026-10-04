@@ -508,7 +508,7 @@ float distanceEstimation(vec3 position)
 vec3 directLight(in vec3 position)
 {
     vec3 lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
-    vec3 absorption = vec3(1);
+    vec3 transmittanceL = vec3(1.0, 1.0, 1.0);
     for (int i = 0; i < 7; i++) {
         float distance = distanceEstimation(position);
         position -= lightDirection * max(distance, ShadowStepSize);
@@ -516,15 +516,15 @@ vec3 directLight(in vec3 position)
             float abStep = ShadowStepSize * frand();
             position -= lightDirection * (abStep - ShadowStepSize);
             if (distance < 0.) {
-                absorption *= exp(-absorbanceFactor * abStep);
-                if (mmax(absorption) < 0.1)
+                transmittanceL *= exp(-absorbanceFactor * abStep);
+                if (mmax(transmittanceL) < 0.1)
                     break;
             }
         }
         if (length(position) > outerRadius)
             break;
     }
-    return lightColor.rgb * lightIntensity * absorption;
+    return lightColor.rgb * lightIntensity * transmittanceL;
 }
 // The Shadertoy shader uses the direction argument to return the color from a
 // cubemap, which is impossible in an ISF shader.
@@ -535,8 +535,8 @@ vec3 backgroundColor(vec3 direction)
 vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
 {
     rayPosition += rayDirection * max(length(rayPosition) - outerRadius, 0.);
-    vec3 absorption = vec3(1);
-    vec3 color = vec3(0);
+    vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
+    vec3 transmittance = vec3(1.0, 1.0, 1.0);
     for (int i = 0; i < 150; i++) {
         float distance = distanceEstimation(rayPosition);
         rayPosition += rayDirection * max(distance, StepSize);
@@ -545,23 +545,22 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
             rayPosition += rayDirection * (abStep - StepSize);
             if (distance < 0.) {
                 float absorbance = exp(-absorbanceFactor * abStep);
-                float transmittance = 1. - absorbance;
                 if (distance > -0.0005)
-                    color += absorption * highlightColor.rgb;
+                    scatteredLuminance += transmittance * highlightColor.rgb;
                 if (frand() < ShadowRaysPerStep)
-                    color += 1. / ShadowRaysPerStep * absorption * volumeColor.rgb * transmittance * directLight(rayPosition);
-                if (mmax(absorption) < 0.05)
+                    scatteredLuminance += 1. / ShadowRaysPerStep * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(rayPosition);
+                if (mmax(transmittance) < 0.05)
                     break;
                 if (frand() > absorbance) {
                     rayDirection = vec3(1, 0, 0) * rotationMatrix(vec3(frand() * TWO_PI, 0, frand() * TWO_PI)); // random direction
-                    absorption *= volumeColor.rgb;
+                    transmittance *= volumeColor.rgb;
                 }
             }
         }
         if (length(rayPosition) > outerRadius && dot(rayDirection, rayPosition) > 0.)
-            return color + backgroundColor(rayDirection) * absorption;
+            return scatteredLuminance + backgroundColor(rayDirection) * transmittance;
     }
-    return color;
+    return scatteredLuminance;
 }
 vec2 sampleAperture(int nbBlades, float rotation)
 {
