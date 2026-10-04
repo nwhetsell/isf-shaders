@@ -206,6 +206,7 @@
 #define RANDOM_SINLESS
 #define RANDOM_HIGHER_RANGE
 
+#define RAYMARCH_MIN_DIST max(length(rayOrigin) - outerRadius, 0.)
 #define RAYMARCH_VOLUME_SAMPLES 150
 #define RAYMARCH_MAX_DIST (0.03 * float(RAYMARCH_VOLUME_SAMPLES))
 #define RAYMARCH_VOLUME_SAMPLES_LIGHT 7
@@ -304,22 +305,26 @@ vec3 backgroundColor(vec3 direction)
     return vec3(0);
 }
 
-vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
+vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
 {
-   	rayPosition += rayDirection * max(length(rayPosition) - outerRadius, 0.);
-
-    vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
+   	vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
     vec3 transmittance = vec3(1.0, 1.0, 1.0);
     float stepSize = RAYMARCH_MAX_DIST/float(RAYMARCH_VOLUME_SAMPLES);
 
+    float t = RAYMARCH_MIN_DIST;
+
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES; i++) {
+        vec3 rayPosition = rayOrigin + rayDirection * t;
         float sdf = distanceEstimation(rayPosition);
         float density = -sdf;
-        rayPosition += rayDirection * max(sdf, stepSize);
+
+        t += max(sdf, stepSize);
+        rayPosition = rayOrigin + rayDirection * t;
 
         if (sdf < stepSize && length(rayPosition) < outerRadius) {
             float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
-            rayPosition += rayDirection * (offset - stepSize);
+            t += -stepSize + offset;
+            rayPosition = rayOrigin + rayDirection * t;
 
             if (density > 0.) {
                 float absorbance = exp(-absorbanceFactor * offset);
