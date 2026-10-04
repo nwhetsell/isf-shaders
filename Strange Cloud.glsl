@@ -267,26 +267,22 @@ float distanceEstimation(vec3 position)
     return 0.5 * log(r) * r / dr;
 }
 
-#define ShadowStepSize 0.2
-
-vec3 directLight(vec3 position)
+vec3 raymarchVolumeShadowTransmittance(vec3 position, vec3 rayDirectionL, float stepSizeL)
 {
-    vec3 lightDirection = normalize(LIGHT_DIRECTION);
-
     vec3 transmittanceL = vec3(1.0, 1.0, 1.0);
     float tL = 0.0;
 
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES_LIGHT; i++) {
-        vec3 positionL = position + lightDirection * tL;
+        vec3 positionL = position + rayDirectionL * tL;
         float sdfL = distanceEstimation(positionL);
         float densityL = -sdfL;
-        tL -= max(sdfL, ShadowStepSize);
-        positionL = position + lightDirection * tL;
+        tL -= max(sdfL, stepSizeL);
+        positionL = position + rayDirectionL * tL;
 
-        if (sdfL < ShadowStepSize) {
-            float offset = frand() * ShadowStepSize * RAYMARCH_VOLUME_DITHER;
-            tL += ShadowStepSize - offset;
-            positionL = position + lightDirection * tL;
+        if (sdfL < stepSizeL) {
+            float offset = frand() * stepSizeL * RAYMARCH_VOLUME_DITHER;
+            tL += stepSizeL - offset;
+            positionL = position + rayDirectionL * tL;
 
             if (densityL > 0.) {
                 transmittanceL *= exp(-absorbanceFactor * offset);
@@ -299,7 +295,7 @@ vec3 directLight(vec3 position)
             break;
     }
 
-    return lightColor.rgb * lightIntensity * transmittanceL;
+    return transmittanceL;
 }
 
 // The Shadertoy shader uses the direction argument to return the color from a
@@ -336,8 +332,14 @@ vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
                 if (density < 0.0005)
                     scatteredLuminance += transmittance * highlightColor.rgb;
 
-                if (frand() < 1. / attenuationL)
-                    scatteredLuminance += attenuationL * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(position);
+                if (frand() < 1. / attenuationL) {
+                    float stepSizeL = 0.2; // RAYMARCH_MAX_DIST/float(RAYMARCH_VOLUME_SAMPLES_LIGHT);
+                    vec3 rayDirectionL = normalize(LIGHT_DIRECTION);
+                    vec3 shadow = raymarchVolumeShadowTransmittance(position, rayDirectionL, stepSizeL);
+                    vec3 L = lightColor.rgb * lightIntensity;
+
+                    scatteredLuminance += attenuationL * shadow * transmittance * volumeColor.rgb * (1. - absorbance) * L;
+                }
 
                 if (mmax(transmittance) < 0.05)
                     break;
