@@ -231,12 +231,6 @@ vec4 tonemapACES(in vec4 v) {
 }
 #define RANDOM_SINLESS 
 #define RANDOM_HIGHER_RANGE 
-#define RAYMARCH_MIN_DIST max(length(rayOrigin) - outerRadius, 0.)
-#define RAYMARCH_VOLUME_SAMPLES 150
-#define RAYMARCH_MAX_DIST (0.03 * float(RAYMARCH_VOLUME_SAMPLES))
-#define RAYMARCH_VOLUME_SAMPLES_LIGHT 7
-#define RAYMARCH_VOLUME_DITHER 1.0
-#define LIGHT_DIRECTION polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD)
 /*
 contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
 description: Pass a value and get some random normalize value between 0 and 1
@@ -323,6 +317,17 @@ vec4 random4(vec4 p4) {
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
+
+// The raymarching volume renderer used in this shader seems to be heavily
+// customized, so that it’s not really possible to adapt it to LYGIA’s
+// raymarcher. For consistency’s sake, we can still use macros with the same
+// names as LYGIA.
+#define RAYMARCH_MIN_DIST max(length(rayOrigin) - outerRadius, 0.)
+#define RAYMARCH_VOLUME_SAMPLES 150
+#define RAYMARCH_MAX_DIST (0.03 * float(RAYMARCH_VOLUME_SAMPLES))
+#define RAYMARCH_VOLUME_SAMPLES_LIGHT 7
+#define RAYMARCH_VOLUME_DITHER 1.0
+#define LIGHT_DIRECTION polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD)
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -537,12 +542,6 @@ vec3 raymarchVolumeShadowTransmittance(vec3 position, vec3 rayDirectionL, float 
     }
     return transmittanceL;
 }
-// The Shadertoy shader uses the direction argument to return the color from a
-// cubemap, which is impossible in an ISF shader.
-vec3 backgroundColor(vec3 direction)
-{
-    return vec3(0);
-}
 vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, vec3 background)
 {
     vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
@@ -596,6 +595,12 @@ vec2 sampleAperture(int nbBlades, float rotation)
     tri.x *= side;
     tri.y *= sqrt(1. - side*side);
     return tri * rotate2d(rotation * DEG2RAD + float(blade) / float(nbBlades) * TWO_PI);
+}
+// The Shadertoy shader uses the direction argument to return the color from a
+// cubemap, which is impossible in an ISF shader.
+vec3 backgroundColor(vec3 direction)
+{
+    return vec3(0);
 }
 void main()
 {
