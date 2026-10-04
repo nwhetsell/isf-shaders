@@ -499,7 +499,7 @@ float frand(void)
     return random(seed);
 }
 float TIME_SCALED = TIME * formationSpeed;
-float distanceEstimation(vec3 position)
+float raymarchVolumeMap(vec3 position)
 {
     float r = length(position);
     if (r > outerRadius)
@@ -523,7 +523,7 @@ vec3 raymarchVolumeShadowTransmittance(vec3 position, vec3 rayDirectionL, float 
     float tL = 0.0;
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES_LIGHT; i++) {
         vec3 positionL = position + rayDirectionL * tL;
-        float sdfL = distanceEstimation(positionL);
+        float sdfL = raymarchVolumeMap(positionL);
         float densityL = -sdfL;
         tL -= max(sdfL, stepSizeL);
         positionL = position + rayDirectionL * tL;
@@ -550,7 +550,7 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
     float t = RAYMARCH_MIN_DIST;
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES; i++) {
         vec3 position = rayOrigin + rayDirection * t;
-        float sdf = distanceEstimation(position);
+        float sdf = raymarchVolumeMap(position);
         float density = -sdf;
         t += max(sdf, stepSize);
         position = rayOrigin + rayDirection * t;
