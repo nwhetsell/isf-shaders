@@ -316,7 +316,8 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
         t += max(sdf, stepSize);
         position = rayOrigin + rayDirection * t;
 
-        if (sdf < stepSize && length(position) < outerRadius) {
+        if (length(position) < outerRadius) {
+            if (sdf < stepSize) {
             float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
             t += -stepSize + offset;
             position = rayOrigin + rayDirection * t;
@@ -344,10 +345,10 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
                     transmittance *= volumeColor.rgb;
                 }
             }
-        }
-
-        if (length(position) > outerRadius && dot(rayDirection, position) > 0.)
+            }
+        } else if (dot(rayDirection, position) > 0.) {
             return background * transmittance + scatteredLuminance;
+        }
     }
 
     return scatteredLuminance;
