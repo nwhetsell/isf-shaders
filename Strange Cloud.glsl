@@ -314,17 +314,17 @@ vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
     float t = RAYMARCH_MIN_DIST;
 
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES; i++) {
-        vec3 rayPosition = rayOrigin + rayDirection * t;
-        float sdf = distanceEstimation(rayPosition);
+        vec3 position = rayOrigin + rayDirection * t;
+        float sdf = distanceEstimation(position);
         float density = -sdf;
 
         t += max(sdf, stepSize);
-        rayPosition = rayOrigin + rayDirection * t;
+        position = rayOrigin + rayDirection * t;
 
-        if (sdf < stepSize && length(rayPosition) < outerRadius) {
+        if (sdf < stepSize && length(position) < outerRadius) {
             float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
             t += -stepSize + offset;
-            rayPosition = rayOrigin + rayDirection * t;
+            position = rayOrigin + rayDirection * t;
 
             if (density > 0.) {
                 float absorbance = exp(-absorbanceFactor * offset);
@@ -333,7 +333,7 @@ vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
                     scatteredLuminance += transmittance * highlightColor.rgb;
 
                 if (frand() < 1. / attenuationL)
-                    scatteredLuminance += attenuationL * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(rayPosition);
+                    scatteredLuminance += attenuationL * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(position);
 
                 if (mmax(transmittance) < 0.05)
                     break;
@@ -345,7 +345,7 @@ vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
             }
         }
 
-        if (length(rayPosition) > outerRadius && dot(rayDirection, rayPosition) > 0.)
+        if (length(position) > outerRadius && dot(rayDirection, position) > 0.)
             return scatteredLuminance + backgroundColor(rayDirection) * transmittance;
     }
 
