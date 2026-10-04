@@ -205,7 +205,7 @@
 //               = sqrt(40 * 40 + 100 * 100 + -10 * -10)
 //               = sqrt(11700) ≈ 108.1665382639
 //   lightPhi = acos(-10 / lightRadius) ≈ 95.3045714391°
-//   lightTheta = atan(100 / 40) = atan(2.5) = 68.1985905136°
+//   lightTheta = atan(100 / 40) = atan(2.5) ≈ 68.1985905136°
 // https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
 #define FLT_MAX 3.402823466e+38
 #define SQRT1_2 0.7071067811865475244008443621048

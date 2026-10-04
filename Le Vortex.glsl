@@ -206,7 +206,7 @@
 //               = sqrt(40 * 40 + 100 * 100 + -10 * -10)
 //               = sqrt(11700) ≈ 108.1665382639
 //   lightPhi = acos(-10 / lightRadius) ≈ 95.3045714391°
-//   lightTheta = atan(100 / 40) = atan(2.5) = 68.1985905136°
+//   lightTheta = atan(100 / 40) = atan(2.5) ≈ 68.1985905136°
 
 #include "lygia-additions/const.glsl"
 
