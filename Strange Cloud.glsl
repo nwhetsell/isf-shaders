@@ -265,10 +265,10 @@ vec3 directLight(in vec3 position)
         float sdfL = distanceEstimation(position);
         position -= lightDirection * max(sdfL, ShadowStepSize);
         if (sdfL < ShadowStepSize) {
-            float abStep = ShadowStepSize * frand();
-            position -= lightDirection * (abStep - ShadowStepSize);
+            float offset = ShadowStepSize * frand();
+            position -= lightDirection * (offset - ShadowStepSize);
             if (sdfL < 0.) {
-                transmittanceL *= exp(-absorbanceFactor * abStep);
+                transmittanceL *= exp(-absorbanceFactor * offset);
                 if (mmax(transmittanceL) < 0.1)
                     break;
             }
@@ -300,10 +300,10 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
         rayPosition += rayDirection * max(sdf, StepSize);
 
         if (sdf < StepSize && length(rayPosition) < outerRadius) {
-            float abStep = StepSize * frand();
-            rayPosition += rayDirection * (abStep - StepSize);
+            float offset = StepSize * frand();
+            rayPosition += rayDirection * (offset - StepSize);
             if (sdf < 0.) {
-                float absorbance = exp(-absorbanceFactor * abStep);
+                float absorbance = exp(-absorbanceFactor * offset);
 
                 if (sdf > -0.0005)
                     scatteredLuminance += transmittance * highlightColor.rgb;
