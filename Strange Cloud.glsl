@@ -30,6 +30,22 @@
             "MIN": 0
         },
         {
+            "NAME": "outerRadius",
+            "LABEL": "Outer radius",
+            "TYPE": "float",
+            "DEFAULT": 1.5,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
+            "NAME": "innerRadius",
+            "LABEL": "Inner radius",
+            "TYPE": "float",
+            "DEFAULT": 1.2,
+            "MAX": 10,
+            "MIN": 0
+        },
+        {
             "NAME": "rotationSpeed",
             "LABEL": "Rotation speed",
             "TYPE": "float",
@@ -82,6 +98,30 @@
             "LABEL": "Volume color",
             "TYPE": "color",
             "DEFAULT": [0.3, 0.3, 0.3, 1]
+        },
+        {
+            "NAME": "lightRadius",
+            "LABEL": "Light distance",
+            "TYPE": "float",
+            "DEFAULT": 3.3166247904,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "lightPhi",
+            "LABEL": "Light phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 72.4515993862,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "lightTheta",
+            "LABEL": "Light theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 251.5650511771,
+            "MIN": 0,
+            "MAX": 360
         },
         {
             "NAME": "lightColor",
@@ -145,6 +185,13 @@
     ]
 }*/
 
+// The default light parameters are:
+//   lightRadius = length(vec3(-1, -3, 1))
+//               = sqrt(-1 * -1 + -3 * -3 + 1 * 1)
+//               = sqrt(11) ≈ 3.3166247904
+//   lightPhi = acos(1 / lightRadius) ≈ 72.4515993862°
+//   lightTheta = atan(-3 / -1) ≈ 251.5650511771°
+
 // #define ISF_EDITOR_WEBSITE
 
 #include "lygia/color/tonemap/aces.glsl"
@@ -184,11 +231,9 @@ float TIME_SCALED = TIME * formationSpeed;
 
 float distanceEstimation(vec3 position)
 {
-    const float maxDistance = 1.5;
-
     float r = length(position);
-    if (r > maxDistance)
-        return r - 1.2;
+    if (r > outerRadius)
+        return r - innerRadius;
 
     float power = powerAmplitude * sin(TIME_SCALED * 0.1);
 
@@ -197,7 +242,7 @@ float distanceEstimation(vec3 position)
     for (int i = 0; i < 6; i++) {
         vec3 polar = cart2polar(z.xzy);
         r = polar.x;
-        if (r > maxDistance)
+        if (r > outerRadius)
             break;
         z = polar2cart(pow(r, power), polar.y * power - TIME_SCALED, polar.z * power - TIME_SCALED) + position;
         dr = pow(r, power - 1.) * power * dr + 1.;
@@ -212,7 +257,7 @@ float distanceEstimation(vec3 position)
 
 vec3 directLight(in vec3 position)
 {
-    const vec3 lightDirection = normalize(vec3(-1, -3, 1));
+    vec3 lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
 
     vec3 absorption = vec3(1);
 
@@ -229,7 +274,7 @@ vec3 directLight(in vec3 position)
             }
         }
 
-        if (length(position) > 1.5)
+        if (length(position) > outerRadius)
             break;
     }
 
@@ -245,7 +290,7 @@ vec3 backgroundColor(vec3 direction)
 
 vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
 {
-   	rayPosition += rayDirection * max(length(rayPosition) - 1.5, 0.);
+   	rayPosition += rayDirection * max(length(rayPosition) - outerRadius, 0.);
 
     vec3 absorption = vec3(1);
     vec3 color = vec3(0);
@@ -254,7 +299,7 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
         float distance = distanceEstimation(rayPosition);
         rayPosition += rayDirection * max(distance, StepSize);
 
-        if (distance < StepSize && length(rayPosition) < 1.5) {
+        if (distance < StepSize && length(rayPosition) < outerRadius) {
             float abStep = StepSize * frand();
             rayPosition += rayDirection * (abStep - StepSize);
             if (distance < 0.) {
@@ -277,7 +322,7 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
             }
         }
 
-        if (length(rayPosition) > 1.5 && dot(rayDirection, rayPosition) > 0.)
+        if (length(rayPosition) > outerRadius && dot(rayDirection, rayPosition) > 0.)
             return color + backgroundColor(rayDirection) * absorption;
     }
 
