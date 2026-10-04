@@ -547,7 +547,7 @@ vec3 backgroundColor(vec3 direction)
 {
     return vec3(0);
 }
-vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
+vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, vec3 background)
 {
     vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
     vec3 transmittance = vec3(1.0, 1.0, 1.0);
@@ -583,7 +583,7 @@ vec3 pathTrace(vec3 rayOrigin, vec3 rayDirection)
             }
         }
         if (length(position) > outerRadius && dot(rayDirection, position) > 0.)
-            return scatteredLuminance + backgroundColor(rayDirection) * transmittance;
+            return background * transmittance + scatteredLuminance;
     }
     return scatteredLuminance;
 }
@@ -613,7 +613,8 @@ void main()
         vec3 cameraPosition = vec3(0, 0, -2.5) * rotationMatrix(vec3(0, rotation, 0));
         mat3 cameraMatrix = rotationMatrix(vec3(0, rotation, 0.5 * sin(TIME_SCALED * 0.3)));
         vec3 rayDirection = normalize(focalPoint - aperture) * cameraMatrix;
-        gl_FragColor = vec4(pathTrace(cameraPosition + aperture * cameraMatrix, rayDirection), 1);
+        float minDist = 1./0.; // Not used
+        gl_FragColor = vec4(raymarchVolume(cameraPosition + aperture * cameraMatrix, rayDirection, uv, minDist, backgroundColor(rayDirection)), 1);
         if (FRAMEINDEX > 0)
             gl_FragColor += IMG_THIS_PIXEL(cloud) * motionBlur;
     }
