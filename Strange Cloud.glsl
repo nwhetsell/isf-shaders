@@ -22,8 +22,8 @@
             "MIN": -20
         },
         {
-            "NAME": "density",
-            "LABEL": "Density",
+            "NAME": "absorbanceFactor",
+            "LABEL": "Absorbance factor",
             "TYPE": "float",
             "DEFAULT": 10,
             "MAX": 100,
@@ -223,7 +223,7 @@ vec3 directLight(in vec3 position)
             float abStep = ShadowStepSize * frand();
             position -= lightDirection * (abStep - ShadowStepSize);
             if (distance < 0.) {
-                absorption *= exp(-density * abStep);
+                absorption *= exp(-absorbanceFactor * abStep);
                 if (mmax(absorption) < 0.1)
                     break;
             }
@@ -258,7 +258,7 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
             float abStep = StepSize * frand();
             rayPosition += rayDirection * (abStep - StepSize);
             if (distance < 0.) {
-                float absorbance = exp(-density * abStep);
+                float absorbance = exp(-absorbanceFactor * abStep);
                 float transmittance = 1. - absorbance;
 
                 if (distance > -0.0005)
