@@ -522,11 +522,12 @@ vec3 directLight(in vec3 position)
     vec3 transmittanceL = vec3(1.0, 1.0, 1.0);
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES_LIGHT; i++) {
         float sdfL = distanceEstimation(position);
+        float densityL = -sdfL;
         position -= lightDirection * max(sdfL, ShadowStepSize);
         if (sdfL < ShadowStepSize) {
             float offset = frand() * ShadowStepSize * RAYMARCH_VOLUME_DITHER;
             position -= lightDirection * (offset - ShadowStepSize);
-            if (sdfL < 0.) {
+            if (densityL > 0.) {
                 transmittanceL *= exp(-absorbanceFactor * offset);
                 if (mmax(transmittanceL) < 0.1)
                     break;
@@ -551,13 +552,14 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
     float stepSize = RAYMARCH_MAX_DIST/float(RAYMARCH_VOLUME_SAMPLES);
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES; i++) {
         float sdf = distanceEstimation(rayPosition);
+        float density = -sdf;
         rayPosition += rayDirection * max(sdf, stepSize);
         if (sdf < stepSize && length(rayPosition) < outerRadius) {
             float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
             rayPosition += rayDirection * (offset - stepSize);
-            if (sdf < 0.) {
+            if (density > 0.) {
                 float absorbance = exp(-absorbanceFactor * offset);
-                if (sdf > -0.0005)
+                if (density < 0.0005)
                     scatteredLuminance += transmittance * highlightColor.rgb;
                 if (frand() < 1. / attenuationL)
                     scatteredLuminance += attenuationL * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(rayPosition);
