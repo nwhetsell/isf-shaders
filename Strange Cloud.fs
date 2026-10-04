@@ -517,17 +517,21 @@ float distanceEstimation(vec3 position)
     return 0.5 * log(r) * r / dr;
 }
 #define ShadowStepSize 0.2
-vec3 directLight(in vec3 position)
+vec3 directLight(vec3 position)
 {
     vec3 lightDirection = normalize(LIGHT_DIRECTION);
     vec3 transmittanceL = vec3(1.0, 1.0, 1.0);
+    float tL = 0.0;
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES_LIGHT; i++) {
-        float sdfL = distanceEstimation(position);
+        vec3 positionL = position + lightDirection * tL;
+        float sdfL = distanceEstimation(positionL);
         float densityL = -sdfL;
-        position -= lightDirection * max(sdfL, ShadowStepSize);
+        tL -= max(sdfL, ShadowStepSize);
+        positionL = position + lightDirection * tL;
         if (sdfL < ShadowStepSize) {
             float offset = frand() * ShadowStepSize * RAYMARCH_VOLUME_DITHER;
-            position -= lightDirection * (offset - ShadowStepSize);
+            tL += ShadowStepSize - offset;
+            positionL = position + lightDirection * tL;
             if (densityL > 0.) {
                 transmittanceL *= exp(-absorbanceFactor * offset);
                 if (mmax(transmittanceL) < 0.1)
