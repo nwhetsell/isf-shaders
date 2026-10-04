@@ -238,11 +238,6 @@ float frand(void)
     #endif
 }
 
-mat3 rotationMatrix(vec3 r)
-{
-    return rotate3dZ(-r.z) * rotate3dX(-r.x) * rotate3dY(r.y);
-}
-
 float TIME_SCALED = TIME * formationSpeed;
 
 float distanceEstimation(vec3 position)
@@ -345,7 +340,7 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
                     break;
 
                 if (frand() > absorbance) {
-                    rayDirection = vec3(1, 0, 0) * rotationMatrix(vec3(frand() * TWO_PI, 0, frand() * TWO_PI)); // random direction
+                    rayDirection = vec3(1, 0, 0) * rotate3dZ(-frand() * TWO_PI) * rotate3dX(-frand() * TWO_PI); // random direction
                     transmittance *= volumeColor.rgb;
                 }
             }
@@ -389,8 +384,9 @@ void main()
         vec3 aperture = cameraAperture * vec3(sampleAperture(6, apertureRotation), 0.);
 
         float rotation = TIME_SCALED * rotationSpeed;
-        vec3 cameraPosition = vec3(0, 0, -2.5) * rotationMatrix(vec3(0, rotation, 0));
-        mat3 cameraMatrix = rotationMatrix(vec3(0, rotation, 0.5 * sin(TIME_SCALED * 0.3)));
+        mat3 cameraMatrix = rotate3dY(rotation);
+        vec3 cameraPosition = vec3(0, 0, -2.5) * cameraMatrix;
+        cameraMatrix = rotate3dZ(-0.5 * sin(TIME_SCALED * 0.3)) * cameraMatrix;
 
         vec3 rayDirection = normalize(focalPoint - aperture) * cameraMatrix;
 
