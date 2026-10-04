@@ -138,6 +138,14 @@
             "MIN": 0
         },
         {
+            "NAME": "attenuationL",
+            "LABEL": "Light attenuation",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MAX": 5,
+            "MIN": 0.01
+        },
+        {
             "NAME": "highlightColor",
             "LABEL": "Highlight color",
             "TYPE": "color",
@@ -223,6 +231,11 @@ vec4 tonemapACES(in vec4 v) {
 }
 #define RANDOM_SINLESS 
 #define RANDOM_HIGHER_RANGE 
+#define RAYMARCH_VOLUME_SAMPLES 150
+#define RAYMARCH_MAX_DIST (0.03 * float(RAYMARCH_VOLUME_SAMPLES))
+#define RAYMARCH_VOLUME_SAMPLES_LIGHT 7
+#define RAYMARCH_VOLUME_DITHER 1.0
+#define LIGHT_DIRECTION polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD)
 /*
 contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
 description: Pass a value and get some random normalize value between 0 and 1
@@ -502,18 +515,16 @@ float distanceEstimation(vec3 position)
     }
     return 0.5 * log(r) * r / dr;
 }
-#define StepSize 0.03
 #define ShadowStepSize 0.2
-#define ShadowRaysPerStep 0.25
 vec3 directLight(in vec3 position)
 {
-    vec3 lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
+    vec3 lightDirection = normalize(LIGHT_DIRECTION);
     vec3 transmittanceL = vec3(1.0, 1.0, 1.0);
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES_LIGHT; i++) {
         float sdfL = distanceEstimation(position);
         position -= lightDirection * max(sdfL, ShadowStepSize);
         if (sdfL < ShadowStepSize) {
-            float offset = ShadowStepSize * frand();
+            float offset = frand() * ShadowStepSize * RAYMARCH_VOLUME_DITHER;
             position -= lightDirection * (offset - ShadowStepSize);
             if (sdfL < 0.) {
                 transmittanceL *= exp(-absorbanceFactor * offset);
@@ -537,18 +548,19 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
     rayPosition += rayDirection * max(length(rayPosition) - outerRadius, 0.);
     vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
     vec3 transmittance = vec3(1.0, 1.0, 1.0);
-    for (int i = 0; i < 150; i++) {
+    float stepSize = RAYMARCH_MAX_DIST/float(RAYMARCH_VOLUME_SAMPLES);
+    for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES; i++) {
         float sdf = distanceEstimation(rayPosition);
-        rayPosition += rayDirection * max(sdf, StepSize);
-        if (sdf < StepSize && length(rayPosition) < outerRadius) {
-            float offset = StepSize * frand();
-            rayPosition += rayDirection * (offset - StepSize);
+        rayPosition += rayDirection * max(sdf, stepSize);
+        if (sdf < stepSize && length(rayPosition) < outerRadius) {
+            float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
+            rayPosition += rayDirection * (offset - stepSize);
             if (sdf < 0.) {
                 float absorbance = exp(-absorbanceFactor * offset);
                 if (sdf > -0.0005)
                     scatteredLuminance += transmittance * highlightColor.rgb;
-                if (frand() < ShadowRaysPerStep)
-                    scatteredLuminance += 1. / ShadowRaysPerStep * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(rayPosition);
+                if (frand() < 1. / attenuationL)
+                    scatteredLuminance += attenuationL * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(rayPosition);
                 if (mmax(transmittance) < 0.05)
                     break;
                 if (frand() > absorbance) {
