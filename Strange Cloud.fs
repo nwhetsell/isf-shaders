@@ -510,12 +510,12 @@ vec3 directLight(in vec3 position)
     vec3 lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
     vec3 transmittanceL = vec3(1.0, 1.0, 1.0);
     for (int i = 0; i < 7; i++) {
-        float distance = distanceEstimation(position);
-        position -= lightDirection * max(distance, ShadowStepSize);
-        if (distance < ShadowStepSize) {
+        float sdfL = distanceEstimation(position);
+        position -= lightDirection * max(sdfL, ShadowStepSize);
+        if (sdfL < ShadowStepSize) {
             float abStep = ShadowStepSize * frand();
             position -= lightDirection * (abStep - ShadowStepSize);
-            if (distance < 0.) {
+            if (sdfL < 0.) {
                 transmittanceL *= exp(-absorbanceFactor * abStep);
                 if (mmax(transmittanceL) < 0.1)
                     break;
@@ -538,14 +538,14 @@ vec3 pathTrace(vec3 rayPosition, vec3 rayDirection)
     vec3 scatteredLuminance = vec3(0.0, 0.0, 0.0);
     vec3 transmittance = vec3(1.0, 1.0, 1.0);
     for (int i = 0; i < 150; i++) {
-        float distance = distanceEstimation(rayPosition);
-        rayPosition += rayDirection * max(distance, StepSize);
-        if (distance < StepSize && length(rayPosition) < outerRadius) {
+        float sdf = distanceEstimation(rayPosition);
+        rayPosition += rayDirection * max(sdf, StepSize);
+        if (sdf < StepSize && length(rayPosition) < outerRadius) {
             float abStep = StepSize * frand();
             rayPosition += rayDirection * (abStep - StepSize);
-            if (distance < 0.) {
+            if (sdf < 0.) {
                 float absorbance = exp(-absorbanceFactor * abStep);
-                if (distance > -0.0005)
+                if (sdf > -0.0005)
                     scatteredLuminance += transmittance * highlightColor.rgb;
                 if (frand() < ShadowRaysPerStep)
                     scatteredLuminance += 1. / ShadowRaysPerStep * transmittance * volumeColor.rgb * (1. - absorbance) * directLight(rayPosition);
