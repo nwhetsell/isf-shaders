@@ -318,33 +318,33 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
 
         if (length(position) < outerRadius) {
             if (sdf < stepSize) {
-            float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
-            t += -stepSize + offset;
-            position = rayOrigin + rayDirection * t;
+                float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
+                t += -stepSize + offset;
+                position = rayOrigin + rayDirection * t;
 
-            if (density > 0.) {
-                float absorbance = exp(-absorbanceFactor * offset);
+                if (density > 0.) {
+                    float absorbance = exp(-absorbanceFactor * offset);
 
-                if (density < 0.0005)
-                    scatteredLuminance += transmittance * highlightColor.rgb;
+                    if (density < 0.0005)
+                        scatteredLuminance += transmittance * highlightColor.rgb;
 
-                if (frand() < 1. / attenuationL) {
-                    float stepSizeL = 0.2; // RAYMARCH_MAX_DIST/float(RAYMARCH_VOLUME_SAMPLES_LIGHT);
-                    vec3 rayDirectionL = normalize(LIGHT_DIRECTION);
-                    vec3 shadow = raymarchVolumeShadowTransmittance(position, rayDirectionL, stepSizeL);
-                    vec3 L = lightColor.rgb * lightIntensity;
+                    if (frand() < 1. / attenuationL) {
+                        float stepSizeL = 0.2; // RAYMARCH_MAX_DIST/float(RAYMARCH_VOLUME_SAMPLES_LIGHT);
+                        vec3 rayDirectionL = normalize(LIGHT_DIRECTION);
+                        vec3 shadow = raymarchVolumeShadowTransmittance(position, rayDirectionL, stepSizeL);
+                        vec3 L = lightColor.rgb * lightIntensity;
 
-                    scatteredLuminance += attenuationL * shadow * transmittance * volumeColor.rgb * (1. - absorbance) * L;
+                        scatteredLuminance += attenuationL * shadow * transmittance * volumeColor.rgb * (1. - absorbance) * L;
+                    }
+
+                    if (mmax(transmittance) < 0.05)
+                        break;
+
+                    if (frand() > absorbance) {
+                        rayDirection = vec3(1, 0, 0) * rotate3dZ(-frand() * TWO_PI) * rotate3dX(-frand() * TWO_PI); // random direction
+                        transmittance *= volumeColor.rgb;
+                    }
                 }
-
-                if (mmax(transmittance) < 0.05)
-                    break;
-
-                if (frand() > absorbance) {
-                    rayDirection = vec3(1, 0, 0) * rotate3dZ(-frand() * TWO_PI) * rotate3dX(-frand() * TWO_PI); // random direction
-                    transmittance *= volumeColor.rgb;
-                }
-            }
             }
         } else if (dot(rayDirection, position) > 0.) {
             return background * transmittance + scatteredLuminance;
