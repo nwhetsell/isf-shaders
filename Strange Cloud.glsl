@@ -338,8 +338,10 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
                         scatteredLuminance += attenuationL * shadow * transmittance * res.scattering * (1. - absorbance) * L;
                     }
 
-                    if (mmax(transmittance) < 0.05)
+                    if (mmax(transmittance) < 0.05) {
+                        transmittance = vec3(0);
                         break;
+                    }
 
                     if (frand() > absorbance) {
                         rayDirection = vec3(1, 0, 0) * rotate3dZ(-frand() * TWO_PI) * rotate3dX(-frand() * TWO_PI); // random direction
@@ -348,11 +350,11 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
                 }
             }
         } else if (dot(rayDirection, position) > 0.) {
-            return background * transmittance + scatteredLuminance;
+            break;
         }
     }
 
-    return scatteredLuminance;
+    return background * transmittance + scatteredLuminance;
 }
 
 vec2 sampleAperture(int nbBlades, float rotation)
