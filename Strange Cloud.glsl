@@ -217,6 +217,7 @@
 #define RAYMARCH_VOLUME_SAMPLES_LIGHT 7
 #define RAYMARCH_VOLUME_DITHER 1.0
 #define LIGHT_DIRECTION polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD)
+#include "lygia/lighting/medium/new.glsl"
 
 #include "lygia/math/const.glsl"
 #include "lygia/math/mmax.glsl"
@@ -244,11 +245,11 @@ float frand(void)
 
 float TIME_SCALED = TIME * formationSpeed;
 
-float raymarchVolumeMap(vec3 position)
+Medium raymarchVolumeMap(vec3 position)
 {
     float r = length(position);
     if (r > outerRadius)
-        return r - innerRadius;
+        return mediumNew(volumeColor.rgb, r - innerRadius);
 
     float power = powerAmplitude * sin(TIME_SCALED * 0.1);
 
@@ -259,11 +260,12 @@ float raymarchVolumeMap(vec3 position)
         r = polar.x;
         if (r > outerRadius)
             break;
-        z = polar2cart(pow(r, power), polar.y * power - TIME_SCALED, polar.z * power - TIME_SCALED) + position;
+        polar.yz = polar.yz * power - TIME_SCALED;
+        z = polar2cart(pow(r, power), polar.y, polar.z) + position;
         dr = pow(r, power - 1.) * power * dr + 1.;
     }
 
-    return 0.5 * log(r) * r / dr;
+    return mediumNew(volumeColor.rgb, 0.5 * log(r) * r / dr);
 }
 
 vec3 raymarchVolumeShadowTransmittance(vec3 position, vec3 rayDirectionL, float stepSizeL)
@@ -273,12 +275,13 @@ vec3 raymarchVolumeShadowTransmittance(vec3 position, vec3 rayDirectionL, float 
 
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES_LIGHT; i++) {
         vec3 positionL = position + rayDirectionL * tL;
-        float sdfL = raymarchVolumeMap(positionL);
-        float densityL = -sdfL;
-        tL -= max(sdfL, stepSizeL);
+        Medium resL = raymarchVolumeMap(positionL);
+        float densityL = -resL.sdf;
+
+        tL -= max(resL.sdf, stepSizeL);
         positionL = position + rayDirectionL * tL;
 
-        if (sdfL < stepSizeL) {
+        if (resL.sdf < stepSizeL) {
             float offset = frand() * stepSizeL * RAYMARCH_VOLUME_DITHER;
             tL += stepSizeL - offset;
             positionL = position + rayDirectionL * tL;
@@ -307,14 +310,15 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
 
     for (int i = 0; i < RAYMARCH_VOLUME_SAMPLES; i++) {
         vec3 position = rayOrigin + rayDirection * t;
-        float sdf = raymarchVolumeMap(position);
-        float density = -sdf;
+        Medium res = raymarchVolumeMap(position);
+        float density = -res.sdf;
+        vec3 extinction = res.absorption + res.scattering;
 
-        t += max(sdf, stepSize);
+        t += max(res.sdf, stepSize);
         position = rayOrigin + rayDirection * t;
 
         if (length(position) < outerRadius) {
-            if (sdf < stepSize) {
+            if (res.sdf < stepSize) {
                 float offset = frand() * stepSize * RAYMARCH_VOLUME_DITHER;
                 t += -stepSize + offset;
                 position = rayOrigin + rayDirection * t;
@@ -331,7 +335,7 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
                         vec3 shadow = raymarchVolumeShadowTransmittance(position, rayDirectionL, stepSizeL);
                         vec3 L = lightColor.rgb * lightIntensity;
 
-                        scatteredLuminance += attenuationL * shadow * transmittance * volumeColor.rgb * (1. - absorbance) * L;
+                        scatteredLuminance += attenuationL * shadow * transmittance * res.scattering * (1. - absorbance) * L;
                     }
 
                     if (mmax(transmittance) < 0.05)
@@ -339,7 +343,7 @@ vec3 raymarchVolume(vec3 rayOrigin, vec3 rayDirection, vec2 st, float minDist, v
 
                     if (frand() > absorbance) {
                         rayDirection = vec3(1, 0, 0) * rotate3dZ(-frand() * TWO_PI) * rotate3dX(-frand() * TWO_PI); // random direction
-                        transmittance *= volumeColor.rgb;
+                        transmittance *= extinction;
                     }
                 }
             }
