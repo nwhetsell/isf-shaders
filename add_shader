@@ -72,7 +72,7 @@ new_element = etree.fromstring(f'''\
 new_element.tail = '\n  '
 
 def sort_key(element):
-    return element.find('./td/a').text
+    return element.find('./td/a').text.lower()
 
 index = bisect(html_table.findall('tr'), sort_key(new_element), key=sort_key)
 html_table.insert(index, new_element)
