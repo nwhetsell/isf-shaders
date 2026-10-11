@@ -46,7 +46,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “CA Molecular dynamics” shader" src="https://github.com/user-attachments/assets/0dfd7e90-2f53-4429-aff7-7ce9e9b224ce" />
+      <img width="197" alt="Screenshot of “CA Molecular dynamics” shader" src="https://github.com/user-attachments/assets/0dfd7e90-2f53-4429-aff7-7ce9e9b224ce"/>
     </td>
   </tr>
   <tr>
@@ -60,7 +60,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Cell system 2” shader" src="https://github.com/user-attachments/assets/61a7d910-fe93-4435-a089-46296b671bdb" />
+      <img width="197" alt="Screenshot of “Cell system 2” shader" src="https://github.com/user-attachments/assets/61a7d910-fe93-4435-a089-46296b671bdb"/>
     </td>
   </tr>
   <tr>
@@ -74,7 +74,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “circle dithering” shader" src="https://github.com/user-attachments/assets/6096eb6e-0a52-4989-8d86-5b9e27aef640" />
+      <img width="197" alt="Screenshot of “circle dithering” shader" src="https://github.com/user-attachments/assets/6096eb6e-0a52-4989-8d86-5b9e27aef640"/>
     </td>
   </tr>
   <tr>
@@ -88,7 +88,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Colormap” shader" src="https://github.com/user-attachments/assets/236cf077-32c4-4917-ba3e-01b86373cc97" />
+      <img width="197" alt="Screenshot of “Colormap” shader" src="https://github.com/user-attachments/assets/236cf077-32c4-4917-ba3e-01b86373cc97"/>
     </td>
   </tr>
   <tr>
@@ -102,7 +102,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Domain-warped FBM noise” shader" src="https://github.com/user-attachments/assets/f06a5169-a53f-44df-bfbb-80ac1e260840" />
+      <img width="197" alt="Screenshot of “Domain-warped FBM noise” shader" src="https://github.com/user-attachments/assets/f06a5169-a53f-44df-bfbb-80ac1e260840"/>
     </td>
   </tr>
   <tr>
@@ -116,7 +116,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Endless living creature” shader" src="https://github.com/user-attachments/assets/f71f48c1-371b-414e-b63f-63f04d7106a9" />
+      <img width="197" alt="Screenshot of “Endless living creature” shader" src="https://github.com/user-attachments/assets/f71f48c1-371b-414e-b63f-63f04d7106a9"/>
     </td>
   </tr>
   <tr>
@@ -131,7 +131,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Ethereal Spectrum Cascade” shader" src="https://github.com/user-attachments/assets/2c77d57d-31fc-418f-a903-9cb75352fd04" />
+      <img width="197" alt="Screenshot of “Ethereal Spectrum Cascade” shader" src="https://github.com/user-attachments/assets/2c77d57d-31fc-418f-a903-9cb75352fd04"/>
     </td>
   </tr>
   <tr>
@@ -145,7 +145,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Everflow” shader" src="https://github.com/user-attachments/assets/58878b46-f931-41e1-9bea-a0772debc691" />
+      <img width="197" alt="Screenshot of “Everflow” shader" src="https://github.com/user-attachments/assets/58878b46-f931-41e1-9bea-a0772debc691"/>
     </td>
   </tr>
   <tr>
@@ -156,7 +156,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       <p><a href="https://www.shadertoy.com/view/4dcGW2">Shadertoy</a> only <!-- A bug in https://editor.isf.video prevents this shader from compiling. --></p>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “expansive reaction-diffusion” shader" src="https://github.com/user-attachments/assets/40ba64ff-3a2a-4904-8fab-fc1fc5331ff8" />
+      <img width="197" alt="Screenshot of “expansive reaction-diffusion” shader" src="https://github.com/user-attachments/assets/40ba64ff-3a2a-4904-8fab-fc1fc5331ff8"/>
     </td>
   </tr>
   <tr>
@@ -170,7 +170,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Gaussian SmoothLife” shader" src="https://github.com/user-attachments/assets/4c51ad5b-868f-450b-8068-69bd912841d4" />
+      <img width="197" alt="Screenshot of “Gaussian SmoothLife” shader" src="https://github.com/user-attachments/assets/4c51ad5b-868f-450b-8068-69bd912841d4"/>
     </td>
   </tr>
   <tr>
@@ -181,7 +181,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       <p><a href="https://editor.isf.video/shaders/6aa17309bca9d5001a9d4ab8">ISF</a> only</p>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Iterated function system” shader" src="https://github.com/user-attachments/assets/6232fe21-4974-461c-bbaa-7f56ad184f66" />
+      <img width="197" alt="Screenshot of “Iterated function system” shader" src="https://github.com/user-attachments/assets/6232fe21-4974-461c-bbaa-7f56ad184f66"/>
     </td>
   </tr>
   <tr>
@@ -196,7 +196,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Le Vortex” shader" src="https://github.com/user-attachments/assets/a18fb39d-b84a-4917-9361-72a5829b1044" />
+      <img width="197" alt="Screenshot of “Le Vortex” shader" src="https://github.com/user-attachments/assets/a18fb39d-b84a-4917-9361-72a5829b1044"/>
     </td>
   </tr>
   <tr>
@@ -210,7 +210,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Lorenz system” shader" src="https://github.com/user-attachments/assets/cc974df7-b9a2-4b33-be46-8ce07cdff7dc" />
+      <img width="197" alt="Screenshot of “Lorenz system” shader" src="https://github.com/user-attachments/assets/cc974df7-b9a2-4b33-be46-8ce07cdff7dc"/>
     </td>
   </tr>
   <tr>
@@ -224,7 +224,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “MattiasCRT” shader" src="https://github.com/user-attachments/assets/7ac1d83b-5441-4c0e-9f1d-db64304b9be5" />
+      <img width="197" alt="Screenshot of “MattiasCRT” shader" src="https://github.com/user-attachments/assets/7ac1d83b-5441-4c0e-9f1d-db64304b9be5"/>
     </td>
   </tr>
   <tr>
@@ -238,7 +238,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Mountains” shader" src="https://github.com/user-attachments/assets/f33fa6ac-7e00-4308-b018-85a3b63e1fff" />
+      <img width="197" alt="Screenshot of “Mountains” shader" src="https://github.com/user-attachments/assets/f33fa6ac-7e00-4308-b018-85a3b63e1fff"/>
     </td>
   </tr>
   <tr>
@@ -252,7 +252,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “notebook drawings” shader" src="https://github.com/user-attachments/assets/a8c2391e-8e08-446d-a79b-83cc73e26759" />
+      <img width="197" alt="Screenshot of “notebook drawings” shader" src="https://github.com/user-attachments/assets/a8c2391e-8e08-446d-a79b-83cc73e26759"/>
     </td>
   </tr>
   <tr>
@@ -263,7 +263,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       <p><a href="https://www.shadertoy.com/view/Nttyz4">Shadertoy</a> only <!-- This shader uses <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/fwidth.xhtml"><code>fwidth</code></a>, which isn’t available on https://editor.isf.video --></p>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “oscilloscope analysis luminance” shader" src="https://github.com/user-attachments/assets/8c9afa33-4983-4490-a60c-866368a44f2c" />
+      <img width="197" alt="Screenshot of “oscilloscope analysis luminance” shader" src="https://github.com/user-attachments/assets/8c9afa33-4983-4490-a60c-866368a44f2c"/>
     </td>
   </tr>
   <tr>
@@ -277,7 +277,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Palettes” shader" src="https://github.com/user-attachments/assets/d898c6a3-8731-4002-8933-b73056a51f81" />
+      <img width="197" alt="Screenshot of “Palettes” shader" src="https://github.com/user-attachments/assets/d898c6a3-8731-4002-8933-b73056a51f81"/>
     </td>
   </tr>
   <tr>
@@ -291,7 +291,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Physarum Polycephalum Simulation” shader" src="https://github.com/user-attachments/assets/ec175ac4-7659-4611-9dcb-e0a9490f7d88" />
+      <img width="197" alt="Screenshot of “Physarum Polycephalum Simulation” shader" src="https://github.com/user-attachments/assets/ec175ac4-7659-4611-9dcb-e0a9490f7d88"/>
     </td>
   </tr>
   <tr>
@@ -305,7 +305,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Rainier mood” shader" src="https://github.com/user-attachments/assets/32d1b87f-34c3-436b-a5c3-21fd2c08ad49" />
+      <img width="197" alt="Screenshot of “Rainier mood” shader" src="https://github.com/user-attachments/assets/32d1b87f-34c3-436b-a5c3-21fd2c08ad49"/>
     </td>
   </tr>
   <tr>
@@ -319,7 +319,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Random slime mold generator” shader" src="https://github.com/user-attachments/assets/9f804502-69c1-485b-bcfe-dc99238c77ed" />
+      <img width="197" alt="Screenshot of “Random slime mold generator” shader" src="https://github.com/user-attachments/assets/9f804502-69c1-485b-bcfe-dc99238c77ed"/>
     </td>
   </tr>
   <tr>
@@ -333,7 +333,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt=" of “Shattered Crystal” shader" src="https://github.com/user-attachments/assets/f7195e50-5297-431e-ac79-12533ad5321e" />
+      <img width="197" alt=" of “Shattered Crystal” shader" src="https://github.com/user-attachments/assets/f7195e50-5297-431e-ac79-12533ad5321e"/>
     </td>
   </tr>
   <tr>
@@ -347,7 +347,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt=" of “Strange Cloud” shader" src="https://github.com/user-attachments/assets/6fc6dc76-8c8a-4ff5-b1c7-5d75828947e3" />
+      <img width="197" alt=" of “Strange Cloud” shader" src="https://github.com/user-attachments/assets/6fc6dc76-8c8a-4ff5-b1c7-5d75828947e3"/>
     </td>
   </tr>
   <tr>
@@ -361,7 +361,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “spilled” shader" src="https://github.com/user-attachments/assets/627a035e-1122-4bfa-8f7d-4f81cbded1d7" />
+      <img width="197" alt="Screenshot of “spilled” shader" src="https://github.com/user-attachments/assets/627a035e-1122-4bfa-8f7d-4f81cbded1d7"/>
     </td>
   </tr>
   <tr>
@@ -375,7 +375,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Suture Fluid” shader" src="https://github.com/user-attachments/assets/a6b2b1b0-b25a-4bf4-8ae5-306ef065fa31" />
+      <img width="197" alt="Screenshot of “Suture Fluid” shader" src="https://github.com/user-attachments/assets/a6b2b1b0-b25a-4bf4-8ae5-306ef065fa31"/>
     </td>
   </tr>
   <tr>
@@ -389,7 +389,7 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “The Weave” shader" src="https://github.com/user-attachments/assets/4d138968-ae6b-46a4-8163-ad4607f6bad2" />
+      <img width="197" alt="Screenshot of “The Weave” shader" src="https://github.com/user-attachments/assets/4d138968-ae6b-46a4-8163-ad4607f6bad2"/>
     </td>
   </tr>
 </table>

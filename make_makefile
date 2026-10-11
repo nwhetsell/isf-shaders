@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+from pathlib import Path
+
+
+dependencies_by_shader = {
+    'Iterated function system': 'rand/rand.glsl'
+}
+
+options_by_shader = {
+    'Endless living creature': '-D__VERSION__=300',
+    'expansive reaction-diffusion': '-fno-directives-only -D__VERSION__=300',
+    'Le Vortex': '-D__VERSION__=300',
+    'Mountains': '-D__VERSION__=300'
+}
+
+shaders = []
+rules = []
+
+for path in sorted(Path('.').glob('*.glsl'), key=lambda path: str(path).lower()):
+    escaped_name = path.stem.replace(' ', r'\ ')
+
+    shaders.append(escaped_name)
+
+    dependencies = f'{escaped_name}.glsl'
+    if path.stem in dependencies_by_shader:
+        dependencies += f' {dependencies_by_shader[path.stem]}'
+
+    command = 'clang $(clang_options)'
+    if path.stem in options_by_shader:
+        command += f' {options_by_shader[path.stem]}'
+    command += ' --output="$@" "$<"'
+    commands = [command]
+    if path.with_suffix('.patch').exists():
+        patch_name = f'{path.stem}.patch'
+        if ' ' in patch_name:
+            patch_name = f"'{patch_name}'"
+        commands.insert(0, f"cd lygia; git apply ../{patch_name};")
+        commands.append('cd lygia; git reset --hard')
+
+    rules.append(f'''\
+{escaped_name}.fs: {dependencies}
+{'\n'.join(f'\t{command}' for command in commands)}
+''')
+
+with open('Makefile', 'w') as f:
+    f.write(f'''\
+shaders = \\
+{' \\\n'.join(f'\t{shader}.fs' for shader in shaders)}
+
+all: $(shaders)
+
+clang_options = --preprocess --comments --no-line-commands -fdirectives-only --language=c
+
+{''.join(rules)}''')
