@@ -10,7 +10,7 @@ Due to limitations of the Clang preprocessor, `#if`/`#else` directives are also 
 
 Many shaders use code from [LYGIA](https://github.com/patriciogonzalezvivo/lygia), which for non-commercial use is distributed under the [Prosperity Public License 3.0.0](https://prosperitylicense.com/versions/3.0.0).
 
-On macOS, after cloning this repository you can run the [make_links.sh](make_links.sh) script to add symbolic links to .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
+On macOS, after cloning this repository you can run the [make_links](make_links) script to add symbolic links to .fs files in the repository’s parent folder. This can be used to expose these shaders to apps like [Videosync](https://www.showsync.com/videosync).
 
 Many of these shaders are intended to be used with floating-point buffers,
 which not all ISF hosts support:
@@ -18,7 +18,7 @@ Videosync supports floating-point buffers (in [v2.0.12](https://support.showsync
 but https://editor.isf.video does not.
 If floating-point buffers are not available, most of these shaders will look very different (if they run at all).
 
-The [Mountains](Mountains.fs) shader can optionally import an image file that can be downloaded from
+The [Mountains](Mountains.glsl) shader can optionally import an image file that can be downloaded from
 https://github.com/patriciogonzalezvivo/lygia_examples/blob/main/assets/rocks.png.
 
 <!--
