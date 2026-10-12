@@ -62,6 +62,12 @@
 #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
 #include "lygia/generative/random.glsl"
+#define RAYMARCH_BACKGROUND vec3(0)
+#define RAYMARCH_SAMPLES 256
+#define RAYMARCH_MIN_DIST 0.
+#define RAYMARCH_MAX_DIST 12.
+#define RAYMARCH_MIN_HIT_DIST 0.001
+#include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/math/mmin.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/math/saturate.glsl"
@@ -99,7 +105,7 @@ vec3 uniformVector(void) {
 }
 
 // scene sdf (menger sponge)
-float map(vec3 p) {
+Material raymarchMap(vec3 p) {
     vec3 q = abs(p);
     float d = p.y; // distance
 
@@ -124,41 +130,27 @@ float map(vec3 p) {
         d = max(d, c/s);
     }
 
-    // return the distance
-    return min(d,12.);
-}
-
-// raymarching function
-float intersect(vec3 ro, vec3 rd) {
-    float t = 0.; // distance travelled
-
-    for (int i=0; i<256; i++) { // marching loop
-        vec3 p = ro + rd*t; // current point
-
-        float h = map(p); // distance to the scene
-        if (h<.001) break; // we hit the surface
-        t += h; // march
-        if (t>12.) return -1.;
-    }
-    // return the distance
-    return t;
+    Material mat = materialNew();
+    mat.position = p;
+    mat.sdf = min(d, RAYMARCH_MAX_DIST);
+    return mat;
 }
 
 // normal estimation
 vec3 calcNormal(vec3 p) {
-    float h = map(p);
+    float h = raymarchMap(p).sdf;
     vec2 e = vec2(h,0); // epsilon
 
-    return normalize(h - vec3(map(p-e.xyy),
-                              map(p-e.yxy),
-                              map(p-e.yyx)));
+    return normalize(h - vec3(raymarchMap(p-e.xyy).sdf,
+                              raymarchMap(p-e.yxy).sdf,
+                              raymarchMap(p-e.yyx).sdf));
 }
 
 // shadow function
 float shadow(vec3 ro, vec3 rd) {
     for (float t=0.; t<4.;) {
         vec3 p = ro + rd*t;
-        float h = map(p);
+        float h = raymarchMap(p).sdf;
         if (h<.001) return 0.;
         t += h;
     }
@@ -178,10 +170,11 @@ vec3 render(vec3 ro, vec3 rd) {
     vec3 emit = vec3(1); // color mask
 
     for (int i=0; i<5; i++) { // 5 bounces of gi
-        float t = intersect(ro, rd);
+        Material res = raymarchCast(ro, rd);
+        float t = res.sdf;
         if (i==0) {fdis = t; frd = rd;}
 
-        if (t<0.) { // we don't hit the surface
+        if (!res.valid) { // we don't hit the surface
             if (i==0) col = bgCol;
             break;
         }
@@ -242,7 +235,7 @@ void main()
         vec3 rd = ca * normalize(vec3(p,1.5)); // ray direction
 
         // depth of field
-        float t = intersect(ro, ca[2]); // focus distance
+        float t = raymarchCast(ro, ca[2]).sdf; // focus distance
         vec3 fp = ro + rd*t; // focus plane
         ro += uniformVector()*.05;
         rd = normalize(fp-ro);

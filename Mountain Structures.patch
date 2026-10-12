@@ -1,0 +1,16 @@
+diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
+index bfe1629d..27508e84 100644
+--- a/lighting/raymarch/cast.glsl
++++ b/lighting/raymarch/cast.glsl
+@@ -40,8 +40,10 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+ #else
+         float dist = res.sdf;
+ #endif
+-        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
++        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) {
++            m.valid = true;
+             break;
++        }
+         m = res;
+         t += res.sdf;
+     }

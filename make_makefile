@@ -11,6 +11,7 @@ options_by_shader = {
     'Endless living creature': '-D__VERSION__=300',
     'expansive reaction-diffusion': '-fno-directives-only -D__VERSION__=300',
     'Le Vortex': '-D__VERSION__=300',
+    'Mountain Structures': '-D__VERSION__=300',
     'Mountains': '-D__VERSION__=300'
 }
 
