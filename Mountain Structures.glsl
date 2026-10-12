@@ -212,9 +212,6 @@ void main()
     }
     else // Shadertoy Image
     {
-        // normalized pixel coordinates
-        vec2 p = fragCoord/iResolution.xy;
-
         // base color
         vec4 data = IMG_THIS_PIXEL(bufferA);
         vec3 col = data.rgb/data.w;
@@ -231,9 +228,6 @@ void main()
 
         col = col*col * (3. - 2. * col); // constrast
         col = tonemapACES(col); // tonemapping
-
-        // black bars
-        col *= step(abs(p.y-.5),.425);
 
         fragColor = vec4(col, 1);
     }
