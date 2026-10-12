@@ -27,6 +27,9 @@
 #define GAMMA 0.4545
 #include "lygia/color/space/gamma2linear.glsl"
 #include "lygia/color/tonemap/aces.glsl"
+#define RANDOM_HIGHER_RANGE
+#define RANDOM_SINLESS
+#include "lygia/generative/random.glsl"
 #include "lygia/math/saturate.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/space/aspect.glsl"
@@ -34,17 +37,21 @@
 #define LOOK_AT_RIGHT_HANDED
 #include "lygia/space/lookAt.glsl"
 
+float seed;
 
-float seed; // randoms seed
+vec2 random2(void)
+{
+    return random2(seed += 0.1);
+}
 
-// hash functions by me
-vec2 hash2() {return fract(sin(seed+=.1)*vec2(8472.5636,9854.4213));}
-
-vec3 hash3() {return fract(sin(seed+=.1)*vec3(7653.1285,6912.8512,5914.7134));}
+vec3 random3(void)
+{
+    return random3(seed += 0.1);
+}
 
 // normalized random 3d vector
 vec3 uniformVector() {
-    return normalize(center(hash3()));
+    return normalize(center(random3()));
 }
 
 // scene sdf (menger sponge)
@@ -179,10 +186,9 @@ void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        // init randoms seed
-        seed = TIME+dot(sin(gl_FragCoord.xy),vec2(453.712,983.234));
+        seed = TIME + dot(sin(gl_FragCoord.xy), vec2(453.712, 983.234));
 
-        vec2 off = hash2()-.5; // AA offset
+        vec2 off = random2()-.5; // AA offset
         // // pixel coordinates centered at the origin
         vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
 
@@ -207,7 +213,7 @@ void main()
     {
         // base color
         vec4 data = IMG_THIS_PIXEL(bufferA);
-        vec3 col = data.rgb/data.w;
+        vec3 col = data.rgb / data.a;
 
         // post processing
 

@@ -72,6 +72,94 @@ vec3 tonemapACES(vec3 v) {
 vec4 tonemapACES(in vec4 v) {
     return vec4(tonemapACES(v.rgb), v.a);
 }
+#define RANDOM_HIGHER_RANGE 
+#define RANDOM_SINLESS 
+/*
+contributors: ["Patricio Gonzalez Vivo", "David Hoskins", "Inigo Quilez"]
+description: Pass a value and get some random normalize value between 0 and 1
+use: float random[2|3](<float|vec2|vec3> value)
+options:
+    - RANDOM_HIGHER_RANGE: for working with a range over 0 and 1
+    - RANDOM_SINLESS: Use sin-less random, which tolerates bigger values before producing pattern. From https://www.shadertoy.com/view/4djSRW
+    - RANDOM_SCALE: by default this scale if for number with a big range. For producing good random between 0 and 1 use bigger range
+examples:
+    - /shaders/generative_random.frag
+license:
+    - MIT License (MIT) Copyright 2014, David Hoskins
+*/
+#define RANDOM_SCALE vec4(.1031, .1030, .0973, .1099)
+#define FNC_RANDOM 
+float random(in float x) {
+    x = fract(x * RANDOM_SCALE.x);
+    x *= x + 33.33;
+    x *= x + x;
+    return fract(x);
+}
+float random(in vec2 st) {
+    vec3 p3 = fract(vec3(st.xyx) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+float random(in vec3 pos) {
+    pos = fract(pos * RANDOM_SCALE.xyz);
+    pos += dot(pos, pos.zyx + 31.32);
+    return fract((pos.x + pos.y) * pos.z);
+}
+float random(in vec4 pos) {
+    pos = fract(pos * RANDOM_SCALE);
+    pos += dot(pos, pos.wzxy + 33.33);
+    return fract((pos.x + pos.y) * (pos.z + pos.w));
+}
+vec2 random2(float p) {
+    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec2 random2(vec2 p) {
+    vec3 p3 = fract(p.xyx * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec2 random2(vec3 p3) {
+    p3 = fract(p3 * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+vec3 random3(float p) {
+    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+vec3 random3(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * RANDOM_SCALE.xyz);
+    p3 += dot(p3, p3.yxz + 19.19);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+vec3 random3(vec3 p) {
+    p = fract(p * RANDOM_SCALE.xyz);
+    p += dot(p, p.yxz + 19.19);
+    return fract((p.xxy + p.yzz) * p.zyx);
+}
+vec4 random4(float p) {
+    vec4 p4 = fract(p * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec2 p) {
+    vec4 p4 = fract(p.xyxy * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec3 p) {
+    vec4 p4 = fract(p.xyzx * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
+vec4 random4(vec4 p4) {
+    p4 = fract(p4 * RANDOM_SCALE);
+    p4 += dot(p4, p4.wzxy + 19.19);
+    return fract((p4.xxyz + p4.yzzw) * p4.zywx);
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: clamp a value between 0 and 1
@@ -160,13 +248,19 @@ mat3 lookAt(vec3 eye, vec3 target, float roll) {
 mat3 lookAt(vec3 forward) {
     return lookAt(forward, vec3(0.0, 1.0, 0.0));
 }
-float seed; // randoms seed
-// hash functions by me
-vec2 hash2() {return fract(sin(seed+=.1)*vec2(8472.5636,9854.4213));}
-vec3 hash3() {return fract(sin(seed+=.1)*vec3(7653.1285,6912.8512,5914.7134));}
+
+float seed;
+vec2 random2(void)
+{
+    return random2(seed += 0.1);
+}
+vec3 random3(void)
+{
+    return random3(seed += 0.1);
+}
 // normalized random 3d vector
 vec3 uniformVector() {
-    return normalize(center(hash3()));
+    return normalize(center(random3()));
 }
 // scene sdf (menger sponge)
 float map(vec3 p) {
@@ -273,9 +367,8 @@ void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        // init randoms seed
-        seed = TIME+dot(sin(gl_FragCoord.xy),vec2(453.712,983.234));
-        vec2 off = hash2()-.5; // AA offset
+        seed = TIME + dot(sin(gl_FragCoord.xy), vec2(453.712, 983.234));
+        vec2 off = random2()-.5; // AA offset
         // // pixel coordinates centered at the origin
         vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
         vec3 ro = vec3(-1,.9,1.6); // ray origin
@@ -295,7 +388,7 @@ void main()
     {
         // base color
         vec4 data = IMG_THIS_PIXEL(bufferA);
-        vec3 col = data.rgb/data.w;
+        vec3 col = data.rgb / data.a;
         // post processing
         col = gamma2linear(col); // gamma correction
         col = col * 1.1 - 0.1; // darkening
