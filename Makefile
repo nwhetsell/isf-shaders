@@ -13,6 +13,7 @@ shaders = \
 	Le\ Vortex.fs \
 	Lorenz\ system.fs \
 	MattiasCRT.fs \
+	Mountain\ Structures.fs \
 	Mountains.fs \
 	notebook\ drawings.fs \
 	oscilloscope\ analysis\ luminance.fs \
@@ -61,6 +62,8 @@ Le\ Vortex.fs: Le\ Vortex.glsl
 Lorenz\ system.fs: Lorenz\ system.glsl
 	clang $(clang_options) --output="$@" "$<"
 MattiasCRT.fs: MattiasCRT.glsl
+	clang $(clang_options) --output="$@" "$<"
+Mountain\ Structures.fs: Mountain\ Structures.glsl
 	clang $(clang_options) --output="$@" "$<"
 Mountains.fs: Mountains.glsl
 	cd lygia; git apply ../Mountains.patch;
