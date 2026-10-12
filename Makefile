@@ -24,7 +24,7 @@ shaders = \
 	spilled.fs \
 	Strange\ Cloud.fs \
 	Suture\ Fluid.fs \
-	The\ Weave.fs \
+	The\ Weave.fs
 
 all: $(shaders)
 
