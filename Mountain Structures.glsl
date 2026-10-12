@@ -35,12 +35,6 @@
 #include "lygia/space/lookAt.glsl"
 
 
-#define fragColor gl_FragColor
-#define fragCoord gl_FragCoord.xy
-#define iMouse vec3(0)
-#define iResolution RENDERSIZE
-#define iTime TIME
-
 float seed; // randoms seed
 
 // hash functions by me
@@ -50,8 +44,7 @@ vec3 hash3() {return fract(sin(seed+=.1)*vec3(7653.1285,6912.8512,5914.7134));}
 
 // normalized random 3d vector
 vec3 uniformVector() {
-    vec3 v = hash3()*2.-1.;
-    return normalize(v);
+    return normalize(center(hash3()));
 }
 
 // scene sdf (menger sponge)
@@ -165,7 +158,7 @@ vec3 render(vec3 ro, vec3 rd) {
 // bloom function
 vec4 bloom(sampler2D tex) {
     // normalized pixel coordinates
-    vec2 p = fragCoord/iResolution.xy;
+    vec2 p = gl_FragCoord.xy / RENDERSIZE;
 
     vec4 col = vec4(0); // accumulated color
     const int N = 8; // quality
@@ -187,11 +180,11 @@ void main()
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         // init randoms seed
-        seed = iTime+dot(sin(fragCoord),vec2(453.712,983.234));
+        seed = TIME+dot(sin(gl_FragCoord.xy),vec2(453.712,983.234));
 
         vec2 off = hash2()-.5; // AA offset
         // // pixel coordinates centered at the origin
-        vec2 p = 0.5 * aspect(center((fragCoord+off) / iResolution), iResolution);
+        vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
 
         vec3 ro = vec3(-1,.9,1.6); // ray origin
         mat3 ca = lookAt(ro, vec3(0), vec3(0, 1, 0));
@@ -208,7 +201,7 @@ void main()
         vec3 col = render(ro, rd);
 
         // blend the color with the previous frame color
-        fragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA) * step(iMouse.z,0.);
+        gl_FragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA);
     }
     else // Shadertoy Image
     {
@@ -229,6 +222,6 @@ void main()
         col = col*col * (3. - 2. * col); // constrast
         col = tonemapACES(col); // tonemapping
 
-        fragColor = vec4(col, 1);
+        gl_FragColor = vec4(col, 1);
     }
 }
