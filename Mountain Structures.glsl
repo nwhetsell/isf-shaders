@@ -24,6 +24,17 @@
     ]
 }*/
 
+#define GAMMA 0.4545
+#include "lygia/color/space/gamma2linear.glsl"
+#include "lygia/color/tonemap/aces.glsl"
+#include "lygia/math/saturate.glsl"
+#include "lygia/math/rotate2d.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
+#define LOOK_AT_RIGHT_HANDED
+#include "lygia/space/lookAt.glsl"
+
+
 #define fragColor gl_FragColor
 #define fragCoord gl_FragCoord.xy
 #define iMouse vec3(0)
@@ -33,8 +44,6 @@
 float seed; // randoms seed
 
 // hash functions by me
-float hash1() {return fract(sin(seed+=.1)*4561.7564);}
-
 vec2 hash2() {return fract(sin(seed+=.1)*vec2(8472.5636,9854.4213));}
 
 vec3 hash3() {return fract(sin(seed+=.1)*vec3(7653.1285,6912.8512,5914.7134));}
@@ -45,12 +54,6 @@ vec3 uniformVector() {
     return normalize(v);
 }
 
-// 2d rotation
-mat2 rot(float a) {
-    float s = sin(a), c = cos(a); // sine, cosine
-    return mat2(c, -s, s, c);
-}
-
 // scene sdf (menger sponge)
 float map(vec3 p) {
     vec3 q = abs(p);
@@ -59,8 +62,8 @@ float map(vec3 p) {
     float s = .6; // scale
     for (int i=0; i<6; i++) { // 6 iteration
         // transformation
-        p.yz *= rot(float(i)*2.);
-        p.xz *= rot(float(i));
+        p.yz *= rotate2d(-float(i)*2.);
+        p.xz *= rotate2d(-float(i));
         vec3 a = mod(p*s, 2.) - 1.;
         s *= 3.;
         vec3 r = 1. - 3.*abs(a);
@@ -159,26 +162,11 @@ vec3 render(vec3 ro, vec3 rd) {
     return col;
 }
 
-// camera function
-mat3 setCamera(vec3 ro, vec3 ta) {
-    vec3 w = normalize(ta - ro);
-    vec3 u = normalize(cross(w, vec3(0,1,0)));
-    vec3 v = cross(u, w);
-    return mat3(u, v, w);
-}
-
-// ACES tonemapper
-vec3 ACES(vec3 x) {
-    float a = 2.51;
-    float b =  .03;
-    float c = 2.43;
-    float d =  .59;
-    float e =  .14;
-    return (x*(a*x+b))/(x*(c*x+d)+e);
-}
-
 // bloom function
-vec4 bloom(sampler2D tex, vec2 p) {
+vec4 bloom(sampler2D tex) {
+    // normalized pixel coordinates
+    vec2 p = fragCoord/iResolution.xy;
+
     vec4 col = vec4(0); // accumulated color
     const int N = 8; // quality
 
@@ -203,11 +191,10 @@ void main()
 
         vec2 off = hash2()-.5; // AA offset
         // // pixel coordinates centered at the origin
-        vec2 p = (fragCoord+off - .5*iResolution.xy) / iResolution.y;
+        vec2 p = 0.5 * aspect(center((fragCoord+off) / iResolution), iResolution);
 
         vec3 ro = vec3(-1,.9,1.6); // ray origin
-        vec3 ta = vec3(0); // target
-        mat3 ca = setCamera(ro, ta); // camera matrix
+        mat3 ca = lookAt(ro, vec3(0), vec3(0, 1, 0));
 
         vec3 rd = ca * normalize(vec3(p,1.5)); // ray direction
 
@@ -221,8 +208,7 @@ void main()
         vec3 col = render(ro, rd);
 
         // blend the color with the previous frame color
-        vec4 data = texelFetch(bufferA, ivec2(fragCoord), 0);
-        fragColor = vec4(col,1.0) + data*step(iMouse.z,0.);
+        fragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA) * step(iMouse.z,0.);
     }
     else // Shadertoy Image
     {
@@ -230,24 +216,25 @@ void main()
         vec2 p = fragCoord/iResolution.xy;
 
         // base color
-        vec4 data = texture(bufferA, p);
+        vec4 data = IMG_THIS_PIXEL(bufferA);
         vec3 col = data.rgb/data.w;
 
         // post processing
-        col = pow(col, vec3(.4545)); // gamma correction
-        col = col*1.1-.1; // darkening
+
+        col = gamma2linear(col); // gamma correction
+        col = col * 1.1 - 0.1; // darkening
 
         // bloom
-        vec3 bloom = bloom(bufferA, p).rgb;
-        col += .4*bloom;
-        col = clamp(col,0.,1.);
+        vec3 bloom = bloom(bufferA).rgb;
+        col += 0.4 * bloom;
+        col = saturate(col);
 
-        col = col*col*(3.-2.*col); // constrast
-        col = ACES(col); // tonemapping
+        col = col*col * (3. - 2. * col); // constrast
+        col = tonemapACES(col); // tonemapping
 
         // black bars
         col *= step(abs(p.y-.5),.425);
 
-        fragColor = vec4(col,1.0);
+        fragColor = vec4(col, 1);
     }
 }
