@@ -9,6 +9,38 @@
         {
             "NAME": "inputImage",
             "TYPE": "image"
+        },
+        {
+            "NAME": "scale",
+            "LABEL": "Scale",
+            "TYPE": "float",
+            "DEFAULT": 0.6,
+            "MAX": 50,
+            "MIN": -50
+        },
+        {
+            "NAME": "feedback",
+            "LABEL": "Feedback amount",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 1,
+            "MIN": 0
+        },
+        {
+            "NAME": "cameraY",
+            "LABEL": "Camera y-coordinate",
+            "TYPE": "float",
+            "DEFAULT": 0.9,
+            "MAX": 5,
+            "MIN": -5
+        },
+        {
+            "NAME": "cameraZ",
+            "LABEL": "Camera z-coordinate",
+            "TYPE": "float",
+            "DEFAULT": 1.6,
+            "MAX": 5,
+            "MIN": -5
         }
     ],
     "ISFVSN": "2",
@@ -162,14 +194,22 @@ vec4 random4(vec4 p4) {
 }
 /*
 contributors: Patricio Gonzalez Vivo
-description: clamp a value between 0 and 1
-use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
-examples:
-    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+description: extend GLSL min function to add more arguments
+use:
+    - min(<float> A, <float> B, <float> C[, <float> D])
+    - min(<vec2|vec3|vec4> A)
 license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
+#define FNC_MMIN 
+float mmin(const float v) { return v; }
+float mmin(in float a, in float b) { return min(a, b); }
+float mmin(in float a, in float b, in float c) { return min(a, min(b, c)); }
+float mmin(in float a, in float b, in float c, in float d) { return min(min(a,b), min(c, d)); }
+float mmin(const vec2 v) { return min(v.x, v.y); }
+float mmin(const vec3 v) { return mmin(v.x, v.y, v.z); }
+float mmin(const vec4 v) { return mmin(v.x, v.y, v.z, v.w); }
 /*
 contributors: Patricio Gonzalez Vivo
 description: returns a 2x2 rotation matrix
@@ -184,6 +224,16 @@ mat2 rotate2d(const in float r){
     float s = sin(r);
     return mat2(c, s, -s, c);
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: clamp a value between 0 and 1
+use: <float|vec2|vec3|vec4> saturation(<float|vec2|vec3|vec4> value)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
 /*
 contributors: Patricio Gonzalez Vivo
 description: 'Fix the aspect ratio of a space keeping things squared for you.'
@@ -249,6 +299,7 @@ mat3 lookAt(vec3 forward) {
     return lookAt(forward, vec3(0.0, 1.0, 0.0));
 }
 
+// #define STRICT_RANDOM
 float seed;
 vec2 random2(void)
 {
@@ -266,20 +317,20 @@ vec3 uniformVector() {
 float map(vec3 p) {
     vec3 q = abs(p);
     float d = p.y; // distance
-    float s = .6; // scale
-    for (int i=0; i<6; i++) { // 6 iteration
+    float s = scale; // scale
+    for (int i = 0; i < 6; i++) { // 6 iteration
         // transformation
-        p.yz *= rotate2d(-float(i)*2.);
+        p.yz *= rotate2d(-float(i) * 2.);
         p.xz *= rotate2d(-float(i));
         vec3 a = mod(p*s, 2.) - 1.;
         s *= 3.;
-        vec3 r = 1. - 3.*abs(a);
+        vec3 r = 1. - 3. * abs(a);
         r = abs(r);
         // cross distance
         float da = max(r.x,r.y);
         float db = max(r.y,r.z);
         float dc = max(r.z,r.x);
-        float c = min(da,min(db,dc)) - 1.;
+        float c = mmin(da, db, dc) - 1.;
         d = max(d, c/s);
     }
     // return the distance
@@ -371,7 +422,7 @@ void main()
         vec2 off = random2()-.5; // AA offset
         // // pixel coordinates centered at the origin
         vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
-        vec3 ro = vec3(-1,.9,1.6); // ray origin
+        vec3 ro = vec3(-1, cameraY, cameraZ); // ray origin
         mat3 ca = lookAt(ro, vec3(0), vec3(0, 1, 0));
         vec3 rd = ca * normalize(vec3(p,1.5)); // ray direction
         // depth of field
@@ -382,7 +433,7 @@ void main()
         // render
         vec3 col = render(ro, rd);
         // blend the color with the previous frame color
-        gl_FragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA);
+        gl_FragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA) * feedback;
     }
     else // Shadertoy Image
     {

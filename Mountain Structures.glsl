@@ -9,6 +9,38 @@
         {
             "NAME": "inputImage",
             "TYPE": "image"
+        },
+        {
+            "NAME": "scale",
+            "LABEL": "Scale",
+            "TYPE": "float",
+            "DEFAULT": 0.6,
+            "MAX": 50,
+            "MIN": -50
+        },
+        {
+            "NAME": "feedback",
+            "LABEL": "Feedback amount",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MAX": 1,
+            "MIN": 0
+        },
+        {
+            "NAME": "cameraY",
+            "LABEL": "Camera y-coordinate",
+            "TYPE": "float",
+            "DEFAULT": 0.9,
+            "MAX": 5,
+            "MIN": -5
+        },
+        {
+            "NAME": "cameraZ",
+            "LABEL": "Camera z-coordinate",
+            "TYPE": "float",
+            "DEFAULT": 1.6,
+            "MAX": 5,
+            "MIN": -5
         }
     ],
     "ISFVSN": "2",
@@ -30,27 +62,39 @@
 #define RANDOM_HIGHER_RANGE
 #define RANDOM_SINLESS
 #include "lygia/generative/random.glsl"
-#include "lygia/math/saturate.glsl"
+#include "lygia/math/mmin.glsl"
 #include "lygia/math/rotate2d.glsl"
+#include "lygia/math/saturate.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
 #define LOOK_AT_RIGHT_HANDED
 #include "lygia/space/lookAt.glsl"
 
+
 float seed;
+
+// #define STRICT_RANDOM
 
 vec2 random2(void)
 {
+#ifdef STRICT_RANDOM
+    return fract(sin(seed += 0.1) * vec2(8472.5636, 9854.4213));
+#else
     return random2(seed += 0.1);
+#endif
 }
 
 vec3 random3(void)
 {
+#ifdef STRICT_RANDOM
+    return fract(sin(seed += 0.1) * vec3(7653.1285, 6912.8512, 5914.7134));
+#else
     return random3(seed += 0.1);
+#endif
 }
 
 // normalized random 3d vector
-vec3 uniformVector() {
+vec3 uniformVector(void) {
     return normalize(center(random3()));
 }
 
@@ -59,23 +103,23 @@ float map(vec3 p) {
     vec3 q = abs(p);
     float d = p.y; // distance
 
-    float s = .6; // scale
-    for (int i=0; i<6; i++) { // 6 iteration
+    float s = scale; // scale
+    for (int i = 0; i < 6; i++) { // 6 iteration
         // transformation
-        p.yz *= rotate2d(-float(i)*2.);
+        p.yz *= rotate2d(-float(i) * 2.);
         p.xz *= rotate2d(-float(i));
         vec3 a = mod(p*s, 2.) - 1.;
         s *= 3.;
-        vec3 r = 1. - 3.*abs(a);
+        vec3 r = 1. - 3. * abs(a);
 
         r = abs(r);
 
         // cross distance
-        float da = max(r.x,r.y);
-        float db = max(r.y,r.z);
-        float dc = max(r.z,r.x);
+        float da = max(r.x, r.y);
+        float db = max(r.y, r.z);
+        float dc = max(r.z, r.x);
 
-        float c = min(da,min(db,dc)) - 1.;
+        float c = mmin(da, db, dc) - 1.;
 
         d = max(d, c/s);
     }
@@ -192,7 +236,7 @@ void main()
         // // pixel coordinates centered at the origin
         vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
 
-        vec3 ro = vec3(-1,.9,1.6); // ray origin
+        vec3 ro = vec3(-1, cameraY, cameraZ); // ray origin
         mat3 ca = lookAt(ro, vec3(0), vec3(0, 1, 0));
 
         vec3 rd = ca * normalize(vec3(p,1.5)); // ray direction
@@ -207,7 +251,7 @@ void main()
         vec3 col = render(ro, rd);
 
         // blend the color with the previous frame color
-        gl_FragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA);
+        gl_FragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA) * feedback;
     }
     else // Shadertoy Image
     {
