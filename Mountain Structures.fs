@@ -41,6 +41,38 @@
             "DEFAULT": 1.6,
             "MAX": 5,
             "MIN": -5
+        },
+        {
+            "NAME": "lightRadius",
+            "LABEL": "Light distance",
+            "TYPE": "float",
+            "DEFAULT": 2.4494897428,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "lightPhi",
+            "LABEL": "Light phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 65.9051574479,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "lightTheta",
+            "LABEL": "Light theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 26.5650511771,
+            "MIN": 0,
+            "MAX": 360
+        },
+        {
+            "NAME": "lightDirectionRandomization",
+            "LABEL": "Light direction randomization",
+            "TYPE": "float",
+            "DEFAULT": 0.1,
+            "MIN": 0,
+            "MAX": 10
         }
     ],
     "ISFVSN": "2",
@@ -55,6 +87,14 @@
         }
     ]
 }*/
+// The default light parameters are:
+//   lightRadius = length(vec3(-1, -3, 1))
+//   lightRadius = length(vec3(2, 1, 1))
+// 2,1,1
+//               = sqrt(2 * 2 + 1 * 1 + 1 * 1)
+//               = sqrt(6) ≈ 2.4494897428
+//   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
+//   lightTheta = atan(1 / 2) ≈ 26.5650511771°
 #define GAMMA 0.4545
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1117,6 +1157,29 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
 }
 /*
 contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define EIGHTH_PI 0.39269908169
+#define QTR_PI 0.78539816339
+#define HALF_PI 1.5707963267948966192313216916398
+#define PI 3.1415926535897932384626433832795
+#define TWO_PI 6.2831853071795864769252867665590
+#define TAU 6.2831853071795864769252867665590
+#define INV_PI 0.31830988618379067153776752674503
+#define INV_SQRT_TAU 0.39894228040143267793994605993439
+#define SQRT_HALF_PI 1.25331413732
+#define PHI 1.618033988749894848204586834
+#define EPSILON 0.0000001
+#define GOLDEN_RATIO 1.6180339887
+#define GOLDEN_RATIO_CONJUGATE 0.61803398875
+#define GOLDEN_ANGLE 2.39996323
+#define DEG2RAD (PI / 180.0)
+#define RAD2DEG (180.0 / PI)
+/*
+contributors: Patricio Gonzalez Vivo
 description: extend GLSL min function to add more arguments
 use:
     - min(<float> A, <float> B, <float> C[, <float> D])
@@ -1221,6 +1284,22 @@ mat3 lookAt(vec3 eye, vec3 target, float roll) {
 mat3 lookAt(vec3 forward) {
     return lookAt(forward, vec3(0.0, 1.0, 0.0));
 }
+/*
+contributors: [Ivan Dianov, Shadi El Hajj]
+description: polar to cartesian conversion.
+use: polar2cart(<vec2> polar)
+*/
+#define FNC_POLAR2CART 
+vec2 polar2cart(in vec2 polar) {
+    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
+}
+// https://mathworld.wolfram.com/SphericalCoordinates.html
+vec3 polar2cart( in float r, in float phi, in float theta) {
+    float x = r * cos(theta) * sin(phi);
+    float y = r * sin(theta) * sin(phi);
+    float z = r * cos(phi);
+    return vec3(x, y, z);
+}
 float seed;
 // #define STRICT_RANDOM
 vec2 random2(void)
@@ -1281,7 +1360,7 @@ float shadow(vec3 ro, vec3 rd) {
 // rendering
 vec3 render(vec3 ro, vec3 rd) {
     // light (sun) direction
-    vec3 lig = normalize(vec3(2,1,1)+.1*uniformVector());
+    vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * uniformVector());
     vec3 bgCol = vec3(.6,.8,1); // background color
     float fdis = 0.; // final distance
     vec3 frd; // final ray direction

@@ -41,6 +41,38 @@
             "DEFAULT": 1.6,
             "MAX": 5,
             "MIN": -5
+        },
+        {
+            "NAME": "lightRadius",
+            "LABEL": "Light distance",
+            "TYPE": "float",
+            "DEFAULT": 2.4494897428,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "lightPhi",
+            "LABEL": "Light phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 65.9051574479,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "lightTheta",
+            "LABEL": "Light theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 26.5650511771,
+            "MIN": 0,
+            "MAX": 360
+        },
+        {
+            "NAME": "lightDirectionRandomization",
+            "LABEL": "Light direction randomization",
+            "TYPE": "float",
+            "DEFAULT": 0.1,
+            "MIN": 0,
+            "MAX": 10
         }
     ],
     "ISFVSN": "2",
@@ -56,6 +88,15 @@
     ]
 }*/
 
+// The default light parameters are:
+//   lightRadius = length(vec3(-1, -3, 1))
+//   lightRadius = length(vec3(2, 1, 1))
+// 2,1,1
+//               = sqrt(2 * 2 + 1 * 1 + 1 * 1)
+//               = sqrt(6) ≈ 2.4494897428
+//   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
+//   lightTheta = atan(1 / 2) ≈ 26.5650511771°
+
 #define GAMMA 0.4545
 #include "lygia/color/space/gamma2linear.glsl"
 #include "lygia/color/tonemap/aces.glsl"
@@ -68,6 +109,7 @@
 #define RAYMARCH_MAX_DIST 12.
 #define RAYMARCH_MIN_HIT_DIST 0.001
 #include "lygia/lighting/raymarch/cast.glsl"
+#include "lygia/math/const.glsl"
 #include "lygia/math/mmin.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/math/saturate.glsl"
@@ -75,6 +117,7 @@
 #include "lygia/space/center.glsl"
 #define LOOK_AT_RIGHT_HANDED
 #include "lygia/space/lookAt.glsl"
+#include "lygia/space/polar2cart.glsl"
 
 
 float seed;
@@ -160,7 +203,7 @@ float shadow(vec3 ro, vec3 rd) {
 // rendering
 vec3 render(vec3 ro, vec3 rd) {
     // light (sun) direction
-    vec3 lig = normalize(vec3(2,1,1)+.1*uniformVector());
+    vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * uniformVector());
     vec3 bgCol = vec3(.6,.8,1); // background color
 
     float fdis = 0.; // final distance
