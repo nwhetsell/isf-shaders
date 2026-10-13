@@ -43,6 +43,12 @@
             "MIN": -5
         },
         {
+            "NAME": "mainColor",
+            "LABEL": "Main color",
+            "TYPE": "color",
+            "DEFAULT": [0.72, 0.81, 0.9, 1]
+        },
+        {
             "NAME": "backgroundColor",
             "LABEL": "Background color",
             "TYPE": "color",
@@ -230,7 +236,7 @@ vec3 render(vec3 ro, vec3 rd)
 
             ro = p + n * 0.002; // new ray origin
             rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
-            emit *= vec3(0.8, 0.9, 1) * 0.9; // color the object
+            emit *= mainColor.rgb; // color the object
 
             float dif = saturate(dot(n, lig)); // diffuse light
             float sha = shadow(ro, lig); // shadow
