@@ -93,6 +93,14 @@
             "DEFAULT": 1.1,
             "MAX": 10,
             "MIN": 0
+        },
+        {
+            "NAME": "bloomSpread",
+            "LABEL": "Bloom spread",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MAX": 100,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2",
@@ -140,6 +148,8 @@
 #define LOOK_AT_RIGHT_HANDED
 #include "lygia/space/lookAt.glsl"
 #include "lygia/space/polar2cart.glsl"
+#define BLOOM_QUALITY 8
+#include "lygia-additions/bloom.glsl" // This isn’t exactly the same as the bloom function in the Shadertoy shader.
 
 
 float seed;
@@ -326,8 +336,7 @@ void main()
         col = blendDarken(vec3(1), col, darkenAmount);
 
         // bloom
-        vec3 bloom = bloom(bufferA).rgb;
-        col += 0.4 * bloom;
+        col += 0.4 * bloom(bufferA, bloomSpread, 4.);
         col = saturate(col);
 
         col = col*col * (3. - 2. * col); // constrast

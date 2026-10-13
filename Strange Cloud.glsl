@@ -161,7 +161,7 @@
             "NAME": "bloomSpread",
             "LABEL": "Bloom spread",
             "TYPE": "float",
-            "DEFAULT": 32,
+            "DEFAULT": 2,
             "MAX": 100,
             "MIN": 0
         },
@@ -229,6 +229,8 @@
 #include "lygia/space/cart2polar.glsl"
 #include "lygia/space/center.glsl"
 #include "lygia/space/polar2cart.glsl"
+#define BLOOM_QUALITY 1
+#include "lygia-additions/bloom.glsl" // This isn’t exactly the same as the bloom in the Shadertoy shader.
 
 
 vec2 seed = vec2(0);
@@ -410,21 +412,13 @@ void main()
     else // Shadertoy Image
     {
         vec4 color = IMG_THIS_PIXEL(cloud);
-
-        vec3 bloom = vec3(0);
-        #ifndef ISF_EDITOR_WEBSITE
-        if (enableBloom) {
-            for(int y = -1; y <= 1; y++)
-            for(int x = -1; x <= 1; x++)
-                bloom += textureLod(cloud, (gl_FragCoord.xy + vec2(x, y) * bloomSpread) / RENDERSIZE, 7.).rgb / color.a;
-            bloom = max(bloom / 9. - 0.5, vec3(0)) * 0.25;
-        }
-        #endif
-
         color /= color.a;
-        color.rgb += bloom;
+
+        color.rgb += 0.25 * bloom(cloud, bloomSpread, 7.);
+
         if (enableTonemap)
             color.rgb = tonemapACES(color.rgb);
+
         gl_FragColor = vec4(color.rgb, length(color.rgb));
     }
 }

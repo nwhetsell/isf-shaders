@@ -93,6 +93,14 @@
             "DEFAULT": 1.1,
             "MAX": 10,
             "MIN": 0
+        },
+        {
+            "NAME": "bloomSpread",
+            "LABEL": "Bloom spread",
+            "TYPE": "float",
+            "DEFAULT": 4,
+            "MAX": 100,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2",
@@ -1603,6 +1611,18 @@ vec3 polar2cart( in float r, in float phi, in float theta) {
     float z = r * cos(phi);
     return vec3(x, y, z);
 }
+#define BLOOM_QUALITY 8
+#define FNC_BLOOM 
+vec3 bloom(sampler2D tex, float bloomSpread, float lod)
+{
+    vec2 pos = gl_FragCoord.xy / RENDERSIZE;
+    vec4 bloom = vec4(0);
+    for (int y = -BLOOM_QUALITY; y <= BLOOM_QUALITY; y++)
+    for (int x = -BLOOM_QUALITY; x <= BLOOM_QUALITY; x++) {
+        bloom += textureLod(tex, pos + (vec2(x, y) / RENDERSIZE) * bloomSpread, lod);
+    }
+    return (bloom / bloom.a).rgb;
+}
 float seed;
 // #define STRICT_RANDOM
 vec2 random2(void)
@@ -1732,8 +1752,7 @@ void main()
         col = gamma2linear(col);
         col = blendDarken(vec3(1), col, darkenAmount);
         // bloom
-        vec3 bloom = bloom(bufferA).rgb;
-        col += 0.4 * bloom;
+        col += 0.4 * bloom(bufferA, bloomSpread, 4.);
         col = saturate(col);
         col = col*col * (3. - 2. * col); // constrast
         col = tonemapACES(col); // tonemapping
