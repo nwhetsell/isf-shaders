@@ -206,30 +206,23 @@ float shadow(vec3 ro, vec3 rd) {
     return 1.;
 }
 
-// rendering
-vec3 render(vec3 ro, vec3 rd) {
+vec3 render(vec3 ro, vec3 rd)
+{
     // light (sun) direction
     vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * uniformVector());
 
-    float fdis = 0.; // final distance
-    vec3 frd; // final ray direction
+    Material res = raymarchCast(ro, rd);
 
-    vec3 col = vec3(0); // accumulated color
+    float fdis = res.sdf; // final distance
+    vec3 frd = rd; // final ray direction
+
+    vec3 col; // accumulated color
+
+    if (res.valid) {
+    col = vec3(0);
     vec3 emit = vec3(1); // color mask
-
     for (int i = 0; i < 5; i++) { // 5 bounces of gi
-        Material res = raymarchCast(ro, rd);
         float t = res.sdf;
-        if (i == 0) {
-            fdis = t;
-            frd = rd;
-        }
-
-        if (!res.valid) { // we don't hit the surface
-            if (i == 0)
-                col = backgroundColor.rgb;
-            break;
-        }
 
         vec3 p = ro + rd * t; // hit point
         vec3 n = calcNormal(p); // surface normal
@@ -243,6 +236,14 @@ vec3 render(vec3 ro, vec3 rd) {
 
         // lighting
         col += emit * dif * sha;
+
+        res = raymarchCast(ro, rd);
+
+        if (!res.valid) // we don't hit the surface
+            break;
+    }
+    } else {
+        col = backgroundColor.rgb;
     }
 
     col = mix(col, backgroundColor.rgb, 1. - exp(-fdis*fdis*fdis * 0.001)); // fog
