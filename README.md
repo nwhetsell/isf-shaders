@@ -228,6 +228,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Mountain%20Structures.glsl">Mountain Structures</a></td>
+    <td><a href="https://www.shadertoy.com/user/Poisson">Poisson</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/ctsSzH">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6ace443f6a66b2001aef9ce5">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Mountain Structures” shader" src="https://github.com/user-attachments/assets/7acc7070-5b57-4efb-8687-ba130950267f"/>
+    </td>
+  </tr>
+  <tr>
     <td><a href="Mountains.glsl">Mountains</a></td>
     <td><a href="https://www.shadertoy.com/user/Dave_Hoskins">Dave Hoskins</a></td>
     <td>n/a</td>
