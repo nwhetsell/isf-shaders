@@ -19,6 +19,14 @@
             "MIN": -50
         },
         {
+            "NAME": "maxDistance",
+            "LABEL": "Maximum distance",
+            "TYPE": "float",
+            "DEFAULT": 12,
+            "MAX": 50,
+            "MIN": 12
+        },
+        {
             "NAME": "feedback",
             "LABEL": "Feedback amount",
             "TYPE": "float",
@@ -41,6 +49,14 @@
             "DEFAULT": 1.6,
             "MAX": 5,
             "MIN": -5
+        },
+        {
+            "NAME": "fogDensity",
+            "LABEL": "Fog density",
+            "TYPE": "float",
+            "DEFAULT": 0.001,
+            "MIN": 0,
+            "MAX": 1
         },
         {
             "NAME": "mainColor",
@@ -135,9 +151,12 @@
 #define RAYMARCH_BACKGROUND vec3(0)
 #define RAYMARCH_SAMPLES 256
 #define RAYMARCH_MIN_DIST 0.
-#define RAYMARCH_MAX_DIST 12.
+#define RAYMARCH_MAX_DIST maxDistance
 #define RAYMARCH_MIN_HIT_DIST 0.001
 #include "lygia/lighting/raymarch/cast.glsl"
+#define FOG_DENSITY fogDensity
+#define FOG_COLOR_COOL backgroundColor.rgb
+#include "lygia/lighting/raymarch/fog.glsl"
 #include "lygia/lighting/raymarch/normal.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/mmin.glsl"
@@ -271,8 +290,13 @@ vec3 render(vec3 ro, vec3 rd)
         col = backgroundColor.rgb;
     }
 
-    col = mix(col, backgroundColor.rgb, 1. - exp(-fdis*fdis*fdis * 0.001)); // fog
-    col += 3. * pow(saturate(dot(frd,lig)), 3.5); // sun glare
+// #define STRICT_FOG
+#ifdef STRICT_FOG
+    col = raymarchFog(col, fdis*fdis*fdis);
+    col += 3. * pow(saturate(dot(frd, lig)), 3.5); // sun glare
+#else
+    col = raymarchColorFog(col, fdis*fdis*fdis, frd, lig);
+#endif
 
     return col;
 }
@@ -304,7 +328,6 @@ void main()
         seed = TIME + dot(sin(gl_FragCoord.xy), vec2(453.712, 983.234));
 
         vec2 off = random2()-.5; // AA offset
-        // // pixel coordinates centered at the origin
         vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
 
         vec3 ro = vec3(-1, cameraY, cameraZ); // ray origin

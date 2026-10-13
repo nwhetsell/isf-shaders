@@ -19,6 +19,14 @@
             "MIN": -50
         },
         {
+            "NAME": "maxDistance",
+            "LABEL": "Maximum distance",
+            "TYPE": "float",
+            "DEFAULT": 12,
+            "MAX": 50,
+            "MIN": 12
+        },
+        {
             "NAME": "feedback",
             "LABEL": "Feedback amount",
             "TYPE": "float",
@@ -41,6 +49,14 @@
             "DEFAULT": 1.6,
             "MAX": 5,
             "MIN": -5
+        },
+        {
+            "NAME": "fogDensity",
+            "LABEL": "Fog density",
+            "TYPE": "float",
+            "DEFAULT": 0.001,
+            "MIN": 0,
+            "MAX": 1
         },
         {
             "NAME": "mainColor",
@@ -277,7 +293,7 @@ vec4 random4(vec4 p4) {
 #define RAYMARCH_BACKGROUND vec3(0)
 #define RAYMARCH_SAMPLES 256
 #define RAYMARCH_MIN_DIST 0.
-#define RAYMARCH_MAX_DIST 12.
+#define RAYMARCH_MAX_DIST maxDistance
 #define RAYMARCH_MIN_HIT_DIST 0.001
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1197,6 +1213,53 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
     m.sdf = t;
     return m;
 }
+#define FOG_DENSITY fogDensity
+#define FOG_COLOR_COOL backgroundColor.rgb
+/*
+contributors: Inigo Quiles
+description: Add fog to the scene. See https://iquilezles.org/articles/fog/
+use: vec3 raymarchFog(in <vec3> pixelColor, float distanceToPoint)
+options:
+    - FOG_DENSITY
+    - FOG_FALLOFF
+    - FOG_COLOR_COOL
+    - FOG_COLOR_WARM
+*/
+#define FOG_FALLOFF 0.0
+#define FOG_COLOR_WARM vec3(1.0, 0.9, 0.7)
+#define FNC_RAYMARCH_FOG 
+vec3 raymarchFog(in vec3 col, // color of pixel
+                in float t) { // distance to point
+    float fogAmount = 1.0 - exp(-t * FOG_DENSITY);
+    return mix(col, FOG_COLOR_COOL, fogAmount);
+}
+vec3 raymarchColorFog(in vec3 col, // color of pixel
+                      in float t, // distance to point
+                      in vec3 rd, // camera to point
+                      in vec3 lig) { // sun direction
+    float fogAmount = 1.0 - exp(-t * FOG_DENSITY);
+    float sunAmount = max(dot(rd, lig), 0.0);
+    vec3 fogColor = mix(FOG_COLOR_COOL, FOG_COLOR_WARM, pow(sunAmount, 8.0));
+    return mix(col, fogColor, fogAmount);
+}
+vec3 raymarchHeightFog( in vec3 col, // color of pixel
+                        in float t, // distance to point
+                        in vec3 ro, // camera position
+                        in vec3 rd) { // camera to point vector
+    float fogAmount = (FOG_DENSITY / FOG_FALLOFF) * exp(-ro.y * FOG_FALLOFF) * (1.0 - exp(-t * rd.y * FOG_FALLOFF)) / rd.y;
+    return mix(col, FOG_COLOR_COOL, saturate(fogAmount));
+}
+vec3 raymarchFog(in vec3 col, in float t, in vec3 ro, in vec3 rd){
+    if (FOG_DENSITY > 0.0 && FOG_FALLOFF > 0.0) {
+        return raymarchHeightFog(col, t, ro, rd);
+    }
+    else if (FOG_DENSITY > 0.0) {
+            return raymarchFog(col, t);
+    }
+    else {
+        return col;
+    }
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
@@ -1701,8 +1764,8 @@ vec3 render(vec3 ro, vec3 rd)
     } else {
         col = backgroundColor.rgb;
     }
-    col = mix(col, backgroundColor.rgb, 1. - exp(-fdis*fdis*fdis * 0.001)); // fog
-    col += 3. * pow(saturate(dot(frd,lig)), 3.5); // sun glare
+// #define STRICT_FOG
+    col = raymarchColorFog(col, fdis*fdis*fdis, frd, lig);
     return col;
 }
 // bloom function
@@ -1728,7 +1791,6 @@ void main()
     {
         seed = TIME + dot(sin(gl_FragCoord.xy), vec2(453.712, 983.234));
         vec2 off = random2()-.5; // AA offset
-        // // pixel coordinates centered at the origin
         vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
         vec3 ro = vec3(-1, cameraY, cameraZ); // ray origin
         mat3 ca = lookAt(ro, vec3(0), vec3(0, 1, 0));
