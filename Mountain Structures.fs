@@ -1852,6 +1852,19 @@ float mmin(const vec3 v) { return mmin(v.x, v.y, v.z); }
 float mmin(const vec4 v) { return mmin(v.x, v.y, v.z, v.w); }
 /*
 contributors: Patricio Gonzalez Vivo
+description: power of 3
+use: <float|vec2|vec3|vec4> pow3(<float|vec2|vec3|vec4> v)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_POW3 
+float pow3(const in float v) { return v * v * v; }
+vec2 pow3(const in vec2 v) { return v * v * v; }
+vec3 pow3(const in vec3 v) { return v * v * v; }
+vec4 pow3(const in vec4 v) { return v * v * v; }
+/*
+contributors: Patricio Gonzalez Vivo
 description: returns a 2x2 rotation matrix
 use: <mat2> rotate2d(<float> radians)
 license:
@@ -2004,17 +2017,17 @@ Material raymarchMap(vec3 p) {
     mat.sdf = min(dist, RAYMARCH_MAX_DIST);
     return mat;
 }
-vec3 render(vec3 ro, vec3 rd)
+vec3 render(vec3 rayOrigin, vec3 rayDirection)
 {
-    // light (sun) direction
-    vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * randomUnitVector());
-    Material res = raymarchCast(ro, rd);
-    float fdis = res.sdf; // final distance
-    vec3 frd = rd; // final ray direction
-    vec3 col; // accumulated color
+    vec3 lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * randomUnitVector());
+    Material res = raymarchCast(rayOrigin, rayDirection);
+    float dist = res.sdf;
+    vec3 color;
     if (res.valid) {
-        col = vec3(0);
+        color = vec3(0);
         vec3 emit = vec3(1); // color mask
+        vec3 ro = rayOrigin;
+        vec3 rd = rayDirection;
         for (int i = 0; i < 5; i++) { // 5 bounces of gi
             float t = res.sdf;
             vec3 p = ro + rd * t; // hit point
@@ -2023,20 +2036,20 @@ vec3 render(vec3 ro, vec3 rd)
             ro = p + n * 0.002; // new ray origin
             rd = normalize(n + randomUnitVector()); // new ray direction, cheap diffuse BRDF
             emit *= mainColor.rgb; // color the object
-            float dif = saturate(dot(n, lig)); // diffuse light
-            float sha = /*shadowAmount **/ raymarchSoftShadow(ro, lig);
+            float dif = saturate(dot(n, lightDirection)); // diffuse light
+            dif *= raymarchSoftShadow(ro, lightDirection);
             // lighting
-            col += emit * dif * sha;
+            color += emit * dif;
             res = raymarchCast(ro, rd);
             if (!res.valid) // we don't hit the surface
                 break;
         }
     } else {
-        col = backgroundColor.rgb;
+        color = backgroundColor.rgb;
     }
 // #define STRICT_FOG
-    col = raymarchColorFog(col, fdis*fdis*fdis, frd, lig);
-    return col;
+    color = raymarchColorFog(color, pow3(dist), rayDirection, lightDirection);
+    return color;
 }
 void main()
 {

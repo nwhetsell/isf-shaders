@@ -166,6 +166,7 @@
 #include "lygia/lighting/raymarch/softShadow.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/mmin.glsl"
+#include "lygia/math/pow3.glsl"
 #include "lygia/math/rotate2d.glsl"
 #include "lygia/math/saturate.glsl"
 #include "lygia/space/aspect.glsl"
@@ -235,22 +236,21 @@ Material raymarchMap(vec3 p) {
     return mat;
 }
 
-vec3 render(vec3 ro, vec3 rd)
+vec3 render(vec3 rayOrigin, vec3 rayDirection)
 {
-    // light (sun) direction
-    vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * randomUnitVector());
+    vec3 lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * randomUnitVector());
 
-    Material res = raymarchCast(ro, rd);
+    Material res = raymarchCast(rayOrigin, rayDirection);
+    float dist = res.sdf;
 
-    float fdis = res.sdf; // final distance
-    vec3 frd = rd; // final ray direction
-
-    vec3 col; // accumulated color
+    vec3 color;
 
     if (res.valid) {
-        col = vec3(0);
+        color = vec3(0);
         vec3 emit = vec3(1); // color mask
 
+        vec3 ro = rayOrigin;
+        vec3 rd = rayDirection;
         for (int i = 0; i < 5; i++) { // 5 bounces of gi
             float t = res.sdf;
 
@@ -270,11 +270,11 @@ vec3 render(vec3 ro, vec3 rd)
             rd = normalize(n + randomUnitVector()); // new ray direction, cheap diffuse BRDF
             emit *= mainColor.rgb; // color the object
 
-            float dif = saturate(dot(n, lig)); // diffuse light
-            dif *= raymarchSoftShadow(ro, lig);
+            float dif = saturate(dot(n, lightDirection)); // diffuse light
+            dif *= raymarchSoftShadow(ro, lightDirection);
 
             // lighting
-            col += emit * dif;
+            color += emit * dif;
 
             res = raymarchCast(ro, rd);
 
@@ -282,18 +282,18 @@ vec3 render(vec3 ro, vec3 rd)
                 break;
         }
     } else {
-        col = backgroundColor.rgb;
+        color = backgroundColor.rgb;
     }
 
 // #define STRICT_FOG
 #ifdef STRICT_FOG
-    col = raymarchFog(col, fdis*fdis*fdis);
-    col += 3. * pow(saturate(dot(frd, lig)), 3.5); // sun glare
+    color = raymarchFog(color, pow3(dist));
+    color += 3. * pow(saturate(dot(rayDirection, lightDirection)), 3.5); // sun glare
 #else
-    col = raymarchColorFog(col, fdis*fdis*fdis, frd, lig);
+    color = raymarchColorFog(color, pow3(dist), rayDirection, lightDirection);
 #endif
 
-    return col;
+    return color;
 }
 
 void main()
