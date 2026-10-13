@@ -219,29 +219,30 @@ vec3 render(vec3 ro, vec3 rd)
     vec3 col; // accumulated color
 
     if (res.valid) {
-    col = vec3(0);
-    vec3 emit = vec3(1); // color mask
-    for (int i = 0; i < 5; i++) { // 5 bounces of gi
-        float t = res.sdf;
+        col = vec3(0);
+        vec3 emit = vec3(1); // color mask
 
-        vec3 p = ro + rd * t; // hit point
-        vec3 n = calcNormal(p); // surface normal
+        for (int i = 0; i < 5; i++) { // 5 bounces of gi
+            float t = res.sdf;
 
-        ro = p + n * 0.002; // new ray origin
-        rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
-        emit *= vec3(0.8, 0.9, 1) * 0.9; // color the object
+            vec3 p = ro + rd * t; // hit point
+            vec3 n = calcNormal(p); // surface normal
 
-        float dif = saturate(dot(n, lig)); // diffuse light
-        float sha = shadow(ro, lig); // shadow
+            ro = p + n * 0.002; // new ray origin
+            rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
+            emit *= vec3(0.8, 0.9, 1) * 0.9; // color the object
 
-        // lighting
-        col += emit * dif * sha;
+            float dif = saturate(dot(n, lig)); // diffuse light
+            float sha = shadow(ro, lig); // shadow
 
-        res = raymarchCast(ro, rd);
+            // lighting
+            col += emit * dif * sha;
 
-        if (!res.valid) // we don't hit the surface
-            break;
-    }
+            res = raymarchCast(ro, rd);
+
+            if (!res.valid) // we don't hit the surface
+                break;
+        }
     } else {
         col = backgroundColor.rgb;
     }
