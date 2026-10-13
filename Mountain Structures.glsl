@@ -130,6 +130,7 @@
 #define RAYMARCH_MAX_DIST 12.
 #define RAYMARCH_MIN_HIT_DIST 0.001
 #include "lygia/lighting/raymarch/cast.glsl"
+#include "lygia/lighting/raymarch/normal.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/mmin.glsl"
 #include "lygia/math/rotate2d.glsl"
@@ -199,15 +200,6 @@ Material raymarchMap(vec3 p) {
     return mat;
 }
 
-// normal estimation
-vec3 calcNormal(vec3 p, float h) {
-    vec2 e = vec2(h,0); // epsilon
-
-    return normalize(h - vec3(raymarchMap(p-e.xyy).sdf,
-                              raymarchMap(p-e.yxy).sdf,
-                              raymarchMap(p-e.yyx).sdf));
-}
-
 // shadow function
 float shadow(vec3 ro, vec3 rd) {
     for (float t=0.; t<4.;) {
@@ -239,7 +231,16 @@ vec3 render(vec3 ro, vec3 rd)
             float t = res.sdf;
 
             vec3 p = ro + rd * t; // hit point
-            vec3 n = calcNormal(p, raymarchMap(p).sdf); // surface normal
+// #define STRICT_NORMAL
+#ifdef STRICT_NORMAL
+            float dist = raymarchMap(p).sdf;
+            vec2 e = vec2(dist, 0);
+            vec3 n = normalize(dist - vec3(raymarchMap(p - e.xyy).sdf,
+                                           raymarchMap(p - e.yxy).sdf,
+                                           raymarchMap(p - e.yyx).sdf));
+#else
+            vec3 n = raymarchNormal(p);
+#endif
 
             ro = p + n * 0.002; // new ray origin
             rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
