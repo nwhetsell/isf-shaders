@@ -85,6 +85,14 @@
             "DEFAULT": 0.1,
             "MIN": 0,
             "MAX": 10
+        },
+        {
+            "NAME": "darkenAmount",
+            "LABEL": "Darken amount",
+            "TYPE": "float",
+            "DEFAULT": 1.1,
+            "MAX": 10,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2",
@@ -107,6 +115,20 @@
 //               = sqrt(6) ≈ 2.4494897428
 //   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
 //   lightTheta = atan(1 / 2) ≈ 26.5650511771°
+/*
+contributors: Jamie Owen
+description: Photoshop Darken blend mode mplementations sourced from this article on https://mouaif.wordpress.com/2009/01/05/photoshop-math-with-glsl-shaders/
+use: blendDarken(<float|vec3> base, <float|vec3> blend [, <float> opacity])
+license: MIT License (MIT) Copyright (c) 2015 Jamie Owen
+*/
+#define FNC_BLENDDARKEN 
+float blendDarken(in float base, in float blend) { return min(blend,base); }
+vec3 blendDarken(in vec3 base, in vec3 blend) {
+    return vec3(blendDarken(base.r, blend.r),
+                blendDarken(base.g, blend.g),
+                blendDarken(base.b, blend.b));
+}
+vec3 blendDarken(in vec3 base, in vec3 blend, in float opacity) { return (blendDarken(base, blend) * opacity + base * (1. - opacity)); }
 #define GAMMA 0.4545
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1446,8 +1468,8 @@ void main()
         vec4 data = IMG_THIS_PIXEL(bufferA);
         vec3 col = data.rgb / data.a;
         // post processing
-        col = gamma2linear(col); // gamma correction
-        col = col * 1.1 - 0.1; // darkening
+        col = gamma2linear(col);
+        col = blendDarken(vec3(1), col, darkenAmount);
         // bloom
         vec3 bloom = bloom(bufferA).rgb;
         col += 0.4 * bloom;

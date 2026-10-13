@@ -85,6 +85,14 @@
             "DEFAULT": 0.1,
             "MIN": 0,
             "MAX": 10
+        },
+        {
+            "NAME": "darkenAmount",
+            "LABEL": "Darken amount",
+            "TYPE": "float",
+            "DEFAULT": 1.1,
+            "MAX": 10,
+            "MIN": 0
         }
     ],
     "ISFVSN": "2",
@@ -109,6 +117,7 @@
 //   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
 //   lightTheta = atan(1 / 2) ≈ 26.5650511771°
 
+#include "lygia/color/blend/darken.glsl"
 #define GAMMA 0.4545
 #include "lygia/color/space/gamma2linear.glsl"
 #include "lygia/color/tonemap/aces.glsl"
@@ -314,8 +323,8 @@ void main()
 
         // post processing
 
-        col = gamma2linear(col); // gamma correction
-        col = col * 1.1 - 0.1; // darkening
+        col = gamma2linear(col);
+        col = blendDarken(vec3(1), col, darkenAmount);
 
         // bloom
         vec3 bloom = bloom(bufferA).rgb;
