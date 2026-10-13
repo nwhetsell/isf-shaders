@@ -217,32 +217,36 @@ vec3 render(vec3 ro, vec3 rd) {
     vec3 col = vec3(0); // accumulated color
     vec3 emit = vec3(1); // color mask
 
-    for (int i=0; i<5; i++) { // 5 bounces of gi
+    for (int i = 0; i < 5; i++) { // 5 bounces of gi
         Material res = raymarchCast(ro, rd);
         float t = res.sdf;
-        if (i==0) {fdis = t; frd = rd;}
+        if (i == 0) {
+            fdis = t;
+            frd = rd;
+        }
 
         if (!res.valid) { // we don't hit the surface
-            if (i==0) col = backgroundColor.rgb;
+            if (i == 0)
+                col = backgroundColor.rgb;
             break;
         }
 
-        vec3 p = ro + rd*t; // hit point
+        vec3 p = ro + rd * t; // hit point
         vec3 n = calcNormal(p); // surface normal
 
-        ro = p+n*.002; // new ray origin
-        rd = normalize(n+uniformVector()); // new ray direction, cheap diffuse BRDF
-        emit *= vec3(.8,.9,1)*.9; // color the object
+        ro = p + n * 0.002; // new ray origin
+        rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
+        emit *= vec3(0.8, 0.9, 1) * 0.9; // color the object
 
-        float dif = clamp(dot(n,lig), 0., 1.); // diffuse light
+        float dif = saturate(dot(n, lig)); // diffuse light
         float sha = shadow(ro, lig); // shadow
 
         // lighting
-        col += emit*dif*sha;
-
+        col += emit * dif * sha;
     }
-    col = mix(col, backgroundColor.rgb, 1.-exp(-fdis*fdis*fdis*.001)); // fog
-    col += 3.*pow(clamp(dot(frd,lig),0.,1.),3.5); // sun glare
+
+    col = mix(col, backgroundColor.rgb, 1. - exp(-fdis*fdis*fdis * 0.001)); // fog
+    col += 3. * pow(saturate(dot(frd,lig)), 3.5); // sun glare
 
     return col;
 }
