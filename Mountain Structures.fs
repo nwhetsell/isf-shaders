@@ -1350,7 +1350,6 @@ vec3 uniformVector(void) {
 }
 // scene sdf (menger sponge)
 Material raymarchMap(vec3 p) {
-    vec3 q = abs(p);
     float d = p.y; // distance
     float s = scale; // scale
     for (int i = 0; i < 6; i++) { // 6 iteration
