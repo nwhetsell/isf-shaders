@@ -158,8 +158,8 @@
             "DEFAULT": true
         },
         {
-            "NAME": "bloomDistance",
-            "LABEL": "Bloom distance",
+            "NAME": "bloomSpread",
+            "LABEL": "Bloom spread",
             "TYPE": "float",
             "DEFAULT": 32,
             "MAX": 100,
@@ -416,7 +416,7 @@ void main()
         if (enableBloom) {
             for(int y = -1; y <= 1; y++)
             for(int x = -1; x <= 1; x++)
-                bloom += textureLod(cloud, (gl_FragCoord.xy + vec2(x, y) * bloomDistance) / RENDERSIZE, 7.).rgb / color.a;
+                bloom += textureLod(cloud, (gl_FragCoord.xy + vec2(x, y) * bloomSpread) / RENDERSIZE, 7.).rgb / color.a;
             bloom = max(bloom / 9. - 0.5, vec3(0)) * 0.25;
         }
         #endif
