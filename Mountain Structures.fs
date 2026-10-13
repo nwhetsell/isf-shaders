@@ -1374,8 +1374,7 @@ Material raymarchMap(vec3 p) {
     return mat;
 }
 // normal estimation
-vec3 calcNormal(vec3 p) {
-    float h = raymarchMap(p).sdf;
+vec3 calcNormal(vec3 p, float h) {
     vec2 e = vec2(h,0); // epsilon
     return normalize(h - vec3(raymarchMap(p-e.xyy).sdf,
                               raymarchMap(p-e.yxy).sdf,
@@ -1405,7 +1404,7 @@ vec3 render(vec3 ro, vec3 rd)
         for (int i = 0; i < 5; i++) { // 5 bounces of gi
             float t = res.sdf;
             vec3 p = ro + rd * t; // hit point
-            vec3 n = calcNormal(p); // surface normal
+            vec3 n = calcNormal(p, raymarchMap(p).sdf); // surface normal
             ro = p + n * 0.002; // new ray origin
             rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
             emit *= mainColor.rgb; // color the object
