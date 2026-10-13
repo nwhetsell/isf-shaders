@@ -14,3 +14,27 @@ index bfe1629d..27508e84 100644
          m = res;
          t += res.sdf;
      }
+diff --git a/lighting/raymarch/softShadow.glsl b/lighting/raymarch/softShadow.glsl
+index 72b8d757..ea7aebae 100644
+--- a/lighting/raymarch/softShadow.glsl
++++ b/lighting/raymarch/softShadow.glsl
+@@ -47,14 +47,15 @@ float raymarchSoftShadow(vec3 ro, vec3 rd) {
+         if (t >= maxt)
+             break;
+         float h = RAYMARCH_MAP_FNC(ro + t * rd).sdf;
+-        res = min(res, h / (w * t));
+ 
+         t += clamp(h, RAYMARCH_SHADOW_MIN_DIST, RAYMARCH_SHADOW_MAX_DIST);
+-        if (res < -1.0 || t > maxt)
++        if (h < RAYMARCH_MIN_HIT_DIST) {
++            res = 0.;
+             break;
++        }
+     }
+     res = max(res, -1.0);
+-    return 0.25 * (1.0 + res) * (1.0 + res) * (2.0 - res);
++    return res;
+ }
+ 
+ #endif
+\ No newline at end of file

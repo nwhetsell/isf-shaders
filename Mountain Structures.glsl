@@ -158,6 +158,10 @@
 #define FOG_COLOR_COOL backgroundColor.rgb
 #include "lygia/lighting/raymarch/fog.glsl"
 #include "lygia/lighting/raymarch/normal.glsl"
+#define RAYMARCH_SHADOW_MIN_DIST 0.
+#define RAYMARCH_SHADOW_MAX_DIST 4.
+#define RAYMARCH_SHADOW_SOLID_ANGLE 0.
+#include "lygia/lighting/raymarch/softShadow.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/mmin.glsl"
 #include "lygia/math/rotate2d.glsl"
@@ -229,17 +233,6 @@ Material raymarchMap(vec3 p) {
     return mat;
 }
 
-// shadow function
-float shadow(vec3 ro, vec3 rd) {
-    for (float t=0.; t<4.;) {
-        vec3 p = ro + rd*t;
-        float h = raymarchMap(p).sdf;
-        if (h<.001) return 0.;
-        t += h;
-    }
-    return 1.;
-}
-
 vec3 render(vec3 ro, vec3 rd)
 {
     // light (sun) direction
@@ -276,10 +269,10 @@ vec3 render(vec3 ro, vec3 rd)
             emit *= mainColor.rgb; // color the object
 
             float dif = saturate(dot(n, lig)); // diffuse light
-            float sha = shadow(ro, lig); // shadow
+            dif *= raymarchSoftShadow(ro, lig);
 
             // lighting
-            col += emit * dif * sha;
+            col += emit * dif;
 
             res = raymarchCast(ro, rd);
 
