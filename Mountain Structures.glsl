@@ -141,6 +141,8 @@
 //   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
 //   lightTheta = atan(1 / 2) ≈ 26.5650511771°
 
+// #define ISF_EDITOR_WEBSITE
+
 #include "lygia/color/blend/darken.glsl"
 #define GAMMA 0.4545
 #include "lygia/color/space/gamma2linear.glsl"
@@ -197,21 +199,21 @@ vec3 random3(void)
 #endif
 }
 
-// normalized random 3d vector
-vec3 uniformVector(void) {
+vec3 randomUnitVector(void)
+{
     return normalize(center(random3()));
 }
 
 // scene sdf (menger sponge)
 Material raymarchMap(vec3 p) {
-    float d = p.y; // distance
+    float dist = p.y;
 
-    float s = scale; // scale
-    for (int i = 0; i < 6; i++) { // 6 iteration
+    float s = scale;
+    for (int i = 0; i < 6; i++) {
         // transformation
         p.yz *= rotate2d(-float(i) * 2.);
         p.xz *= rotate2d(-float(i));
-        vec3 a = mod(p*s, 2.) - 1.;
+        vec3 a = mod(p * s, 2.) - 1.;
         s *= 3.;
         vec3 r = 1. - 3. * abs(a);
 
@@ -224,19 +226,19 @@ Material raymarchMap(vec3 p) {
 
         float c = mmin(da, db, dc) - 1.;
 
-        d = max(d, c/s);
+        dist = max(dist, c/s);
     }
 
     Material mat = materialNew();
     mat.position = p;
-    mat.sdf = min(d, RAYMARCH_MAX_DIST);
+    mat.sdf = min(dist, RAYMARCH_MAX_DIST);
     return mat;
 }
 
 vec3 render(vec3 ro, vec3 rd)
 {
     // light (sun) direction
-    vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * uniformVector());
+    vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * randomUnitVector());
 
     Material res = raymarchCast(ro, rd);
 
@@ -265,7 +267,7 @@ vec3 render(vec3 ro, vec3 rd)
 #endif
 
             ro = p + n * 0.002; // new ray origin
-            rd = normalize(n + uniformVector()); // new ray direction, cheap diffuse BRDF
+            rd = normalize(n + randomUnitVector()); // new ray direction, cheap diffuse BRDF
             emit *= mainColor.rgb; // color the object
 
             float dif = saturate(dot(n, lig)); // diffuse light
@@ -294,70 +296,45 @@ vec3 render(vec3 ro, vec3 rd)
     return col;
 }
 
-// bloom function
-vec4 bloom(sampler2D tex) {
-    // normalized pixel coordinates
-    vec2 p = gl_FragCoord.xy / RENDERSIZE;
-
-    vec4 col = vec4(0); // accumulated color
-    const int N = 8; // quality
-
-    for (int i=-N; i<=N; i++)
-    for (int j=-N; j<=N; j++)  {
-        vec2 off = vec2(i,j) / float(N); // blur offset
-        if (dot(off, off)<1.) { // inside disk
-            // blurred texture
-            col += textureLod(tex, p+.05*off, 4.);
-        }
-    }
-    // output
-    return col/col.a;
-}
-
 void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         seed = TIME + dot(sin(gl_FragCoord.xy), vec2(453.712, 983.234));
 
-        vec2 off = random2()-.5; // AA offset
-        vec2 p = 0.5 * aspect(center((gl_FragCoord.xy + off) / RENDERSIZE), RENDERSIZE);
+        vec2 antiAliasingOffset = random2() - 0.5;
+        vec2 pos = 0.5 * aspect(center((gl_FragCoord.xy + antiAliasingOffset) / RENDERSIZE), RENDERSIZE);
 
-        vec3 ro = vec3(-1, cameraY, cameraZ); // ray origin
-        mat3 ca = lookAt(ro, vec3(0), vec3(0, 1, 0));
+        vec3 rayOrigin = vec3(-1, cameraY, cameraZ);
+        mat3 lookAtMatrix = lookAt(rayOrigin, vec3(0), vec3(0, 1, 0));
 
-        vec3 rd = ca * normalize(vec3(p,1.5)); // ray direction
+        vec3 rayDirection = lookAtMatrix * normalize(vec3(pos, 1.5));
 
-        // depth of field
-        float t = raymarchCast(ro, ca[2]).sdf; // focus distance
-        vec3 fp = ro + rd*t; // focus plane
-        ro += uniformVector()*.05;
-        rd = normalize(fp-ro);
+        // Depth of field
+        float focalDistance = raymarchCast(rayOrigin, lookAtMatrix[2]).sdf;
+        vec3 focalPlane = rayOrigin + rayDirection * focalDistance;
+        rayOrigin += randomUnitVector() * 0.05;
+        rayDirection = normalize(focalPlane - rayOrigin);
 
-        // render
-        vec3 col = render(ro, rd);
+        gl_FragColor = vec4(render(rayOrigin, rayDirection), 1);
 
-        // blend the color with the previous frame color
-        gl_FragColor = vec4(col, 1) + IMG_THIS_PIXEL(bufferA) * feedback;
+        if (FRAMEINDEX > 0)
+            gl_FragColor += IMG_THIS_PIXEL(bufferA) * feedback;
     }
     else // Shadertoy Image
     {
-        // base color
         vec4 data = IMG_THIS_PIXEL(bufferA);
-        vec3 col = data.rgb / data.a;
+        vec3 color = data.rgb / data.a;
 
-        // post processing
+        color = gamma2linear(color);
+        color = blendDarken(vec3(1), color, darkenAmount);
 
-        col = gamma2linear(col);
-        col = blendDarken(vec3(1), col, darkenAmount);
+        color += 0.4 * bloom(bufferA, bloomSpread, 4.);
+        color = saturate(color);
 
-        // bloom
-        col += 0.4 * bloom(bufferA, bloomSpread, 4.);
-        col = saturate(col);
+        color = color*color * (3. - 2. * color); // contrast
+        color = tonemapACES(color);
 
-        col = col*col * (3. - 2. * col); // constrast
-        col = tonemapACES(col); // tonemapping
-
-        gl_FragColor = vec4(col, 1);
+        gl_FragColor = vec4(color, 1);
     }
 }
