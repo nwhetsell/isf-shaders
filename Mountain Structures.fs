@@ -43,6 +43,12 @@
             "MIN": -5
         },
         {
+            "NAME": "backgroundColor",
+            "LABEL": "Background color",
+            "TYPE": "color",
+            "DEFAULT": [0.6, 0.8, 1, 1]
+        },
+        {
             "NAME": "lightRadius",
             "LABEL": "Light distance",
             "TYPE": "float",
@@ -1361,7 +1367,6 @@ float shadow(vec3 ro, vec3 rd) {
 vec3 render(vec3 ro, vec3 rd) {
     // light (sun) direction
     vec3 lig = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD) + lightDirectionRandomization * uniformVector());
-    vec3 bgCol = vec3(.6,.8,1); // background color
     float fdis = 0.; // final distance
     vec3 frd; // final ray direction
     vec3 col = vec3(0); // accumulated color
@@ -1371,7 +1376,7 @@ vec3 render(vec3 ro, vec3 rd) {
         float t = res.sdf;
         if (i==0) {fdis = t; frd = rd;}
         if (!res.valid) { // we don't hit the surface
-            if (i==0) col = bgCol;
+            if (i==0) col = backgroundColor.rgb;
             break;
         }
         vec3 p = ro + rd*t; // hit point
@@ -1384,7 +1389,7 @@ vec3 render(vec3 ro, vec3 rd) {
         // lighting
         col += emit*dif*sha;
     }
-    col = mix(col, bgCol, 1.-exp(-fdis*fdis*fdis*.001)); // fog
+    col = mix(col, backgroundColor.rgb, 1.-exp(-fdis*fdis*fdis*.001)); // fog
     col += 3.*pow(clamp(dot(frd,lig),0.,1.),3.5); // sun glare
     return col;
 }
