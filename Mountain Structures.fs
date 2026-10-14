@@ -2387,7 +2387,6 @@ examples:
     - https://connorahaskins.substack.com/p/ray-marching-menger-sponge-breakdown
 */
 #define MENGERSPONGE_ITERATIONS 6
-#define MENGERSPONGE_TRANSFORM_FNC(fi,st) st
 #define FNC_MENGERSPONGESDF 
 float mengerSpongeSDF( in vec3 st, in float scale, in float initialDistance ) {
     float dist = initialDistance;
