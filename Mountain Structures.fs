@@ -2383,6 +2383,8 @@ description: |
 use: mengerSpongeSDF(<vec2> st)
 examples:
     - https://www.shadertoy.com/view/ctsSzH
+    - https://scrapbox.io/atlas-of-shaders/Menger_Sponge
+    - https://connorahaskins.substack.com/p/ray-marching-menger-sponge-breakdown
 */
 #define MENGERSPONGE_ITERATIONS 6
 #define MENGERSPONGE_TRANSFORM_FNC(fi,st) st

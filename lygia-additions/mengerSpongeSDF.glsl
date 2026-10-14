@@ -13,6 +13,8 @@ description: |
 use: mengerSpongeSDF(<vec2> st)
 examples:
     - https://www.shadertoy.com/view/ctsSzH
+    - https://scrapbox.io/atlas-of-shaders/Menger_Sponge
+    - https://connorahaskins.substack.com/p/ray-marching-menger-sponge-breakdown
 */
 
 #ifndef MENGERSPONGE_ITERATIONS
