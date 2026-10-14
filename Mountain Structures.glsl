@@ -175,6 +175,8 @@
 #include "lygia/space/polar2cart.glsl"
 #define BLOOM_QUALITY 8
 #include "lygia-additions/bloom.glsl" // This isn’t exactly the same as the bloom function in the Shadertoy shader.
+#define MENGERSPONGE_TRANSFORM(fi, st) rotate3dY(-fi) * rotate3dX(fi * 2.) * st;
+#include "lygia-additions/mengerSpongeSDF.glsl"
 
 
 float seed;
@@ -204,35 +206,11 @@ vec3 randomUnitVector(void)
     return normalize(center(random3()));
 }
 
-// Menger sponge
-Material raymarchMap(vec3 p)
+Material raymarchMap(vec3 pos)
 {
-    float dist = p.y;
-
-    float s = scale;
-    for (int i = 0; i < 6; i++) {
-        // transformation
-        p = rotate3dY(-float(i)) * rotate3dX(float(i) * 2.) * p;
-
-        vec3 a = mod(p * s, 2.) - 1.;
-        s *= 3.;
-        vec3 r = 1. - 3. * abs(a);
-
-        r = abs(r);
-
-        // cross distance
-        float da = max(r.x, r.y);
-        float db = max(r.y, r.z);
-        float dc = max(r.z, r.x);
-
-        float c = mmin(da, db, dc) - 1.;
-
-        dist = max(dist, c / s);
-    }
-
     Material mat = materialNew();
-    mat.position = p;
-    mat.sdf = min(dist, RAYMARCH_MAX_DIST);
+    mat.position = pos;
+    mat.sdf = min(mengerSpongeSDF(pos, scale), RAYMARCH_MAX_DIST);
     return mat;
 }
 
