@@ -63,7 +63,7 @@ Lorenz\ system.fs: Lorenz\ system.glsl
 	clang $(clang_options) --output="$@" "$<"
 MattiasCRT.fs: MattiasCRT.glsl
 	clang $(clang_options) --output="$@" "$<"
-Mountain\ Structures.fs: Mountain\ Structures.glsl
+Mountain\ Structures.fs: Mountain\ Structures.glsl lygia-additions/mengerSpongeSDF.glsl
 	cd lygia; git apply ../'Mountain Structures.patch';
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard

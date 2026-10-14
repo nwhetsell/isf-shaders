@@ -226,7 +226,7 @@ Material raymarchMap(vec3 pos)
 {
     Material mat = materialNew();
     mat.position = pos;
-    mat.sdf = min(mengerSpongeSDF(pos, scale), RAYMARCH_MAX_DIST);
+    mat.sdf = min(mengerSpongeSDF(pos, scale, pos.y), RAYMARCH_MAX_DIST);
     return mat;
 }
 

@@ -1,4 +1,9 @@
+#include "../lygia/sdf/crossSDF.glsl"
+#include "../lygia/sdf/cubeSDF.glsl"
+#include "../lygia/sdf/opIntersection.glsl"
+#include "../lygia/sdf/opRepeat.glsl"
 #include "../lygia/math/mmin.glsl"
+#include "crossSDF.glsl"
 
 /*
 contributors: [Poisson](https://www.shadertoy.com/user/Poisson)
@@ -21,30 +26,21 @@ examples:
 #ifndef FNC_MENGERSPONGESDF
 #define FNC_MENGERSPONGESDF
 
-float mengerSpongeSDF( in vec3 st, float scale ) {
-    float dist = st.y;
+float mengerSpongeSDF( in vec3 st, in float scale, in float initialDistance ) {
+    float dist = initialDistance;
 
-    float s = scale;
     for (int i = 0; i < MENGERSPONGE_ITERATIONS; i++) {
         st = MENGERSPONGE_TRANSFORM(float(i), st);
-
-        vec3 a = mod(st * s, 2.) - 1.;
-        s *= 3.;
-        vec3 r = 1. - 3. * abs(a);
-
-        r = abs(r);
-
-        // cross distance
-        float da = max(r.x, r.y);
-        float db = max(r.y, r.z);
-        float dc = max(r.z, r.x);
-
-        float c = mmin(da, db, dc) - 1.;
-
-        dist = max(dist, c / s);
+        vec3 r = opRepeat(st, vec3(2. / scale)) * scale;
+        scale *= 3.;
+        dist = opIntersection(dist, -crossSDF(r * 3.) / scale);
     }
 
-   return dist;
+    return dist;
+}
+
+float mengerSpongeSDF( in vec3 st, in float scale ) {
+    return mengerSpongeSDF(st, scale, cubeSDF(st, 1.));
 }
 
 float mengerSpongeSDF( in vec3 st ) {
