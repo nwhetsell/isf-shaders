@@ -19,6 +19,22 @@
             "MIN": -50
         },
         {
+            "NAME": "xRotation",
+            "LABEL": "x-axis rotation",
+            "TYPE": "float",
+            "DEFAULT": 114.5915590262,
+            "MAX": 360,
+            "MIN": 0
+        },
+        {
+            "NAME": "yRotation",
+            "LABEL": "y-axis rotation",
+            "TYPE": "float",
+            "DEFAULT": 57.2957795131,
+            "MAX": 360,
+            "MIN": 0
+        },
+        {
             "NAME": "maxDistance",
             "LABEL": "Maximum distance",
             "TYPE": "float",
@@ -1995,7 +2011,7 @@ vec3 bloom(sampler2D tex, float bloomSpread, float lod)
     }
     return (bloom / bloom.a).rgb;
 }
-#define MENGERSPONGE_TRANSFORM(fi,st) rotate3dY(-fi) * rotate3dX(fi * 2.) * st;
+#define MENGERSPONGE_TRANSFORM(fi,st) rotate3dY(-fi * yRotation * DEG2RAD) * rotate3dX(fi * xRotation * DEG2RAD) * st;
 /*
 contributors: [Poisson](https://www.shadertoy.com/user/Poisson)
 description: |

@@ -19,6 +19,22 @@
             "MIN": -50
         },
         {
+            "NAME": "xRotation",
+            "LABEL": "x-axis rotation",
+            "TYPE": "float",
+            "DEFAULT": 114.5915590262,
+            "MAX": 360,
+            "MIN": 0
+        },
+        {
+            "NAME": "yRotation",
+            "LABEL": "y-axis rotation",
+            "TYPE": "float",
+            "DEFAULT": 57.2957795131,
+            "MAX": 360,
+            "MIN": 0
+        },
+        {
             "NAME": "maxDistance",
             "LABEL": "Maximum distance",
             "TYPE": "float",
@@ -175,7 +191,7 @@
 #include "lygia/space/polar2cart.glsl"
 #define BLOOM_QUALITY 8
 #include "lygia-additions/bloom.glsl" // This isn’t exactly the same as the bloom function in the Shadertoy shader.
-#define MENGERSPONGE_TRANSFORM(fi, st) rotate3dY(-fi) * rotate3dX(fi * 2.) * st;
+#define MENGERSPONGE_TRANSFORM(fi, st) rotate3dY(-fi * yRotation * DEG2RAD) * rotate3dX(fi * xRotation * DEG2RAD) * st;
 #include "lygia-additions/mengerSpongeSDF.glsl"
 
 
