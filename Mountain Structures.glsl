@@ -133,9 +133,7 @@
 }*/
 
 // The default light parameters are:
-//   lightRadius = length(vec3(-1, -3, 1))
 //   lightRadius = length(vec3(2, 1, 1))
-// 2,1,1
 //               = sqrt(2 * 2 + 1 * 1 + 1 * 1)
 //               = sqrt(6) ≈ 2.4494897428
 //   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
