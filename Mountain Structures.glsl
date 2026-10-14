@@ -165,7 +165,8 @@
 #include "lygia/math/const.glsl"
 #include "lygia/math/mmin.glsl"
 #include "lygia/math/pow3.glsl"
-#include "lygia/math/rotate2d.glsl"
+#include "lygia/math/rotate3dX.glsl"
+#include "lygia/math/rotate3dY.glsl"
 #include "lygia/math/saturate.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
@@ -203,15 +204,16 @@ vec3 randomUnitVector(void)
     return normalize(center(random3()));
 }
 
-// scene sdf (menger sponge)
-Material raymarchMap(vec3 p) {
+// Menger sponge
+Material raymarchMap(vec3 p)
+{
     float dist = p.y;
 
     float s = scale;
     for (int i = 0; i < 6; i++) {
         // transformation
-        p.yz *= rotate2d(-float(i) * 2.);
-        p.xz *= rotate2d(-float(i));
+        p = rotate3dY(-float(i)) * rotate3dX(float(i) * 2.) * p;
+
         vec3 a = mod(p * s, 2.) - 1.;
         s *= 3.;
         vec3 r = 1. - 3. * abs(a);
@@ -225,7 +227,7 @@ Material raymarchMap(vec3 p) {
 
         float c = mmin(da, db, dc) - 1.;
 
-        dist = max(dist, c/s);
+        dist = max(dist, c / s);
     }
 
     Material mat = materialNew();
@@ -249,10 +251,10 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
 
         vec3 ro = rayOrigin;
         vec3 rd = rayDirection;
-        for (int i = 0; i < 5; i++) { // 5 bounces of gi
+        for (int i = 0; i < 5; i++) { // 5 bounces of global illumination
             float t = res.sdf;
-
             vec3 p = ro + rd * t; // hit point
+
 // #define STRICT_NORMAL
 #ifdef STRICT_NORMAL
             float dist = raymarchMap(p).sdf;
@@ -266,16 +268,15 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
 
             ro = p + n * 0.002; // new ray origin
             rd = normalize(n + randomUnitVector()); // new ray direction, cheap diffuse BRDF
+
             emit *= mainColor.rgb; // color the object
 
             float dif = saturate(dot(n, lightDirection)); // diffuse light
             dif *= raymarchSoftShadow(ro, lightDirection);
 
-            // lighting
             color += emit * dif;
 
             res = raymarchCast(ro, rd);
-
             if (!res.valid) // we don't hit the surface
                 break;
         }

@@ -132,9 +132,7 @@
     ]
 }*/
 // The default light parameters are:
-//   lightRadius = length(vec3(-1, -3, 1))
 //   lightRadius = length(vec3(2, 1, 1))
-// 2,1,1
 //               = sqrt(2 * 2 + 1 * 1 + 1 * 1)
 //               = sqrt(6) ≈ 2.4494897428
 //   lightPhi = acos(1 / lightRadius) ≈ 65.9051574479°
@@ -1865,17 +1863,35 @@ vec3 pow3(const in vec3 v) { return v * v * v; }
 vec4 pow3(const in vec4 v) { return v * v * v; }
 /*
 contributors: Patricio Gonzalez Vivo
-description: returns a 2x2 rotation matrix
-use: <mat2> rotate2d(<float> radians)
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dX(<float> radians)
 license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_ROTATE2D 
-mat2 rotate2d(const in float r){
+#define FNC_ROTATE3DX 
+mat3 rotate3dX(const in float r){
     float c = cos(r);
     float s = sin(r);
-    return mat2(c, s, -s, c);
+    return mat3(vec3(1.0,0.0,0.0),
+                vec3(0.0,c,s),
+                vec3(0.0,-s,c));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dY(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE3DY 
+mat3 rotate3dY(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(c,0.,-s),
+                vec3(0.,1.,0.),
+                vec3(s,0.,c));
 }
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1993,14 +2009,14 @@ vec3 randomUnitVector(void)
 {
     return normalize(center(random3()));
 }
-// scene sdf (menger sponge)
-Material raymarchMap(vec3 p) {
+// Menger sponge
+Material raymarchMap(vec3 p)
+{
     float dist = p.y;
     float s = scale;
     for (int i = 0; i < 6; i++) {
         // transformation
-        p.yz *= rotate2d(-float(i) * 2.);
-        p.xz *= rotate2d(-float(i));
+        p = rotate3dY(-float(i)) * rotate3dX(float(i) * 2.) * p;
         vec3 a = mod(p * s, 2.) - 1.;
         s *= 3.;
         vec3 r = 1. - 3. * abs(a);
@@ -2010,7 +2026,7 @@ Material raymarchMap(vec3 p) {
         float db = max(r.y, r.z);
         float dc = max(r.z, r.x);
         float c = mmin(da, db, dc) - 1.;
-        dist = max(dist, c/s);
+        dist = max(dist, c / s);
     }
     Material mat = materialNew();
     mat.position = p;
@@ -2028,7 +2044,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
         vec3 emit = vec3(1); // color mask
         vec3 ro = rayOrigin;
         vec3 rd = rayDirection;
-        for (int i = 0; i < 5; i++) { // 5 bounces of gi
+        for (int i = 0; i < 5; i++) { // 5 bounces of global illumination
             float t = res.sdf;
             vec3 p = ro + rd * t; // hit point
 // #define STRICT_NORMAL
@@ -2038,7 +2054,6 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
             emit *= mainColor.rgb; // color the object
             float dif = saturate(dot(n, lightDirection)); // diffuse light
             dif *= raymarchSoftShadow(ro, lightDirection);
-            // lighting
             color += emit * dif;
             res = raymarchCast(ro, rd);
             if (!res.valid) // we don't hit the surface
