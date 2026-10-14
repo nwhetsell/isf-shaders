@@ -1847,23 +1847,49 @@ license:
 #define DEG2RAD (PI / 180.0)
 #define RAD2DEG (180.0 / PI)
 /*
-contributors: Patricio Gonzalez Vivo
-description: extend GLSL min function to add more arguments
-use:
-    - min(<float> A, <float> B, <float> C[, <float> D])
-    - min(<vec2|vec3|vec4> A)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+contributors: Inigo Quiles
+description: cubic polynomial https://iquilezles.org/articles/smoothsteps/
+use: <float|vec2|vec3|vec4> cubic(<float|vec2|vec3|vec4> value[, <float> in, <float> out]);
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/math_functions.frag
 */
-#define FNC_MMIN 
-float mmin(const float v) { return v; }
-float mmin(in float a, in float b) { return min(a, b); }
-float mmin(in float a, in float b, in float c) { return min(a, min(b, c)); }
-float mmin(in float a, in float b, in float c, in float d) { return min(min(a,b), min(c, d)); }
-float mmin(const vec2 v) { return min(v.x, v.y); }
-float mmin(const vec3 v) { return mmin(v.x, v.y, v.z); }
-float mmin(const vec4 v) { return mmin(v.x, v.y, v.z, v.w); }
+#define FNC_CUBIC 
+float cubic(const in float v) { return v*v*(3.0-2.0*v); }
+vec2 cubic(const in vec2 v) { return v*v*(3.0-2.0*v); }
+vec3 cubic(const in vec3 v) { return v*v*(3.0-2.0*v); }
+vec4 cubic(const in vec4 v) { return v*v*(3.0-2.0*v); }
+float cubic(const in float v, in float slope0, in float slope1) {
+    float a = slope0 + slope1 - 2.;
+    float b = -2. * slope0 - slope1 + 3.;
+    float c = slope0;
+    float v2 = v * v;
+    float v3 = v * v2;
+    return a * v3 + b * v2 + c * v;
+}
+vec2 cubic(const in vec2 v, in float slope0, in float slope1) {
+    float a = slope0 + slope1 - 2.;
+    float b = -2. * slope0 - slope1 + 3.;
+    float c = slope0;
+    vec2 v2 = v * v;
+    vec2 v3 = v * v2;
+    return a * v3 + b * v2 + c * v;
+}
+vec3 cubic(const in vec3 v, in float slope0, in float slope1) {
+    float a = slope0 + slope1 - 2.;
+    float b = -2. * slope0 - slope1 + 3.;
+    float c = slope0;
+    vec3 v2 = v * v;
+    vec3 v3 = v * v2;
+    return a * v3 + b * v2 + c * v;
+}
+vec4 cubic(const in vec4 v, in float slope0, in float slope1) {
+    float a = slope0 + slope1 - 2.;
+    float b = -2. * slope0 - slope1 + 3.;
+    float c = slope0;
+    vec4 v2 = v * v;
+    vec4 v3 = v * v2;
+    return a * v3 + b * v2 + c * v;
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: power of 3
@@ -2367,7 +2393,24 @@ vec2 opRepeat( in vec2 p, in vec2 lima, in vec2 limb, in float s ) {
 vec3 opRepeat( in vec3 p, in vec3 lima, in vec3 limb, in float s ) {
     return p-s*clamp(floor(p/s),lima,limb);
 }
-
+/*
+contributors: Patricio Gonzalez Vivo
+description: extend GLSL min function to add more arguments
+use:
+    - min(<float> A, <float> B, <float> C[, <float> D])
+    - min(<vec2|vec3|vec4> A)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_MMIN 
+float mmin(const float v) { return v; }
+float mmin(in float a, in float b) { return min(a, b); }
+float mmin(in float a, in float b, in float c) { return min(a, min(b, c)); }
+float mmin(in float a, in float b, in float c, in float d) { return min(min(a,b), min(c, d)); }
+float mmin(const vec2 v) { return min(v.x, v.y); }
+float mmin(const vec3 v) { return mmin(v.x, v.y, v.z); }
+float mmin(const vec4 v) { return mmin(v.x, v.y, v.z, v.w); }
 
 #define FNC_CROSSSDF_ADDITIONS 
 float crossSDF(vec3 st) {
@@ -2448,7 +2491,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
             dif *= raymarchSoftShadow(ro, lightDirection);
             color += emit * dif;
             res = raymarchCast(ro, rd);
-            if (!res.valid) // we don't hit the surface
+            if (!res.valid)
                 break;
         }
     } else {
@@ -2484,8 +2527,7 @@ void main()
         color = gamma2linear(color);
         color = blendDarken(vec3(1), color, darkenAmount);
         color += 0.4 * bloom(bufferA, bloomSpread, 4.);
-        color = saturate(color);
-        color = color*color * (3. - 2. * color); // contrast
+        color = cubic(saturate(color));
         color = tonemapACES(color);
         gl_FragColor = vec4(color, 1);
     }

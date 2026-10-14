@@ -179,7 +179,7 @@
 #define RAYMARCH_SHADOW_SOLID_ANGLE 0.
 #include "lygia/lighting/raymarch/softShadow.glsl"
 #include "lygia/math/const.glsl"
-#include "lygia/math/mmin.glsl"
+#include "lygia/math/cubic.glsl"
 #include "lygia/math/pow3.glsl"
 #include "lygia/math/rotate3dX.glsl"
 #include "lygia/math/rotate3dY.glsl"
@@ -271,7 +271,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
             color += emit * dif;
 
             res = raymarchCast(ro, rd);
-            if (!res.valid) // we don't hit the surface
+            if (!res.valid)
                 break;
         }
     } else {
@@ -321,11 +321,8 @@ void main()
 
         color = gamma2linear(color);
         color = blendDarken(vec3(1), color, darkenAmount);
-
         color += 0.4 * bloom(bufferA, bloomSpread, 4.);
-        color = saturate(color);
-
-        color = color*color * (3. - 2. * color); // contrast
+        color = cubic(saturate(color));
         color = tonemapACES(color);
 
         gl_FragColor = vec4(color, 1);
