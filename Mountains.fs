@@ -158,6 +158,36 @@
             "MIN": -100
         },
         {
+            "NAME": "sunlightRadius",
+            "LABEL": "Sunlight distance",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "sunlightPhi",
+            "LABEL": "Sunlight phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 61.3145979859,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "sunlightTheta",
+            "LABEL": "Sunlight theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 45,
+            "MIN": 0,
+            "MAX": 360
+        },
+        {
+            "NAME": "sunColor",
+            "LABEL": "Sun color",
+            "TYPE": "color",
+            "DEFAULT": [1, 0.9, 0.83, 1]
+        },
+        {
             "NAME": "anaglyph3D",
             "LABEL": "Anaglyph 3D",
             "TYPE": "bool",
@@ -170,6 +200,10 @@
         "rocks": { "PATH": "rocks.png" }
     }
 }*/
+// The default sunlight parameters are:
+//   sunlightRadius = length(normalize(vec3(0.4, 0.4, 0.48))) = 1
+//   sunlightPhi = acos(0.48 / 1) ≈ 61.3145979859°
+//   sunlightTheta = atan(0.4 / 0.4) = atan(1) = 45°
 #define RANDOM_HIGHER_RANGE 
 #define RANDOM_SINLESS 
 #define FBM_NOISE_FNC(UV) gnoise(UV)
@@ -1865,8 +1899,6 @@ vec2 gnoise2(in vec2 st) {
 }
 float treeLine = 0.;
 float treeCol = 0.;
-vec3 sunLight = normalize(vec3(0.4, 0.4, 0.48));
-vec3 sunColour = vec3(1, 0.9, 0.83);
 float specular = 0.;
 float ambient;
 float Trees(vec2 p)
@@ -1946,6 +1978,8 @@ vec3 GetClouds(in vec3 camera, in vec3 color, in vec3 rd)
     return color;
 }
 // Grab all sky information for a given ray from camera
+vec3 sunLight;
+vec3 sunColour;
 vec3 GetSky(in vec3 rd)
 {
     float sunAmount = max(dot(rd, sunLight), 0.);
@@ -2085,6 +2119,8 @@ vec3 PostEffects(vec3 rgb)
 }
 void main()
 {
+    sunLight = polar2cart(sunlightRadius, sunlightPhi * DEG2RAD, sunlightTheta * DEG2RAD);
+    sunColour = sunColor.rgb;
     vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
     vec3 camera;
     camera.xz = CameraPath(0.).xz;
