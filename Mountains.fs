@@ -2090,10 +2090,10 @@ void main()
     camera.xz = CameraPath(0.).xz;
     float h = 0.;
     if (autoCameraHeight) {
-    // Use several forward heights, of decreasing influence with distance from the camera.
-    for (float f = 1.; f > 0.3; f -= 0.1) {
-        h += Terrain(CameraPath((0.6 - f) * 0.008).xz) * f;
-    }
+        // Use several forward heights, of decreasing influence with distance from the camera.
+        for (float f = 1.; f > 0.3; f -= 0.1) {
+            h += Terrain(CameraPath((0.6 - f) * 0.008).xz) * f;
+        }
     }
     camera.y = h * 0.25 + cameraHeightOffset;
     if (autoCameraHeight)
