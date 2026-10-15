@@ -359,7 +359,7 @@ vec3 ApplyFog(in vec3 rgb, in float distance, in vec3 dir)
 // Calculate sun light...
 float specular;
 float ambient;
-void DoLighting(inout vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in float dis)
+void DoLighting(inout vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir)
 {
     float h = dot(sunLight, normal);
     float c = max(h, 0.) + ambient;
@@ -441,10 +441,10 @@ vec3 TerrainColour(vec3 camera, vec3 pos, vec3 normal, float distance)
         }
     }
 
-    float distanceSquared = distance * distance; // Squaring it gives better distance scales.
-    DoLighting(mat, pos, normal, dir, distanceSquared);
+    DoLighting(mat, pos, normal, dir);
 
     // Do the water...
+    float distanceSquared = distance * distance; // Squaring it gives better distance scales.
     if (matPos.y < 0.) {
         // Pull back along the ray direction to get water surface point at y = 0.0 ...
         float time = TIME * 0.03;
@@ -532,8 +532,9 @@ void main()
         camera += 0.45 * xaxis * isCyan; // move camera to the right - the rayDirection is still good
     }
 
-    vec3 color;
     Material res = raymarchCast(camera, rayDirection);
+
+    vec3 color;
     if (res.valid) {
         float t = res.sdf;
         // Get world coordinate of landscape...
@@ -562,5 +563,5 @@ void main()
         color *= vec3(isCyan, vec2(1. - isCyan));
     }
 
-    gl_FragColor = vec4(color, 1.);
+    gl_FragColor = vec4(color, 1);
 }
