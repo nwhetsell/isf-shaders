@@ -42,6 +42,20 @@
             "MIN": 0
         },
         {
+            "NAME": "autoCameraHeight",
+            "LABEL": "Automatic camera height",
+            "TYPE": "bool",
+            "DEFAULT": true
+        },
+        {
+            "NAME": "cameraHeightOffset",
+            "LABEL": "Camera height offset",
+            "TYPE": "float",
+            "DEFAULT": 3.5,
+            "MAX": 1000,
+            "MIN": 0
+        },
+        {
             "NAME": "mountainHeight",
             "LABEL": "Mountain height",
             "TYPE": "float",
@@ -452,12 +466,16 @@ void main()
 
     vec3 camera;
     camera.xz = CameraPath(0.).xz;
-    // Use several forward heights, of decreasing influence with distance from the camera.
     float h = 0.;
+    if (autoCameraHeight) {
+    // Use several forward heights, of decreasing influence with distance from the camera.
     for (float f = 1.; f > 0.3; f -= 0.1) {
         h += Terrain(CameraPath((0.6 - f) * 0.008).xz) * f;
     }
-    camera.y = max(h * 0.25 + 3.5, 1.5 + sin(TIME * 5.) * 0.5);
+    }
+    camera.y = h * 0.25 + cameraHeightOffset;
+    if (autoCameraHeight)
+        camera.y = max(camera.y, 1.5 + sin(TIME * 5.) * 0.5);
 
     vec3 cameraTarget;
     cameraTarget.xz = CameraPath(0.1).xz;
