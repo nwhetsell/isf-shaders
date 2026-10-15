@@ -1897,14 +1897,6 @@ vec2 gnoise2(in vec2 st) {
            (c - a) * u.y * (1.0 - u.x) +
            (d - b) * u.x * u.y;
 }
-float treeLine = 0.;
-float treeCol = 0.;
-float specular = 0.;
-float ambient;
-float Trees(vec2 p)
-{
-    return gnoise(p * 13.) * treeLine;
-}
 // Low def version for ray-marching through the height field...
 float Terrain(in vec2 p, out vec2 pos, out float w)
 {
@@ -1931,7 +1923,13 @@ float Terrain(in vec2 p)
     float w;
     return Terrain(p, pos, w);
 }
+float treeLine;
+float Trees(vec2 p)
+{
+    return gnoise(p * 13.) * treeLine;
+}
 // Map to lower resolution for height field mapping for raymarchCast function...
+float treeCol;
 Material raymarchMap(in vec3 pos)
 {
     float h = Terrain(pos.xz);
@@ -1998,6 +1996,8 @@ vec3 ApplyFog(in vec3 rgb, in float distance, in vec3 dir)
     return mix(GetSky(dir), rgb, fogAmount);
 }
 // Calculate sun light...
+float specular;
+float ambient;
 void DoLighting(inout vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in float dis)
 {
     float h = dot(sunLight, normal);
@@ -2119,6 +2119,8 @@ vec3 PostEffects(vec3 rgb)
 }
 void main()
 {
+    treeLine = 0.;
+    treeCol = 0.;
     sunLight = polar2cart(sunlightRadius, sunlightPhi * DEG2RAD, sunlightTheta * DEG2RAD);
     sunColour = sunColor.rgb;
     vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
