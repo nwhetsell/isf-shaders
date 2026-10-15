@@ -4,7 +4,19 @@ from pathlib import Path
 
 
 dependencies_by_shader = {
-    'Iterated function system': 'rand/rand.glsl'
+    'CA Molecular dynamics': 'lygia-additions/gaussian.glsl',
+    'Cell System 2': 'lygia-additions/gaussian.glsl',
+    'Domain-warped FBM noise': 'lygia-additions/gnoise.glsl',
+    'Endless living creature': 'lygia-additions/opRepeat.glsl',
+    'Everflow': 'lygia-additions/gaussian.glsl',
+    'Iterated function system': 'rand/rand.glsl',
+    'Le Vortex': 'lygia-additions/const.glsl lygia-additions/opRepeat.glsl',
+    'Lorenz eystem': 'lygia-additions/const.glsl',
+    'Mountain Structures': 'lygia-additions/bloom.glsl lygia-additions/mengerSpongeSDF.glsl',
+    'Mountains': 'lygia-additions/gnoise.glsl',
+    'Physarum Polycephalum Simulation': 'lygia-additions/const.glsl',
+    'Random slime mold generator.glsl': 'lygia-additions/gaussian.glsl',
+    'Strange Cloud': 'lygia-additions/bloom.glsl'
 }
 
 options_by_shader = {

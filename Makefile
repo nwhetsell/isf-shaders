@@ -9,6 +9,7 @@ shaders = \
 	Everflow.fs \
 	expansive\ reaction-diffusion.fs \
 	Gaussian\ SmoothLife.fs \
+	Heightfield\ Slice\ Renderer.fs \
 	Iterated\ function\ system.fs \
 	Le\ Vortex.fs \
 	Lorenz\ system.fs \
@@ -22,6 +23,7 @@ shaders = \
 	Rainier\ mood.fs \
 	Random\ slime\ mold\ generator.fs \
 	Shattered\ Crystal.fs \
+	Sketch.fs \
 	spilled.fs \
 	Strange\ Cloud.fs \
 	Suture\ Fluid.fs \
@@ -31,7 +33,7 @@ all: $(shaders)
 
 clang_options = --preprocess --comments --no-line-commands -fdirectives-only --language=c
 
-CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl
+CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl lygia-additions/gaussian.glsl
 	clang $(clang_options) --output="$@" "$<"
 Cell\ system\ 2.fs: Cell\ system\ 2.glsl
 	clang $(clang_options) --output="$@" "$<"
@@ -39,13 +41,13 @@ circle\ dithering.fs: circle\ dithering.glsl
 	clang $(clang_options) --output="$@" "$<"
 Colormap.fs: Colormap.glsl
 	clang $(clang_options) --output="$@" "$<"
-Domain-warped\ FBM\ noise.fs: Domain-warped\ FBM\ noise.glsl
+Domain-warped\ FBM\ noise.fs: Domain-warped\ FBM\ noise.glsl lygia-additions/gnoise.glsl
 	clang $(clang_options) --output="$@" "$<"
-Endless\ living\ creature.fs: Endless\ living\ creature.glsl
+Endless\ living\ creature.fs: Endless\ living\ creature.glsl lygia-additions/opRepeat.glsl
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 Ether.fs: Ether.glsl
 	clang $(clang_options) --output="$@" "$<"
-Everflow.fs: Everflow.glsl
+Everflow.fs: Everflow.glsl lygia-additions/gaussian.glsl
 	clang $(clang_options) --output="$@" "$<"
 expansive\ reaction-diffusion.fs: expansive\ reaction-diffusion.glsl
 	cd lygia; git apply ../'expansive reaction-diffusion.patch';
@@ -55,7 +57,7 @@ Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 	clang $(clang_options) --output="$@" "$<"
 Iterated\ function\ system.fs: Iterated\ function\ system.glsl rand/rand.glsl
 	clang $(clang_options) --output="$@" "$<"
-Le\ Vortex.fs: Le\ Vortex.glsl
+Le\ Vortex.fs: Le\ Vortex.glsl lygia-additions/const.glsl lygia-additions/opRepeat.glsl
 	cd lygia; git apply ../'Le Vortex.patch';
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
@@ -63,11 +65,11 @@ Lorenz\ system.fs: Lorenz\ system.glsl
 	clang $(clang_options) --output="$@" "$<"
 MattiasCRT.fs: MattiasCRT.glsl
 	clang $(clang_options) --output="$@" "$<"
-Mountain\ Structures.fs: Mountain\ Structures.glsl lygia-additions/mengerSpongeSDF.glsl
+Mountain\ Structures.fs: Mountain\ Structures.glsl lygia-additions/bloom.glsl lygia-additions/mengerSpongeSDF.glsl
 	cd lygia; git apply ../'Mountain Structures.patch';
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
-Mountains.fs: Mountains.glsl
+Mountains.fs: Mountains.glsl lygia-additions/gnoise.glsl
 	cd lygia; git apply ../Mountains.patch;
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
@@ -77,7 +79,7 @@ oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 	clang $(clang_options) --output="$@" "$<"
 Palettes.fs: Palettes.glsl
 	clang $(clang_options) --output="$@" "$<"
-Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl
+Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl lygia-additions/const.glsl
 	clang $(clang_options) --output="$@" "$<"
 Rainier\ mood.fs: Rainier\ mood.glsl
 	clang $(clang_options) --output="$@" "$<"
@@ -87,7 +89,7 @@ Shattered\ Crystal.fs: Shattered\ Crystal.glsl
 	clang $(clang_options) --output="$@" "$<"
 spilled.fs: spilled.glsl
 	clang $(clang_options) --output="$@" "$<"
-Strange\ Cloud.fs: Strange\ Cloud.glsl
+Strange\ Cloud.fs: Strange\ Cloud.glsl lygia-additions/bloom.glsl
 	clang $(clang_options) --output="$@" "$<"
 Suture\ Fluid.fs: Suture\ Fluid.glsl
 	clang $(clang_options) --output="$@" "$<"
