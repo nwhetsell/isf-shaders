@@ -200,6 +200,54 @@ license:
 */
 /*
 contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dX(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE3DX 
+mat3 rotate3dX(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(1.0,0.0,0.0),
+                vec3(0.0,c,s),
+                vec3(0.0,-s,c));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dY(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE3DY 
+mat3 rotate3dY(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(c,0.,-s),
+                vec3(0.,1.,0.),
+                vec3(s,0.,c));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dZ(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_ROTATE3DZ 
+mat3 rotate3dZ(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(c,s,0.),
+                vec3(-s,c,0.),
+                vec3(0.,0.,1.));
+}
+/*
+contributors: Patricio Gonzalez Vivo
 description: 'Fix the aspect ratio of a space keeping things squared for you.'
 use: <vec2> aspect(<vec2> st, <vec2> st_size)
 examples:
@@ -260,13 +308,7 @@ struct Camera {
     float focalLength, focalDistance, aperture;
 };
 mat3 rotationMatrix(vec3 rotEuler){
-    float c = cos(rotEuler.x), s = sin(rotEuler.x);
-    mat3 rx = mat3(1, 0, 0, 0, c, -s, 0, s, c);
-    c = cos(rotEuler.y), s = sin(rotEuler.y);
-    mat3 ry = mat3(c, 0, -s, 0, 1, 0, s, 0, c);
-    c = cos(rotEuler.z), s = sin(rotEuler.z);
-    mat3 rz = mat3(c, -s, 0, s, c, 0, 0, 0, 1);
-    return rz * rx * ry;
+    return rotate3dZ(-rotEuler.z) * rotate3dX(-rotEuler.x) * rotate3dY(rotEuler.y);
 }
 Camera getCam(float time){
     //time = 0.;

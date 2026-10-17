@@ -48,6 +48,9 @@
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
 #include "lygia/math/const.glsl"
+#include "lygia/math/rotate3dX.glsl"
+#include "lygia/math/rotate3dY.glsl"
+#include "lygia/math/rotate3dZ.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
 
@@ -98,14 +101,7 @@ struct Camera {
 
 
 mat3 rotationMatrix(vec3 rotEuler){
-    float c = cos(rotEuler.x), s = sin(rotEuler.x);
-    mat3 rx = mat3(1, 0, 0, 0, c, -s, 0, s, c);
-    c = cos(rotEuler.y), s = sin(rotEuler.y);
-    mat3 ry = mat3(c, 0, -s, 0, 1, 0, s, 0, c);
-    c = cos(rotEuler.z), s = sin(rotEuler.z);
-    mat3 rz = mat3(c, -s, 0, s, c, 0, 0, 0, 1);
-
-    return rz * rx * ry;
+    return rotate3dZ(-rotEuler.z) * rotate3dX(-rotEuler.x) * rotate3dY(rotEuler.y);
 }
 
 Camera getCam(float time){
