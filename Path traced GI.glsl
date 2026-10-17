@@ -49,6 +49,11 @@
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
+#define RAYMARCH_SAMPLES 128
+float directLightMinDist(in vec3 ro, in vec3 rd);
+#define RAYMARCH_MIN_DIST directLightMinDist(ro, rd)
+#define RAYMARCH_MIN_HIT_DIST 0.015
+#include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/rotate3dX.glsl"
 #include "lygia/math/rotate3dY.glsl"
@@ -144,16 +149,20 @@ float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor){
 	return (length(p.xyz) - C1) / p.w - C2;
 }
 
-float sdf(vec3 position){
+Material raymarchMap(vec3 pos)
+{
+    Material mat = materialNew();
+    mat.position = pos;
     vec3 dc, ec;
-    return sdf(position, dc, ec);
+    mat.sdf = sdf(pos, dc, ec);
+    return mat;
 }
 
 vec3 normalEstimation(vec3 pos){
   vec2 k = vec2(MinDist, 0);
-  return normalize(vec3(sdf(pos + k.xyy) - sdf(pos - k.xyy),
-	  					sdf(pos + k.yxy) - sdf(pos - k.yxy),
-  						sdf(pos + k.yyx) - sdf(pos - k.yyx)));
+  return normalize(vec3(raymarchMap(pos + k.xyy).sdf - raymarchMap(pos - k.xyy).sdf,
+	  					raymarchMap(pos + k.yxy).sdf - raymarchMap(pos - k.yxy).sdf,
+  						raymarchMap(pos + k.yyx).sdf - raymarchMap(pos - k.yyx).sdf));
 }
 
 float henyeyGreenstein(vec3 dirI, vec3 dirO){
@@ -167,7 +176,7 @@ vec3 directLight(vec3 pos, vec3 normal){
     vec3 pos0 = pos;
     float minAngle = LightRadius;
     for(int i = 0; i < MaxShadowSteps; i++){
-        float dist = sdf(pos);
+        float dist = raymarchMap(pos).sdf;
         if(dist > MaxDist) break;
         if(dist < MinDist) return vec3(0.0);
         pos -= LightDir * dist * 2.5;	//goes 2.5 times faster since we don't need details
@@ -176,22 +185,13 @@ vec3 directLight(vec3 pos, vec3 normal){
     return LightColor * dotLight * clamp(minAngle/LightRadius, .0, 1.0);
 }
 
-
-bool traceB(inout vec3 pos, in vec3 dir){
-    pos += dir*sdf(pos);
-    pos += dir*sdf(pos);
-    for(int i = 0; i < MaxStepsDirect; i++){
-        float dist = sdf(pos);
-        if(dist > MaxDist) break;
-        if(dist < MinDist){
-            pos -= (2.*MinDist-dist) * dir;
-            pos -= (2.*MinDist-sdf(pos)) * dir;
-            pos -= (2.*MinDist-sdf(pos)) * dir;
-            return true;
-        }
-        pos += dir*dist;
+float directLightMinDist(in vec3 ro, in vec3 rd)
+{
+    float t = 0.;
+    for (int i = 0; i < 2; i++) {
+        t += raymarchMap(ro + rd * t).sdf;
     }
-    return false;
+    return t;
 }
 
 
@@ -226,7 +226,7 @@ vec3 directBackground(vec3 dir){
 
 bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal){
     for(int i = 0; i < MaxStepsIndirect; i++){
-        float dist = sdf(pos);
+        float dist = raymarchMap(pos).sdf;
         if(dist > MaxDist) break;
         if(dist < MinDist){
             normal = normalEstimation(pos);
@@ -311,10 +311,21 @@ void main()
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
         Camera cam = getCam(TIME);
-        if (traceB(cam.pos, uv2dir(cam, uv)))
-            gl_FragColor = vec4(cam.pos, 1);
-        else
+
+        vec3 rayOrigin = cam.pos;
+        vec3 rayDirection = uv2dir(cam, uv);
+
+        Material res = raymarchCast(rayOrigin, rayDirection);
+        if (res.valid) {
+            float twiceMinHitDist = 2. * MinDist;
+            for (int i = 0; i < 3; i++) {
+                res.sdf -= twiceMinHitDist - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
+            }
+
+            gl_FragColor = vec4(rayOrigin + rayDirection * res.sdf, 1);
+        } else {
             gl_FragColor = vec4(0);
+        }
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {

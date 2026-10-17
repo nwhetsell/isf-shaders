@@ -1,0 +1,36 @@
+diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
+index bfe1629d..532e0fab 100644
+--- a/lighting/raymarch/cast.glsl
++++ b/lighting/raymarch/cast.glsl
+@@ -32,7 +32,6 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+    
+     float t = tmin;
+     Material m = materialNew();
+-    m.valid = false;
+     for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
+         Material res = RAYMARCH_MAP_FNC(ro + rd * t);
+ #ifdef RAYMARCH_ABS_DIST
+@@ -40,17 +39,17 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+ #else
+         float dist = res.sdf;
+ #endif
+-        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
++        if (dist < RAYMARCH_MIN_HIT_DIST)
+             break;
++        if (t > tmax) {
++            m.valid = false;
++            break;
++        }
++
+         m = res;
+         t += res.sdf;
+     }
+ 
+-    #if defined(RAYMARCH_BACKGROUND) || defined(RAYMARCH_FLOOR)
+-    if ( t > tmax )
+-        m.valid = false;
+-    #endif
+-
+     m.sdf = t;
+     return m;
+ }
