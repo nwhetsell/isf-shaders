@@ -151,6 +151,46 @@ vec4 random4(vec4 p4) {
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define EIGHTH_PI 0.39269908169
+#define QTR_PI 0.78539816339
+#define HALF_PI 1.5707963267948966192313216916398
+#define PI 3.1415926535897932384626433832795
+#define TWO_PI 6.2831853071795864769252867665590
+#define TAU 6.2831853071795864769252867665590
+#define INV_PI 0.31830988618379067153776752674503
+#define INV_SQRT_TAU 0.39894228040143267793994605993439
+#define SQRT_HALF_PI 1.25331413732
+#define PHI 1.618033988749894848204586834
+#define EPSILON 0.0000001
+#define GOLDEN_RATIO 1.6180339887
+#define GOLDEN_RATIO_CONJUGATE 0.61803398875
+#define GOLDEN_ANGLE 2.39996323
+#define DEG2RAD (PI / 180.0)
+#define RAD2DEG (180.0 / PI)
+
+// Henyey-Greenstein phase function factor [-1, 1]
+// represents the average cosine of the scattered directions
+// 0 is isotropic scattering
+// > 1 is forward scattering, < 1 is backwards
+#define HENYEYGREENSTEIN_SCATTERING 0.76
+#define FNC_HENYEYGREENSTEIN 
+float henyeyGreenstein(const in float mu) {
+    return max(0.0, (1.0 - HENYEYGREENSTEIN_SCATTERING*HENYEYGREENSTEIN_SCATTERING) / ((4. + PI) * pow(1.0 + HENYEYGREENSTEIN_SCATTERING*HENYEYGREENSTEIN_SCATTERING - 2.0 * HENYEYGREENSTEIN_SCATTERING * mu, 1.5)));
+}
+float henyeyGreenstein(float mu, float g) {
+    float gg = g * g;
+    return (1.0 / (4.0 * PI)) * ((1.0 - gg) / pow(1.0 + gg - 2.0 * g * mu, 1.5));
+}
+float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
+    return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
+}
 
 #define fragColor gl_FragColor
 #define iResolution RENDERSIZE.xy
@@ -241,8 +281,7 @@ vec3 normalEstimation(vec3 pos){
         sdf(pos + k.yyx) - sdf(pos - k.yyx)));
 }
 float henyeyGreenstein(vec3 dirI, vec3 dirO){
- float cosTheta = dot(dirI, dirO);
-  return Pi/4.0 * (1.0-Anisotropy*Anisotropy) / pow(1.0 + Anisotropy*Anisotropy - 2.0*Anisotropy*cosTheta, 3.0/2.0);
+ return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
 }
 vec3 directLight(vec3 pos, vec3 normal){
     //return vec3(0.);

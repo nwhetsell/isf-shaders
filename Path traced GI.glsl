@@ -46,6 +46,7 @@
 
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
+#include "lygia/lighting/common/henyeyGreenstein.glsl"
 
 #define fragColor gl_FragColor
 #define iResolution RENDERSIZE.xy
@@ -167,8 +168,7 @@ vec3 normalEstimation(vec3 pos){
 }
 
 float henyeyGreenstein(vec3 dirI, vec3 dirO){
-	float cosTheta = dot(dirI, dirO);
- 	return Pi/4.0 * (1.0-Anisotropy*Anisotropy) / pow(1.0 + Anisotropy*Anisotropy - 2.0*Anisotropy*cosTheta, 3.0/2.0);
+	return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
 }
 
 vec3 directLight(vec3 pos, vec3 normal){
