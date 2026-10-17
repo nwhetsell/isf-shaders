@@ -192,10 +192,9 @@ float henyeyGreenstein(float mu, float g) {
 float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
     return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
 }
-float directLightMinDist(in vec3 ro, in vec3 rd);
 #define RAYMARCH_SAMPLES 128
+float directLightMinDist(in vec3 ro, in vec3 rd);
 #define RAYMARCH_MIN_DIST directLightMinDist(ro, rd)
-// #define RAYMARCH_MAX_DIST 4.
 #define RAYMARCH_MIN_HIT_DIST 0.015
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1135,6 +1134,38 @@ license:
 */
 /*
 contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Holger Dammertz
+description: Return a Hammersley point
+use: hammersley(uint index)
+license: CC BY 3.0 Copyright (c) 2012 Holger Dammertz
+*/
+#define FNC_HAMMERSLEY 
+vec2 hammersley(uint index, int numSamples) {
+    const float tof = 0.5 / float(0x80000000U);
+    uint bits = index;
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return vec2(float(index) / float(numSamples), float(bits) * tof);
+}
+vec3 hemisphereCosSample(vec2 u) {
+    float phi = 2.0 * PI * u.x;
+    float cosTheta2 = 1.0 - u.y;
+    float cosTheta = sqrt(cosTheta2);
+    float sinTheta = sqrt(1.0 - cosTheta2);
+    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+}
+/*
+contributors: Patricio Gonzalez Vivo
 description: returns a 3x3 rotation matrix
 use: <mat3> rotate3dX(<float> radians)
 license:
@@ -1315,27 +1346,6 @@ float directLightMinDist(in vec3 ro, in vec3 rd)
     }
     return t;
 }
-Material traceB(in vec3 ro, in vec3 rd)
-{
-    float tmin = RAYMARCH_MIN_DIST;
-    float tmax = RAYMARCH_MAX_DIST;
-    float t = tmin;
-    Material m = materialNew();
-    for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
-        Material res = RAYMARCH_MAP_FNC(ro + rd * t);
-        float dist = res.sdf;
-        if (dist < RAYMARCH_MIN_HIT_DIST)
-            break;
-        if (t > tmax) {
-            m.valid = false;
-            break;
-        }
-        m = res;
-        t += dist;
-    }
-    m.sdf = t;
-    return m;
-}
 float seed;
 float randomFloat(){
     return fract(sin(seed++)*43758.54536156);
@@ -1344,13 +1354,10 @@ vec3 ortho(vec3 v) {
   return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0.0) : vec3(0.0, -v.z, v.y);
 }
 vec3 getCosineWeightedSample(vec3 dir) {
- vec3 o1 = normalize(ortho(dir));
- vec3 o2 = normalize(cross(dir, o1));
- vec2 r = vec2(randomFloat(), randomFloat());
- r.x = r.x * TWO_PI;
- r.y = pow(r.y, .5);
- float oneminus = sqrt(1.0-r.y*r.y);
- return cos(r.x) * oneminus * o1 + sin(r.x) * oneminus * o2 + r.y * dir;
+    vec3 o1 = normalize(ortho(dir));
+    vec3 o2 = normalize(cross(dir, o1));
+    vec3 weight = hemisphereCosSample(vec2(randomFloat(), randomFloat()));
+    return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
 vec3 background(vec3 dir){
     return LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
@@ -1423,7 +1430,7 @@ void main()
         vec3 rayDirection = uv2dir(cam, uv);
         Material res = raymarchCast(rayOrigin, rayDirection);
         if (res.valid) {
-            float twiceMinHitDist = 2. * MinDist;
+            float twiceMinHitDist = 2. * RAYMARCH_MIN_HIT_DIST;
             for (int i = 0; i < 3; i++) {
                 res.sdf -= twiceMinHitDist - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
             }
@@ -1439,7 +1446,7 @@ void main()
         vec4 hit = IMG_THIS_PIXEL(bufferB);
         if (hit.a == 0.) {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1.);
+            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
         } else {
             vec3 normal = normalEstimation(hit.xyz);
             vec3 iLight = vec3(0.);

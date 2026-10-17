@@ -55,6 +55,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd);
 #define RAYMARCH_MIN_HIT_DIST 0.015
 #include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/math/const.glsl"
+#include "lygia/math/hammersley.glsl"
 #include "lygia/math/rotate3dX.glsl"
 #include "lygia/math/rotate3dY.glsl"
 #include "lygia/math/rotate3dZ.glsl"
@@ -206,13 +207,10 @@ vec3 ortho(vec3 v) {
 }
 
 vec3 getCosineWeightedSample(vec3 dir) {
-	vec3 o1 = normalize(ortho(dir));
-	vec3 o2 = normalize(cross(dir, o1));
-	vec2 r = vec2(randomFloat(), randomFloat());
-	r.x = r.x * TWO_PI;
-	r.y = pow(r.y, .5);
-	float oneminus = sqrt(1.0-r.y*r.y);
-	return cos(r.x) * oneminus * o1 + sin(r.x) * oneminus * o2 + r.y * dir;
+    vec3 o1 = normalize(ortho(dir));
+    vec3 o2 = normalize(cross(dir, o1));
+    vec3 weight = hemisphereCosSample(vec2(randomFloat(), randomFloat()));
+    return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
 
 
@@ -317,7 +315,7 @@ void main()
 
         Material res = raymarchCast(rayOrigin, rayDirection);
         if (res.valid) {
-            float twiceMinHitDist = 2. * MinDist;
+            float twiceMinHitDist = 2. * RAYMARCH_MIN_HIT_DIST;
             for (int i = 0; i < 3; i++) {
                 res.sdf -= twiceMinHitDist - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
             }
@@ -336,7 +334,7 @@ void main()
         vec4 hit = IMG_THIS_PIXEL(bufferB);
         if (hit.a == 0.) {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1.);
+            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
         } else {
 
             #if 0
