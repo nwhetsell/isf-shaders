@@ -44,6 +44,8 @@
     ]
 }*/
 
+// #define ISF_EDITOR_WEBSITE
+
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
@@ -53,11 +55,6 @@
 #include "lygia/math/rotate3dZ.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
-
-#define fragColor gl_FragColor
-#define iResolution RENDERSIZE.xy
-#define iTime TIME
-#define iTimeDelta TIMEDELTA
 
 
 //increase this number for a better GI
@@ -255,16 +252,15 @@ vec3 sampleIndirectLight(vec3 pos, vec3 normal){
 }
 
 float distancePixel(vec2 prevFragCoord, vec4 hit){
-    if(  min(iResolution.xy, prevFragCoord) != prevFragCoord
+    if(  min(RENDERSIZE, prevFragCoord) != prevFragCoord
       && max(vec2(0.)      , prevFragCoord) != prevFragCoord) return MaxDist;
-    vec4 prevPos = texture(bufferA, prevFragCoord/iResolution.xy);
-    Camera cam = getCam(iTime);
+    vec4 prevPos = IMG_NORM_PIXEL(bufferA, prevFragCoord/RENDERSIZE);
     return length(prevPos-hit);
 }
 
 vec4 previousSample(vec4 hit){
-    vec2 prevUv = pos2uv(getCam(iTime-iTimeDelta), hit.xyz);
-    vec2 prevFragCoord = prevUv * iResolution.y + iResolution.xy/2.0;
+    vec2 prevUv = pos2uv(getCam(TIME-TIMEDELTA), hit.xyz);
+    vec2 prevFragCoord = prevUv * RENDERSIZE.y + RENDERSIZE/2.0;
 
     vec2 pfc, finalpfc;
     float dist, finaldist = MaxDist;
@@ -279,12 +275,13 @@ vec4 previousSample(vec4 hit){
     	}
     }
 
-    Camera cam = getCam(iTime);
-    if(finaldist < PixelAcceptance*length(hit.xyz-cam.pos)/cam.focalLength/iResolution.y)
-        return texture(bufferC, finalpfc/iResolution.xy);
+    Camera cam = getCam(TIME);
+    if(finaldist < PixelAcceptance*length(hit.xyz-cam.pos)/cam.focalLength/RENDERSIZE.y)
+        return IMG_NORM_PIXEL(bufferC, finalpfc/RENDERSIZE);
     return vec4(0.);
 }
 
+#ifdef ISF_EDITOR_WEBSITE
 
 mat3 gaussianFilter = mat3(41, 26, 7,
                            26, 16, 4,
@@ -295,20 +292,19 @@ vec3 bloom(float scale, float threshold, vec2 fragCoord){
     vec3 bloom = vec3(0);
     for(int y = -2; y <= 2; y++)
     for(int x = -2; x <= 2; x++)
-        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord+vec2(x, y)*scale)/iResolution.xy, logScale).rgb;
+        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord+vec2(x, y)*scale)/RENDERSIZE, logScale).rgb;
 
     return max(bloom - vec3(threshold), vec3(0));
 }
 
-
-#define fragCoord gl_FragCoord.xy
+#endif
 
 
 void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        fragColor = IMG_THIS_PIXEL(bufferB);
+        gl_FragColor = IMG_THIS_PIXEL(bufferB);
     }
     else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
@@ -319,7 +315,7 @@ void main()
         gl_FragColor = vec4(0);
         vec3 pos = cam.pos;
         if (traceB(pos, dir))
-            fragColor = vec4(pos, 1);
+            gl_FragColor = vec4(pos, 1);
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
@@ -327,16 +323,16 @@ void main()
 
         Camera cam = getCam(TIME);
 
-        vec4 hit = texelFetch(bufferB, ivec2(fragCoord), 0);
+        vec4 hit = IMG_THIS_PIXEL(bufferB);
         if (hit.a == 0.) {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            fragColor = vec4(directBackground(uv2dir(cam, uv)), 1.);
+            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1.);
         } else {
 
             #if 0
-            fragColor = previousSample(hit);
-            fragColor.rgb = fragColor.a == 0. ? vec3(1., 0., 0.) : vec3(0., 1., 0.);
-            fragColor.a = 1.;
+            gl_FragColor = previousSample(hit);
+            gl_FragColor.rgb = gl_FragColor.a == 0. ? vec3(1., 0., 0.) : vec3(0., 1., 0.);
+            gl_FragColor.a = 1.;
             #else
             vec3 normal = normalEstimation(hit.xyz);
 
@@ -345,23 +341,23 @@ void main()
                 iLight += sampleIndirectLight(hit.xyz, normal)/float(IndirectSamples);
 
 
-            fragColor = previousSample(hit);
-            fragColor.a += fragColor.a > float(SamplesLimit) ? 0. : float(IndirectSamples);
-            iLight = clamp(iLight, vec3(.0), vec3(fragColor.a/10.)); // clamp gi for low sample count
-            fragColor.rgb = mix(fragColor.rgb, iLight, 1.0/(fragColor.a/float(IndirectSamples)));
+            gl_FragColor = previousSample(hit);
+            gl_FragColor.a += gl_FragColor.a > float(SamplesLimit) ? 0. : float(IndirectSamples);
+            iLight = clamp(iLight, vec3(.0), vec3(gl_FragColor.a/10.)); // clamp gi for low sample count
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1.0/(gl_FragColor.a/float(IndirectSamples)));
             #endif
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
     {
-        Camera cam = getCam(iTime);
+        Camera cam = getCam(TIME);
 
-        vec4 col = texelFetch(bufferC, ivec2(fragCoord), 0);
-        vec4 tx = texelFetch(bufferB, ivec2(fragCoord), 0);
+        vec4 col = IMG_THIS_PIXEL(bufferC);
+        vec4 tx = IMG_THIS_PIXEL(bufferB);
         vec3 finalPos = tx.rgb;
         col.a = length(cam.pos-finalPos);
 
-        vec2 uv = (fragCoord-iResolution.xy/2.0) / iResolution.y;
+        vec2 uv = (gl_FragCoord.xy-RENDERSIZE/2.0) / RENDERSIZE.y;
         vec3 dir = uv2dir(cam, uv);
 
         if(tx.a != 0.) {
@@ -376,7 +372,7 @@ void main()
         float stepDist = (tx.a == 0. ? FogRange : min(FogRange, col.a))/float(FogSteps);
         vec3 stepAbs = exp(-Density*stepDist);
         vec3 stepCol = (vec3(1.) - stepAbs) * henyeyGreenstein(-LightDir, dir);
-        pos += stepDist * dir * random(fragCoord/vec2(1024)) /*texture(iChannel2, fragCoord/vec2(1024)).a*/;
+        pos += stepDist * dir * random(gl_FragCoord.xy/vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
         for(int i = 0; i < FogSteps; i++){
             volAbs *= stepAbs;
             volCol += stepCol*volAbs*directLight(pos, -LightDir);
@@ -385,20 +381,20 @@ void main()
 
         col.rgb = col.rgb*volAbs + volCol;
 
-        fragColor = col;
+        gl_FragColor = col;
     }
     else // Shadertoy Image
     {
-        Camera cam = getCam(iTime);
+        Camera cam = getCam(TIME);
 
         vec4 col = vec4(0.);
-        float frd = iResolution.y*cam.aperture*DoFClamping;
+        float frd = RENDERSIZE.y*cam.aperture*DoFClamping;
         int rd = int(ceil(frd - .5));
         for(int y = -rd; y <= rd; y++){
             int ln = int(ceil(sqrt(frd*frd-float(y*y)) - .5));
             for(int x = -ln; x <= ln; x++){
-                vec4 p = texelFetch(bufferD, ivec2(clamp(fragCoord + vec2(x, y), vec2(0), iResolution.xy-1.)), 0);
-                float dof = min(abs(p.a-cam.focalDistance)/p.a, DoFClamping) * iResolution.y*cam.aperture;
+                vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE-1.)));
+                float dof = min(abs(p.a-cam.focalDistance)/p.a, DoFClamping) * RENDERSIZE.y*cam.aperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + .5, 0.0, 1.0) / (dof*dof+.5);
                 col += p;
@@ -407,9 +403,11 @@ void main()
 
         col /= col.a;
 
+#ifdef ISF_EDITOR_WEBSITE
         if (enableBloom)
-            col.rgb += bloom(.07 * iResolution.y, .0, fragCoord) * .06;
+            col.rgb += bloom(.07 * RENDERSIZE.y, .0, gl_FragCoord.xy) * .06;
+#endif
 
-        fragColor = vec4(tonemapACES(col.rgb), 1);
+        gl_FragColor = vec4(tonemapACES(col.rgb), 1);
     }
 }
