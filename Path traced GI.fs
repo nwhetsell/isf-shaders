@@ -211,7 +211,6 @@ license:
 #define Bounces 1
 #define PixelAcceptance 1.5
 #define PixelCheckDistance .5
-#define Pi 3.14159265359
 #define MaxStepsDirect 128
 #define MaxStepsIndirect 32
 #define MaxShadowSteps 32
@@ -411,12 +410,12 @@ void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
-        fragColor = texelFetch(bufferB, ivec2(fragCoord), 0);
+        fragColor = IMG_THIS_PIXEL(bufferB);
     }
     else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
-        Camera cam = getCam(iTime);
-        vec2 uv = (fragCoord-iResolution.xy/2.0) / iResolution.y;
+        Camera cam = getCam(TIME);
+        vec2 uv = (gl_FragCoord.xy - RENDERSIZE / 2.) / RENDERSIZE.y;
         vec3 dir = uv2dir(cam, uv);
         fragColor = vec4(0.);
         vec3 pos = cam.pos;
