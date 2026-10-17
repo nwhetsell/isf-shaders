@@ -18,6 +18,7 @@ shaders = \
 	notebook\ drawings.fs \
 	oscilloscope\ analysis\ luminance.fs \
 	Palettes.fs \
+	Path\ traced\ GI.fs \
 	Physarum\ Polycephalum\ Simulation.fs \
 	Rainier\ mood.fs \
 	Random\ slime\ mold\ generator.fs \
@@ -76,6 +77,8 @@ notebook\ drawings.fs: notebook\ drawings.glsl
 oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 	clang $(clang_options) --output="$@" "$<"
 Palettes.fs: Palettes.glsl
+	clang $(clang_options) --output="$@" "$<"
+Path\ traced\ GI.fs: Path\ traced\ GI.glsl
 	clang $(clang_options) --output="$@" "$<"
 Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl lygia-additions/const.glsl
 	clang $(clang_options) --output="$@" "$<"
