@@ -151,7 +151,7 @@
     "ISFVSN": "2",
     "PASSES": [
         {
-            "TARGET": "bufferA",
+            "TARGET": "lastData",
             "PERSISTENT": true,
             "FLOAT": true
         },
@@ -325,11 +325,11 @@ void main()
         gl_FragColor = vec4(render(rayOrigin, rayDirection), 1);
 
         if (FRAMEINDEX > 0)
-            gl_FragColor += IMG_THIS_PIXEL(bufferA) * feedback;
+            gl_FragColor += IMG_THIS_PIXEL(lastData) * feedback;
     }
     else // Shadertoy Image
     {
-        vec4 data = IMG_THIS_PIXEL(bufferA);
+        vec4 data = IMG_THIS_PIXEL(lastData);
         vec3 color = data.rgb / data.a;
 
         color = gamma2linear(color);
