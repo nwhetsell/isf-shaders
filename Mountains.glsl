@@ -457,7 +457,7 @@ vec3 TerrainColour(vec3 camera, vec3 pos, vec3 normal, float distance)
         co += gnoise2(vec2(watPos.z * 8.6 + time * 13. - tx, watPos.x * 8.712 + tz)) * 0.4;
         vec3 nor = normalize(vec3(co.x, 20., co.y));
         nor = normalize(reflect(dir, nor));
-        // Mix it in at depth transparancy to give beach cues..
+        // Mix it in at depth transparency to give beach cues..
         tx = watPos.y - matPos.y;
         mat = mix(mat, GetClouds(camera, GetSky(nor) * vec3(0.3, 0.3, 0.5), nor) * 0.1 + vec3(0.0, 0.02, 0.03), clamp((tx) * 0.4, 0.6, 1.));
         // Add some extra water glint...
