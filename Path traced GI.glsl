@@ -119,10 +119,6 @@ vec2 pos2uv(Camera cam, vec3 pos){
     return dir.xy * cam.focalLength / dir.z;
 }
 
-vec3 dirFromUv(Camera cam, vec2 uv){
-    return normalize(vec3(uv, cam.focalLength)) * rotationMatrix(cam.rot);
-}
-
 
 float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor){
     diffuseColor = vec3(1.);
