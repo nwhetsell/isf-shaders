@@ -9,7 +9,6 @@ shaders = \
 	Everflow.fs \
 	expansive\ reaction-diffusion.fs \
 	Gaussian\ SmoothLife.fs \
-	Heightfield\ Slice\ Renderer.fs \
 	Iterated\ function\ system.fs \
 	Le\ Vortex.fs \
 	Lorenz\ system.fs \
@@ -23,7 +22,6 @@ shaders = \
 	Rainier\ mood.fs \
 	Random\ slime\ mold\ generator.fs \
 	Shattered\ Crystal.fs \
-	Sketch.fs \
 	spilled.fs \
 	Strange\ Cloud.fs \
 	Suture\ Fluid.fs \
