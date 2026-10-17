@@ -50,6 +50,14 @@
             "MIN": 0
         },
         {
+            "NAME": "cameraX",
+            "LABEL": "Camera x-coordinate",
+            "TYPE": "float",
+            "DEFAULT": -1,
+            "MAX": 5,
+            "MIN": -5
+        },
+        {
             "NAME": "cameraY",
             "LABEL": "Camera y-coordinate",
             "TYPE": "float",
@@ -2507,7 +2515,7 @@ void main()
         seed = TIME + dot(sin(gl_FragCoord.xy), vec2(453.712, 983.234));
         vec2 antiAliasingOffset = random2() - 0.5;
         vec2 pos = 0.5 * aspect(center((gl_FragCoord.xy + antiAliasingOffset) / RENDERSIZE), RENDERSIZE);
-        vec3 rayOrigin = vec3(-1, cameraY, cameraZ);
+        vec3 rayOrigin = vec3(cameraX, cameraY, cameraZ);
         mat3 lookAtMatrix = lookAt(rayOrigin, vec3(0), vec3(0, 1, 0));
         vec3 rayDirection = lookAtMatrix * normalize(vec3(pos, 1.5));
         // Depth of field
