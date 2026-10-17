@@ -48,6 +48,8 @@
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
 #include "lygia/math/const.glsl"
+#include "lygia/space/aspect.glsl"
+#include "lygia/space/center.glsl"
 
 #define fragColor gl_FragColor
 #define iResolution RENDERSIZE.xy
@@ -320,7 +322,7 @@ void main()
     {
         Camera cam = getCam(TIME);
 
-        vec2 uv = (gl_FragCoord.xy - RENDERSIZE / 2.) / RENDERSIZE.y;
+        vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = uv2dir(cam, uv);
         fragColor = vec4(0.);
         vec3 pos = cam.pos;
