@@ -466,13 +466,12 @@ void main()
     }
     else if (PASSINDEX == 1) // Shadertoy Buffer B
     {
-        Camera cam = getCam(TIME);
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-        vec3 dir = uv2dir(cam, uv);
-        gl_FragColor = vec4(0);
-        vec3 pos = cam.pos;
-        if (traceB(pos, dir))
-            gl_FragColor = vec4(pos, 1);
+        Camera cam = getCam(TIME);
+        if (traceB(cam.pos, uv2dir(cam, uv)))
+            gl_FragColor = vec4(cam.pos, 1);
+        else
+            gl_FragColor = vec4(0);
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
