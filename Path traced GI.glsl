@@ -47,6 +47,7 @@
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
+#include "lygia/math/const.glsl"
 
 #define fragColor gl_FragColor
 #define iResolution RENDERSIZE.xy
@@ -67,9 +68,6 @@
 #define PixelAcceptance 1.5
 #define PixelCheckDistance .5
 
-
-
-#define Pi 3.14159265359
 
 #define MaxStepsDirect 128
 #define MaxStepsIndirect 32
@@ -220,7 +218,7 @@ vec3 getCosineWeightedSample(vec3 dir) {
 	vec3 o1 = normalize(ortho(dir));
 	vec3 o2 = normalize(cross(dir, o1));
 	vec2 r = vec2(randomFloat(), randomFloat());
-	r.x = r.x * 2.0 * Pi;
+	r.x = r.x * TWO_PI;
 	r.y = pow(r.y, .5);
 	float oneminus = sqrt(1.0-r.y*r.y);
 	return cos(r.x) * oneminus * o1 + sin(r.x) * oneminus * o2 + r.y * dir;

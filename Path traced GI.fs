@@ -191,6 +191,13 @@ float henyeyGreenstein(float mu, float g) {
 float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
     return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
 }
+/*
+contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
 
 #define fragColor gl_FragColor
 #define iResolution RENDERSIZE.xy
@@ -325,7 +332,7 @@ vec3 getCosineWeightedSample(vec3 dir) {
  vec3 o1 = normalize(ortho(dir));
  vec3 o2 = normalize(cross(dir, o1));
  vec2 r = vec2(randomFloat(), randomFloat());
- r.x = r.x * 2.0 * Pi;
+ r.x = r.x * TWO_PI;
  r.y = pow(r.y, .5);
  float oneminus = sqrt(1.0-r.y*r.y);
  return cos(r.x) * oneminus * o1 + sin(r.x) * oneminus * o2 + r.y * dir;
