@@ -155,7 +155,7 @@
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
-            "DEFAULT": true
+            "DEFAULT": false
         },
         {
             "NAME": "bloomSpread",
