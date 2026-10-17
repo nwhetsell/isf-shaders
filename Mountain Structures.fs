@@ -1,6 +1,5 @@
 /*{
     "CATEGORIES": [
-        "Filter",
         "Generator"
     ],
     "CREDIT": "Poisson <https://www.shadertoy.com/user/Poisson>",
