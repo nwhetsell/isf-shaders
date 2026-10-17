@@ -134,6 +134,12 @@
             "MIN": 0
         },
         {
+            "NAME": "enableBloom",
+            "LABEL": "Enable bloom",
+            "TYPE": "bool",
+            "DEFAULT": false
+        },
+        {
             "NAME": "bloomSpread",
             "LABEL": "Bloom spread",
             "TYPE": "float",
@@ -2533,7 +2539,8 @@ void main()
         vec3 color = data.rgb / data.a;
         color = gamma2linear(color);
         color = blendDarken(vec3(1), color, darkenAmount);
-        color += 0.4 * bloom(bufferA, bloomSpread, 4.);
+        if (enableBloom)
+            color += 0.4 * bloom(lastData, bloomSpread, 4.);
         color = cubic(saturate(color));
         color = tonemapACES(color);
         gl_FragColor = vec4(color, 1);
