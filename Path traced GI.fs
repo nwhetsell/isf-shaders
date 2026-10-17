@@ -447,17 +447,18 @@ void main()
         Camera cam = getCam(TIME);
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = uv2dir(cam, uv);
-        fragColor = vec4(0.);
+        gl_FragColor = vec4(0);
         vec3 pos = cam.pos;
-        if(traceB(pos, dir)) fragColor = vec4(pos, 1.);
+        if (traceB(pos, dir))
+            fragColor = vec4(pos, 1);
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        seed = .256435865*fragCoord.x+.316548465*fragCoord.y+sin(iTime)*16886.3158915;
-        Camera cam = getCam(iTime);
+        seed = .256435865*gl_FragCoord.x+.316548465*gl_FragCoord.y+sin(TIME)*16886.3158915;
+        Camera cam = getCam(TIME);
         vec4 hit = texelFetch(bufferB, ivec2(fragCoord), 0);
         if (hit.a == 0.) {
-            vec2 uv = (fragCoord-iResolution.xy/2.0) / iResolution.y;
+            vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             fragColor = vec4(directBackground(uv2dir(cam, uv)), 1.);
         } else {
             vec3 normal = normalEstimation(hit.xyz);
