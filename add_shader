@@ -39,6 +39,14 @@ if not Path(filename).exists():
                 "ISFVSN": "2"
             }}*/
 
+            #define fragColor gl_FragColor
+            #define fragCoord gl_FragCoord.xy
+            #define iDate DATE
+            #define iFrame FRAMEINDEX
+            #define iResolution RENDERSIZE
+            #define iTime TIME
+            #define iTimeDelta TIMEDELTA
+
             void main()
             {{
 
