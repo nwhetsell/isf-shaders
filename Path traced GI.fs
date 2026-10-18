@@ -1272,6 +1272,50 @@ vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
 // https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
 #define FLT_MAX 3.402823466e+38
 #define SQRT1_2 0.7071067811865475244008443621048
+
+// #define STRICT_RANDOM
+// #define ISF_EDITOR_WEBSITE
+#define RAND 
+// Linear congruential generator for random numbers
+// (https://en.wikipedia.org/wiki/Linear_congruential_generator).
+int seed = 1;
+// This is the multiplier a and increment c from Microsoft’s Visual C
+// implementation; see
+// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
+// in the “Microsoft Visual/Quick C/C++” row. The multiplier may not be a good
+// choice. Table 4 (page 258) of “Tables of Linear Congruential Generators of
+// Different Sizes and Good Lattice Structure” (Pierre L’Ecuyer 1999,
+// https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf)
+// may have better constants (the 2^31 modulus row gives 37769685, 26757677, or
+// 20501397), but that article has errata that does not seem to be easily
+// available, so just use the Microsoft value.
+const int a = 0x343fd;
+const int c = 0x269ec3;
+const int randBitMask = 0x7fff;
+int rand(void)
+{
+    seed = seed * a + c;
+    // Return bits 16 to 30.
+    return (seed >> 16) & randBitMask;
+}
+float frand(void)
+{
+    return float(rand()) / float(randBitMask);
+}
+void srand(int s)
+{
+    seed = s;
+}
+// This is a pseudo-random integer generator attributed to Hugo Elias. The
+// original source for this seems to be
+// http://freespace.virgin.net/hugo.elias/models/m_perlin.htm, but that website
+// is defunct. This appears to be a Python translation:
+// https://gist.github.com/dragon0/f70e2637e6d4e64a6ab210faf8a85a50
+int hash(int n)
+{
+    n = (n << 13) ^ n;
+    return n * (n * n * 15731 + 789221) + 1376312589;
+}
 //increase this number for a better GI
 #define IndirectSamples 1.
 //increase to remove more noise, but might make the result blurrier
@@ -1381,17 +1425,13 @@ float directLightMinDist(in vec3 ro, in vec3 rd)
     }
     return t;
 }
-float seed;
-float randomFloat() {
-    return fract(sin(seed++) * 43758.54536156);
-}
 vec3 ortho(vec3 v) {
   return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0) : vec3(0, -v.z, v.y);
 }
 vec3 getCosineWeightedSample(vec3 dir) {
     vec3 o1 = normalize(ortho(dir));
     vec3 o2 = normalize(cross(dir, o1));
-    vec3 weight = hemisphereCosSample(vec2(randomFloat(), randomFloat()));
+    vec3 weight = hemisphereCosSample(vec2(frand(), frand()));
     return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
 vec3 background(vec3 dir) {
@@ -1497,7 +1537,7 @@ void main()
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        seed = sum(gl_FragCoord.xy * vec2(0.256435865, 0.316548465)) + sin(TIME) * 16886.3158915;
+        seed = int(sum(gl_FragCoord.xy) + FRAMEINDEX);
         Camera cam = getCam(TIME);
         vec4 data = IMG_THIS_PIXEL(bufferB);
         bool valid = data.w > 0.;

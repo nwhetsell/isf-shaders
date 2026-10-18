@@ -68,6 +68,16 @@ float directLightMinDist(in vec3 ro, in vec3 rd);
 #include "lygia/space/uncenter.glsl"
 #include "lygia-additions/const.glsl"
 
+// #define STRICT_RANDOM
+#ifndef STRICT_RANDOM
+#include "rand/rand.glsl"
+#else
+float seed;
+float frand(void) {
+    return fract(sin(seed++) * 43758.54536156);
+}
+#endif
+
 
 //increase this number for a better GI
 #define IndirectSamples 1.
@@ -206,13 +216,6 @@ float directLightMinDist(in vec3 ro, in vec3 rd)
     return t;
 }
 
-
-float seed;
-
-float randomFloat() {
-    return fract(sin(seed++) * 43758.54536156);
-}
-
 vec3 ortho(vec3 v) {
   return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0)  : vec3(0, -v.z, v.y);
 }
@@ -220,7 +223,7 @@ vec3 ortho(vec3 v) {
 vec3 getCosineWeightedSample(vec3 dir) {
     vec3 o1 = normalize(ortho(dir));
     vec3 o2 = normalize(cross(dir, o1));
-    vec3 weight = hemisphereCosSample(vec2(randomFloat(), randomFloat()));
+    vec3 weight = hemisphereCosSample(vec2(frand(), frand()));
     return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
 
@@ -350,7 +353,11 @@ void main()
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
+#ifndef STRICT_RANDOM
+        seed = int(sum(gl_FragCoord.xy) + FRAMEINDEX);
+#else
         seed = sum(gl_FragCoord.xy * vec2(0.256435865, 0.316548465)) + sin(TIME) * 16886.3158915;
+#endif
 
         Camera cam = getCam(TIME);
 
