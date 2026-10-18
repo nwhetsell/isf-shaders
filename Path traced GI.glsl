@@ -315,7 +315,7 @@ vec3 bloom(float scale, float threshold, vec2 fragCoord){
     vec3 bloom = vec3(0);
     for(int y = -2; y <= 2; y++)
     for(int x = -2; x <= 2; x++)
-        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord+vec2(x, y)*scale)/RENDERSIZE, logScale).rgb;
+        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord + vec2(x, y) * scale)/RENDERSIZE, logScale).rgb;
 
     return max(bloom - vec3(threshold), vec3(0));
 }
