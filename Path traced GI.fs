@@ -1501,10 +1501,7 @@ void main()
         Camera cam = getCam(TIME);
         vec4 hit = IMG_THIS_PIXEL(bufferB);
         bool valid = hit.a > 0.;
-        if (!valid) {
-            vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
-        } else {
+        if (valid) {
             vec3 normal = normalEstimation(hit.xyz);
             vec3 iLight = vec3(0);
             for (int i = 0; i < IndirectSamples; i++) {
@@ -1515,6 +1512,9 @@ void main()
                 gl_FragColor.a += float(IndirectSamples);
             iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
             gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / float(IndirectSamples)));
+        } else {
+            vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
+            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
