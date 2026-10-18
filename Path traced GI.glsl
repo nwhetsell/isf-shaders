@@ -56,6 +56,9 @@ float directLightMinDist(in vec3 ro, in vec3 rd);
 #include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
+#ifdef ISF_EDITOR_WEBSITE
+#include "lygia/math/inverse.glsl"
+#endif
 #include "lygia/math/rotate3dX.glsl"
 #include "lygia/math/rotate3dY.glsl"
 #include "lygia/math/rotate3dZ.glsl"

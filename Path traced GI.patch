@@ -34,3 +34,16 @@ index bfe1629d..532e0fab 100644
      m.sdf = t;
      return m;
  }
+diff --git a/math/inverse.glsl b/math/inverse.glsl
+index be7a4020..a14008f5 100644
+--- a/math/inverse.glsl
++++ b/math/inverse.glsl
+@@ -7,7 +7,7 @@ use: <float|mat2|mat3|mat4> inverse(in <float|mat2|mat3|mat4> m)
+ #ifndef FNC_INVERSE
+ #define FNC_INVERSE
+ 
+-#if (__VERSION__ < 140)
++#ifdef ISF_EDITOR_WEBSITE
+ 
+ float inverse(float m) { return 1.0 / m; }
+ 
