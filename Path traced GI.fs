@@ -1255,6 +1255,23 @@ license:
 float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Moves the center from 0.0 to 0.5'
+use: <float|vec2|vec3> uncenter(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_UNCENTER 
+float uncenter(float v) { return v * 0.5 + 0.5; }
+vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
+vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
+// https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
+#define FLT_MAX 3.402823466e+38
+#define SQRT1_2 0.7071067811865475244008443621048
 //increase this number for a better GI
 #define IndirectSamples 1
 //increase to remove more noise, but might make the result blurrier
@@ -1409,25 +1426,28 @@ float distancePixel(vec2 prevFragCoord, vec4 hit){
     vec4 prevPos = IMG_NORM_PIXEL(bufferA, prevFragCoord/RENDERSIZE);
     return length(prevPos-hit);
 }
-vec4 previousSample(vec4 hit){
-    vec2 prevUv = pos2uv(getCam(TIME-TIMEDELTA), hit.xyz);
-    vec2 prevFragCoord = prevUv * RENDERSIZE.y + RENDERSIZE/2.0;
-    vec2 pfc, finalpfc;
-    float dist, finaldist = MaxDist;
-    for(int x = -1; x <= 1; x++){
-        for(int y = -1; y <= 1; y++){
-            pfc = prevFragCoord + PixelCheckDistance*vec2(x, y);
-            dist = distancePixel(pfc, hit);
-            if(dist < finaldist){
-                finalpfc = pfc;
-                finaldist = dist;
-            }
-     }
+vec2 unaspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.y / s.x);
+    return st;
+}
+vec4 previousSample(vec4 hit) {
+    vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), hit.xyz);
+    vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
+    vec2 minFragCoord;
+    float minDist = FLT_MAX;
+    for (int y = -1; y <= 1; y++)
+    for (int x = -1; x <= 1; x++) {
+        vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
+        float dist = distancePixel(fragCoord, hit);
+        if (dist < minDist){
+            minFragCoord = fragCoord;
+            minDist = dist;
+        }
     }
     Camera cam = getCam(TIME);
-    if(finaldist < PixelAcceptance*length(hit.xyz-cam.pos)/cam.focalLength/RENDERSIZE.y)
-        return IMG_NORM_PIXEL(bufferC, finalpfc/RENDERSIZE);
-    return vec4(0.);
+    if (minDist < PixelAcceptance * length(hit.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
+        return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
+    return vec4(0);
 }
 void main()
 {

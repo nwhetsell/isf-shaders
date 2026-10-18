@@ -65,6 +65,8 @@ float directLightMinDist(in vec3 ro, in vec3 rd);
 #include "lygia/math/sum.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
+#include "lygia/space/uncenter.glsl"
+#include "lygia-additions/const.glsl"
 
 
 //increase this number for a better GI
@@ -260,27 +262,32 @@ float distancePixel(vec2 prevFragCoord, vec4 hit){
     return length(prevPos-hit);
 }
 
-vec4 previousSample(vec4 hit){
-    vec2 prevUv = pos2uv(getCam(TIME-TIMEDELTA), hit.xyz);
-    vec2 prevFragCoord = prevUv * RENDERSIZE.y + RENDERSIZE/2.0;
+vec2 unaspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.y / s.x);
+    return st;
+}
 
-    vec2 pfc, finalpfc;
-    float dist, finaldist = MaxDist;
-    for(int x = -1; x <= 1; x++){
-        for(int y = -1; y <= 1; y++){
-            pfc = prevFragCoord + PixelCheckDistance*vec2(x, y);
-            dist = distancePixel(pfc, hit);
-            if(dist < finaldist){
-                finalpfc = pfc;
-                finaldist = dist;
-            }
-    	}
-    }
+vec4 previousSample(vec4 hit) {
+    vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), hit.xyz);
+    vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
+
+    vec2 minFragCoord;
+    float minDist = FLT_MAX;
+    for (int y = -1; y <= 1; y++)
+    for (int x = -1; x <= 1; x++) {
+        vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
+        float dist = distancePixel(fragCoord, hit);
+        if (dist < minDist){
+            minFragCoord = fragCoord;
+            minDist = dist;
+        }
+   	}
 
     Camera cam = getCam(TIME);
-    if(finaldist < PixelAcceptance*length(hit.xyz-cam.pos)/cam.focalLength/RENDERSIZE.y)
-        return IMG_NORM_PIXEL(bufferC, finalpfc/RENDERSIZE);
-    return vec4(0.);
+    if (minDist < PixelAcceptance * length(hit.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
+        return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
+
+    return vec4(0);
 }
 
 #ifdef ISF_EDITOR_WEBSITE
