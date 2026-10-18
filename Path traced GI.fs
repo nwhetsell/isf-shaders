@@ -1298,39 +1298,41 @@ struct Camera {
     vec3 pos, rot;
     float focalLength, focalDistance, aperture;
 };
-mat3 rotationMatrix(vec3 rotEuler){
+mat3 rotationMatrix(vec3 rotEuler) {
     return rotate3dZ(-rotEuler.z) * rotate3dX(-rotEuler.x) * rotate3dY(rotEuler.y);
 }
-Camera getCam(float time){
+Camera getCam(float time) {
     //time = 0.;
-    vec3 rot = vec3(cos(time*.4)/6., 1. + time*.2 + sin(time*.2)/4., .5);
-    return Camera(vec3(0., 0., -10.) * rotationMatrix(rot), rot, 1., 7.5, .025);
+    vec3 rot = vec3(cos(time * 0.4) / 6., 1. + time * 0.2 + sin(time * 0.2) / 4., 0.5);
+    return Camera(vec3(0, 0, -10) * rotationMatrix(rot), rot, 1., 7.5, 0.025);
 }
-vec3 uv2dir(Camera cam, vec2 uv){
+vec3 uv2dir(Camera cam, vec2 uv) {
     return normalize(vec3(uv, cam.focalLength)) * rotationMatrix(cam.rot);
 }
-vec2 pos2uv(Camera cam, vec3 pos){
+vec2 pos2uv(Camera cam, vec3 pos) {
     vec3 dir = normalize(pos - cam.pos) * inverse(rotationMatrix(cam.rot));
     return dir.xy * cam.focalLength / dir.z;
 }
-float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor){
-    diffuseColor = vec3(1.);
-    emissionColor = vec3(0.);
+float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor) {
+    diffuseColor = vec3(1);
+    emissionColor = vec3(0);
     float Scale = 2.25;
-    float Radius = .25;
-    mat3 Rotation;
+    float Radius = 0.25;
     float time = 15.;
-    Rotation = rotationMatrix(vec3(time, time*.7, time*.4)*.2);
-    Scale += sin(time*.5)*.25;
-    Radius += cos(time) *.25;
+    mat3 Rotation = rotationMatrix(vec3(time, time * 0.7, time * 0.4) * 0.2);
+    Scale += sin(time * 0.5) * 0.25;
+    Radius += cos(time) * 0.25;
  vec4 scalevec = vec4(Scale, Scale, Scale, abs(Scale)) / Radius;
- float C1 = abs(Scale-1.0), C2 = pow(abs(Scale), float(1- /*iterations*/7));
- vec4 p = vec4(position.xyz*Rotation, 1.0), p0 = p;
- for (int i = 0; i<7; i++) {
-     p.xyz = clamp(p.xyz, -1.0, 1.0) * 2.0 - p.xyz;
-     p.xyzw *= clamp(max(Radius/dot(p.xyz, p.xyz), Radius), 0.0, 1.0);
-        if(i < 3) p.xyz *= Rotation;
-     p.xyzw = p*scalevec + p0;
+ float C1 = abs(Scale - 1.);
+ float C2 = pow(abs(Scale), float(1 - /*iterations*/7));
+ vec4 p = vec4(position.xyz * Rotation, 1);
+ vec4 p0 = p;
+ for (int i = 0; i < 7; i++) {
+     p.xyz = clamp(p.xyz, -1., 1.) * 2. - p.xyz;
+     p.xyzw *= clamp(max(Radius/dot(p.xyz, p.xyz), Radius), 0., 1.);
+        if (i < 3)
+            p.xyz *= Rotation;
+     p.xyzw = p * scalevec + p0;
  }
     /*diffuseColor = fract(p0.x)<.1 ? vec3(.2) : vec3(1.);
     emissionColor = fract(p0.x)<.1 ? (normalize(p.xyz)*.5+.5)*10. : vec3(0.);*/
@@ -1344,29 +1346,32 @@ Material raymarchMap(vec3 pos)
     mat.sdf = sdf(pos, dc, ec);
     return mat;
 }
-vec3 normalEstimation(vec3 pos){
+vec3 normalEstimation(vec3 pos) {
   vec2 k = vec2(MinDist, 0);
   return normalize(vec3(raymarchMap(pos + k.xyy).sdf - raymarchMap(pos - k.xyy).sdf,
         raymarchMap(pos + k.yxy).sdf - raymarchMap(pos - k.yxy).sdf,
         raymarchMap(pos + k.yyx).sdf - raymarchMap(pos - k.yyx).sdf));
 }
-float henyeyGreenstein(vec3 dirI, vec3 dirO){
+float henyeyGreenstein(vec3 dirI, vec3 dirO) {
  return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
 }
-vec3 directLight(vec3 pos, vec3 normal){
+vec3 directLight(vec3 pos, vec3 normal) {
     //return vec3(0.);
     float dotLight = -dot(normal, LightDir);
-    if(dotLight < 0.0) return vec3(0);
+    if (dotLight < 0.)
+        return vec3(0);
     vec3 pos0 = pos;
     float minAngle = LightRadius;
-    for(int i = 0; i < MaxShadowSteps; i++){
+    for (int i = 0; i < MaxShadowSteps; i++) {
         float dist = raymarchMap(pos).sdf;
-        if(dist > MaxDist) break;
-        if(dist < MinDist) return vec3(0.0);
-        pos -= LightDir * dist * 2.5; //goes 2.5 times faster since we don't need details
-        minAngle = min(asin(dist/length(pos-pos0)), minAngle);
+        if (dist > MaxDist)
+            break;
+        if (dist < MinDist)
+            return vec3(0);
+        pos -= LightDir * dist * 2.5; // goes 2.5 times faster since we don't need details
+        minAngle = min(asin(dist / length(pos - pos0)), minAngle);
     }
-    return LightColor * dotLight * clamp(minAngle/LightRadius, .0, 1.0);
+    return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
 }
 float directLightMinDist(in vec3 ro, in vec3 rd)
 {
@@ -1377,11 +1382,11 @@ float directLightMinDist(in vec3 ro, in vec3 rd)
     return t;
 }
 float seed;
-float randomFloat(){
-    return fract(sin(seed++)*43758.54536156);
+float randomFloat() {
+    return fract(sin(seed++) * 43758.54536156);
 }
 vec3 ortho(vec3 v) {
-  return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0.0) : vec3(0.0, -v.z, v.y);
+  return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0) : vec3(0, -v.z, v.y);
 }
 vec3 getCosineWeightedSample(vec3 dir) {
     vec3 o1 = normalize(ortho(dir));
@@ -1389,42 +1394,49 @@ vec3 getCosineWeightedSample(vec3 dir) {
     vec3 weight = hemisphereCosSample(vec2(randomFloat(), randomFloat()));
     return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
-vec3 background(vec3 dir){
+vec3 background(vec3 dir) {
     return LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
 }
-vec3 directBackground(vec3 dir){
+vec3 directBackground(vec3 dir) {
     return LightColor * Density * 1.;
 }
-bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal){
-    for(int i = 0; i < MaxStepsIndirect; i++){
+bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
+    for (int i = 0; i < MaxStepsIndirect; i++) {
         float dist = raymarchMap(pos).sdf;
-        if(dist > MaxDist) break;
-        if(dist < MinDist){
+        if (dist > MaxDist)
+            break;
+        if (dist < MinDist) {
             normal = normalEstimation(pos);
-            pos -= (2.*MinDist-dist) * dir;
+            pos -= (2. * MinDist - dist) * dir;
             return true;
         }
-        pos += dir*dist;
+        pos += dir * dist;
     }
     return false;
 }
-vec3 sampleIndirectLight(vec3 pos, vec3 normal){
+vec3 sampleIndirectLight(vec3 pos, vec3 normal) {
     vec3 dir;
-    vec3 abso = vec3(1.), light = vec3(0.), dc, ec;
-    for(int i = 0; i < Bounces; i++){
+    vec3 abso = vec3(1);
+    vec3 light = vec3(0);
+    vec3 dc;
+    vec3 ec;
+    for (int i = 0; i < Bounces; i++) {
         dir = getCosineWeightedSample(normal);
-        if(!traceC(pos, dir, normal)) return light + abso*background(dir);
+        if (!traceC(pos, dir, normal))
+            return light + abso * background(dir);
         sdf(pos, dc, ec);
-        light += abso * (ec + dc*directLight(pos, normal));
+        light += abso * (ec + dc * directLight(pos, normal));
         abso *= dc;
     }
     return light;
 }
-float distancePixel(vec2 prevFragCoord, vec4 hit){
-    if( min(RENDERSIZE, prevFragCoord) != prevFragCoord
-      && max(vec2(0.) , prevFragCoord) != prevFragCoord) return MaxDist;
-    vec4 prevPos = IMG_NORM_PIXEL(bufferA, prevFragCoord/RENDERSIZE);
-    return length(prevPos-hit);
+float distancePixel(vec2 fragCoord, vec4 hit){
+    if (min(RENDERSIZE, fragCoord) != fragCoord &&
+        max(vec2(0.), fragCoord) != fragCoord) {
+        return MaxDist;
+    }
+    vec4 pos = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
+    return length(pos - hit);
 }
 vec2 unaspect(vec2 st, vec2 s) {
     st.x = st.x * (s.y / s.x);
