@@ -355,27 +355,28 @@ void main()
         Camera cam = getCam(TIME);
 
         vec4 hit = IMG_THIS_PIXEL(bufferB);
-        if (hit.a == 0.) {
+        bool valid = hit.a > 0.;
+        if (!valid) {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
         } else {
-
             #if 0
             gl_FragColor = previousSample(hit);
-            gl_FragColor.rgb = gl_FragColor.a == 0. ? vec3(1., 0., 0.) : vec3(0., 1., 0.);
+            gl_FragColor.rgb = gl_FragColor.a == 0. ? vec3(1, 0, 0) : vec3(0, 1, 0);
             gl_FragColor.a = 1.;
             #else
             vec3 normal = normalEstimation(hit.xyz);
 
-            vec3 iLight = vec3(0.);
-            for(int i = 0; i < IndirectSamples; i++)
-                iLight += sampleIndirectLight(hit.xyz, normal)/float(IndirectSamples);
-
+            vec3 iLight = vec3(0);
+            for (int i = 0; i < IndirectSamples; i++) {
+                iLight += sampleIndirectLight(hit.xyz, normal) / float(IndirectSamples);
+            }
 
             gl_FragColor = previousSample(hit);
-            gl_FragColor.a += gl_FragColor.a > float(SamplesLimit) ? 0. : float(IndirectSamples);
-            iLight = clamp(iLight, vec3(.0), vec3(gl_FragColor.a/10.)); // clamp gi for low sample count
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1.0/(gl_FragColor.a/float(IndirectSamples)));
+            if (gl_FragColor.a <= float(SamplesLimit))
+                gl_FragColor.a += float(IndirectSamples);
+            iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / float(IndirectSamples)));
             #endif
         }
     }
