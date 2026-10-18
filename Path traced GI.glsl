@@ -267,13 +267,13 @@ vec3 sampleIndirectLight(vec3 pos) {
     return light;
 }
 
-float distancePixel(vec2 fragCoord, vec4 hit){
+float distancePixel(vec2 fragCoord, vec4 data) {
     if (min(RENDERSIZE, fragCoord) != fragCoord &&
         max(vec2(0.),   fragCoord) != fragCoord) {
         return MaxDist;
     }
-    vec4 pos = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
-    return length(pos - hit);
+    vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
+    return length(prevData - data);
 }
 
 vec2 unaspect(vec2 st, vec2 s) {
@@ -281,8 +281,8 @@ vec2 unaspect(vec2 st, vec2 s) {
     return st;
 }
 
-vec4 previousSample(vec4 hit) {
-    vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), hit.xyz);
+vec4 previousSample(vec4 data) {
+    vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), data.xyz);
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
 
     vec2 minFragCoord;
@@ -290,7 +290,7 @@ vec4 previousSample(vec4 hit) {
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
-        float dist = distancePixel(fragCoord, hit);
+        float dist = distancePixel(fragCoord, data);
         if (dist < minDist){
             minFragCoord = fragCoord;
             minDist = dist;
@@ -298,7 +298,7 @@ vec4 previousSample(vec4 hit) {
    	}
 
     Camera cam = getCam(TIME);
-    if (minDist < PixelAcceptance * length(hit.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
+    if (minDist < PixelAcceptance * length(data.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
 
     return vec4(0);
@@ -354,20 +354,20 @@ void main()
 
         Camera cam = getCam(TIME);
 
-        vec4 hit = IMG_THIS_PIXEL(bufferB);
-        bool valid = hit.a > 0.;
+        vec4 data = IMG_THIS_PIXEL(bufferB);
+        bool valid = data.w > 0.;
         if (valid) {
             #if 0
-            gl_FragColor = previousSample(hit);
+            gl_FragColor = previousSample(data);
             gl_FragColor.rgb = gl_FragColor.a == 0. ? vec3(1, 0, 0) : vec3(0, 1, 0);
             gl_FragColor.a = 1.;
             #else
             vec3 iLight = vec3(0);
             for (float i = 0; i < IndirectSamples; i++) {
-                iLight += sampleIndirectLight(hit.xyz) / IndirectSamples;
+                iLight += sampleIndirectLight(data.xyz) / IndirectSamples;
             }
 
-            gl_FragColor = previousSample(hit);
+            gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(SamplesLimit))
                 gl_FragColor.a += IndirectSamples;
             iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
