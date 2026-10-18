@@ -302,7 +302,7 @@ vec4 previousSample(vec4 hit) {
     return vec4(0);
 }
 
-#ifdef ISF_EDITOR_WEBSITE
+#ifndef ISF_EDITOR_WEBSITE
 
 mat3 gaussianFilter = mat3(41, 26, 7,
                            26, 16, 4,
@@ -416,9 +416,10 @@ void main()
     }
     else // Shadertoy Image
     {
-        Camera cam = getCam(TIME);
-
         vec4 col = vec4(0.);
+
+#ifndef ISF_EDITOR_WEBSITE
+        Camera cam = getCam(TIME);
         float frd = RENDERSIZE.y*cam.aperture*DoFClamping;
         int rd = int(ceil(frd - .5));
         for(int y = -rd; y <= rd; y++){
@@ -434,7 +435,6 @@ void main()
 
         col /= col.a;
 
-#ifdef ISF_EDITOR_WEBSITE
         if (enableBloom)
             col.rgb += bloom(.07 * RENDERSIZE.y, .0, gl_FragCoord.xy) * .06;
 #endif

@@ -1461,6 +1461,17 @@ vec4 previousSample(vec4 hit) {
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
     return vec4(0);
 }
+mat3 gaussianFilter = mat3(41, 26, 7,
+                           26, 16, 4,
+                           7, 4, 1) / 273.;
+vec3 bloom(float scale, float threshold, vec2 fragCoord){
+    float logScale = log2(scale);
+    vec3 bloom = vec3(0);
+    for(int y = -2; y <= 2; y++)
+    for(int x = -2; x <= 2; x++)
+        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord+vec2(x, y)*scale)/RENDERSIZE, logScale).rgb;
+    return max(bloom - vec3(threshold), vec3(0));
+}
 void main()
 {
     if (PASSINDEX == 0) // Shadertoy Buffer A
@@ -1534,8 +1545,8 @@ void main()
     }
     else // Shadertoy Image
     {
-        Camera cam = getCam(TIME);
         vec4 col = vec4(0.);
+        Camera cam = getCam(TIME);
         float frd = RENDERSIZE.y*cam.aperture*DoFClamping;
         int rd = int(ceil(frd - .5));
         for(int y = -rd; y <= rd; y++){
@@ -1549,6 +1560,8 @@ void main()
             }
         }
         col /= col.a;
+        if (enableBloom)
+            col.rgb += bloom(.07 * RENDERSIZE.y, .0, gl_FragCoord.xy) * .06;
         gl_FragColor = vec4(tonemapACES(col.rgb), 1);
     }
 }
