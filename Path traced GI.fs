@@ -1563,7 +1563,7 @@ void main()
         vec4 tx = IMG_THIS_PIXEL(bufferB);
         vec3 finalPos = tx.rgb;
         col.a = length(cam.pos-finalPos);
-        vec2 uv = (gl_FragCoord.xy-RENDERSIZE/2.0) / RENDERSIZE.y;
+        vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = uv2dir(cam, uv);
         if(tx.a != 0.) {
             vec3 dc, ec;
