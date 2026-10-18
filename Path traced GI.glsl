@@ -62,6 +62,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd);
 #include "lygia/math/rotate3dX.glsl"
 #include "lygia/math/rotate3dY.glsl"
 #include "lygia/math/rotate3dZ.glsl"
+#include "lygia/math/sum.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
 
@@ -330,7 +331,7 @@ void main()
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        seed = .256435865*gl_FragCoord.x+.316548465*gl_FragCoord.y+sin(TIME)*16886.3158915;
+        seed = sum(gl_FragCoord.xy * vec2(0.256435865, 0.316548465)) + sin(TIME) * 16886.3158915;
 
         Camera cam = getCam(TIME);
 

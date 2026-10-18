@@ -1214,6 +1214,19 @@ mat3 rotate3dZ(const in float r){
 }
 /*
 contributors: Patricio Gonzalez Vivo
+description: Sum elements of a vector
+use: <float> sum(<vec2|vec3|vec4> value)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_SUM 
+float sum( float v ) { return v; }
+float sum( vec2 v ) { return v.x+v.y; }
+float sum( vec3 v ) { return v.x+v.y+v.z; }
+float sum( vec4 v ) { return v.x+v.y+v.z+v.w; }
+/*
+contributors: Patricio Gonzalez Vivo
 description: 'Fix the aspect ratio of a space keeping things squared for you.'
 use: <vec2> aspect(<vec2> st, <vec2> st_size)
 examples:
@@ -1441,7 +1454,7 @@ void main()
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        seed = .256435865*gl_FragCoord.x+.316548465*gl_FragCoord.y+sin(TIME)*16886.3158915;
+        seed = sum(gl_FragCoord.xy * vec2(0.256435865, 0.316548465)) + sin(TIME) * 16886.3158915;
         Camera cam = getCam(TIME);
         vec4 hit = IMG_THIS_PIXEL(bufferB);
         if (hit.a == 0.) {
