@@ -70,7 +70,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd);
 
 
 //increase this number for a better GI
-#define IndirectSamples 1
+#define IndirectSamples 1.
 
 //increase to remove more noise, but might make the result blurrier
 #define SamplesLimit 150
@@ -340,11 +340,9 @@ void main()
 
         Material res = raymarchCast(rayOrigin, rayDirection);
         if (res.valid) {
-            float twiceMinHitDist = 2. * RAYMARCH_MIN_HIT_DIST;
             for (int i = 0; i < 3; i++) {
-                res.sdf -= twiceMinHitDist - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
+                res.sdf -= 2. * RAYMARCH_MIN_HIT_DIST - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
             }
-
             gl_FragColor = vec4(rayOrigin + rayDirection * res.sdf, 1);
         } else {
             gl_FragColor = vec4(0);
@@ -365,15 +363,15 @@ void main()
             gl_FragColor.a = 1.;
             #else
             vec3 iLight = vec3(0);
-            for (int i = 0; i < IndirectSamples; i++) {
-                iLight += sampleIndirectLight(hit.xyz) / float(IndirectSamples);
+            for (float i = 0; i < IndirectSamples; i++) {
+                iLight += sampleIndirectLight(hit.xyz) / IndirectSamples;
             }
 
             gl_FragColor = previousSample(hit);
             if (gl_FragColor.a <= float(SamplesLimit))
-                gl_FragColor.a += float(IndirectSamples);
+                gl_FragColor.a += IndirectSamples;
             iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / float(IndirectSamples)));
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / IndirectSamples));
             #endif
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
