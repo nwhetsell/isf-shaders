@@ -48,7 +48,7 @@ Ether.fs: Ether.glsl
 Everflow.fs: Everflow.glsl lygia-additions/gaussian.glsl
 	clang $(clang_options) --output="$@" "$<"
 expansive\ reaction-diffusion.fs: expansive\ reaction-diffusion.glsl
-	cd lygia; git apply ../'expansive reaction-diffusion.patch';
+	cd lygia; git apply ../'expansive reaction-diffusion.patch'
 	clang $(clang_options) -fno-directives-only -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
 Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
@@ -56,7 +56,7 @@ Gaussian\ SmoothLife.fs: Gaussian\ SmoothLife.glsl
 Iterated\ function\ system.fs: Iterated\ function\ system.glsl rand/rand.glsl
 	clang $(clang_options) --output="$@" "$<"
 Le\ Vortex.fs: Le\ Vortex.glsl lygia-additions/const.glsl lygia-additions/opRepeat.glsl
-	cd lygia; git apply ../'Le Vortex.patch';
+	cd lygia; git apply ../'Le Vortex.patch'
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
 Lorenz\ system.fs: Lorenz\ system.glsl
@@ -64,11 +64,11 @@ Lorenz\ system.fs: Lorenz\ system.glsl
 MattiasCRT.fs: MattiasCRT.glsl
 	clang $(clang_options) --output="$@" "$<"
 Mountain\ Structures.fs: Mountain\ Structures.glsl lygia-additions/bloom.glsl lygia-additions/mengerSpongeSDF.glsl
-	cd lygia; git apply ../'Mountain Structures.patch';
+	cd lygia; git apply ../'Mountain Structures.patch'
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
 Mountains.fs: Mountains.glsl lygia-additions/gnoise.glsl
-	cd lygia; git apply ../Mountains.patch;
+	cd lygia; git apply ../Mountains.patch
 	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
 notebook\ drawings.fs: notebook\ drawings.glsl

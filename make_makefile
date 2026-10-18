@@ -48,7 +48,7 @@ for path in sorted(Path('.').glob('*.glsl'), key=lambda path: str(path).lower())
         patch_name = f'{path.stem}.patch'
         if ' ' in patch_name:
             patch_name = f"'{patch_name}'"
-        commands.insert(0, f"cd lygia; git apply ../{patch_name};")
+        commands.insert(0, f"cd lygia; git apply ../{patch_name}")
         commands.append('cd lygia; git reset --hard')
 
     rules.append(f'''\
