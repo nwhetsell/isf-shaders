@@ -1414,7 +1414,8 @@ bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
     }
     return false;
 }
-vec3 sampleIndirectLight(vec3 pos, vec3 normal) {
+vec3 sampleIndirectLight(vec3 pos) {
+    vec3 normal = normalEstimation(pos.xyz);
     vec3 dir;
     vec3 abso = vec3(1);
     vec3 light = vec3(0);
@@ -1502,10 +1503,9 @@ void main()
         vec4 hit = IMG_THIS_PIXEL(bufferB);
         bool valid = hit.a > 0.;
         if (valid) {
-            vec3 normal = normalEstimation(hit.xyz);
             vec3 iLight = vec3(0);
             for (int i = 0; i < IndirectSamples; i++) {
-                iLight += sampleIndirectLight(hit.xyz, normal) / float(IndirectSamples);
+                iLight += sampleIndirectLight(hit.xyz) / float(IndirectSamples);
             }
             gl_FragColor = previousSample(hit);
             if (gl_FragColor.a <= float(SamplesLimit))

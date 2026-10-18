@@ -248,7 +248,9 @@ bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
     return false;
 }
 
-vec3 sampleIndirectLight(vec3 pos, vec3 normal) {
+vec3 sampleIndirectLight(vec3 pos) {
+    vec3 normal = normalEstimation(pos.xyz);
+
     vec3 dir;
     vec3 abso = vec3(1);
     vec3 light = vec3(0);
@@ -362,11 +364,9 @@ void main()
             gl_FragColor.rgb = gl_FragColor.a == 0. ? vec3(1, 0, 0) : vec3(0, 1, 0);
             gl_FragColor.a = 1.;
             #else
-            vec3 normal = normalEstimation(hit.xyz);
-
             vec3 iLight = vec3(0);
             for (int i = 0; i < IndirectSamples; i++) {
-                iLight += sampleIndirectLight(hit.xyz, normal) / float(IndirectSamples);
+                iLight += sampleIndirectLight(hit.xyz) / float(IndirectSamples);
             }
 
             gl_FragColor = previousSample(hit);
