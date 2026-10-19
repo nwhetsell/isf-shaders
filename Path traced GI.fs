@@ -10,6 +10,54 @@
             "TYPE": "image"
         },
         {
+            "NAME": "sdfScale",
+            "LABEL": "Scale",
+            "TYPE": "float",
+            "DEFAULT": 2.4844999942,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "sdfRadius",
+            "LABEL": "Radius",
+            "TYPE": "float",
+            "DEFAULT": 0.0600780218,
+            "MIN": 0,
+            "MAX": 200
+        },
+        {
+            "NAME": "sdfRotationFactor",
+            "LABEL": "Rotation factor",
+            "TYPE": "float",
+            "DEFAULT": 0.2,
+            "MIN": -5,
+            "MAX": 5
+        },
+        {
+            "NAME": "spacing",
+            "LABEL": "Spacing",
+            "TYPE": "float",
+            "DEFAULT": 2,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "repetition",
+            "LABEL": "Repetitions",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "colorMix",
+            "LABEL": "Color mix",
+            "TYPE": "float",
+            "DEFAULT": 0,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -43,6 +91,9 @@
         }
     ]
 }*/
+// The defaults are:
+//    sdfRadius = 0.25 + cos(15.) * 0.25
+//    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
 // #define ISF_EDITOR_WEBSITE
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1166,6 +1217,18 @@ vec3 hemisphereCosSample(vec2 u) {
 }
 /*
 contributors: Patricio Gonzalez Vivo
+description: Squared length
+use: <vec4|vec3|vec2> lengthSq(<vec4|vec3|vec2> v)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_LENGTHSQ 
+float lengthSq(in vec2 v) { return dot(v, v); }
+float lengthSq(in vec3 v) { return dot(v, v); }
+float lengthSq(in vec4 v) { return dot(v, v); }
+/*
+contributors: Patricio Gonzalez Vivo
 description: returns a 3x3 rotation matrix
 use: <mat3> rotate3dX(<float> radians)
 license:
@@ -1225,6 +1288,14 @@ float sum( float v ) { return v; }
 float sum( vec2 v ) { return v.x+v.y; }
 float sum( vec3 v ) { return v.x+v.y+v.z; }
 float sum( vec4 v ) { return v.x+v.y+v.z+v.w; }
+/*
+contributors:  Inigo Quiles
+description: generate the SDF of a sphere
+use: <float> sphereSDF( in <vec3> pos[], in <float> size] ) 
+*/
+#define FNC_SPHERESDF 
+float sphereSDF(vec3 p) { return length(p); }
+float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
 /*
 contributors: Patricio Gonzalez Vivo
 description: 'Fix the aspect ratio of a space keeping things squared for you.'
@@ -1316,6 +1387,7 @@ int hash(int n)
     n = (n << 13) ^ n;
     return n * (n * n * 15731 + 789221) + 1376312589;
 }
+#define SDF_ITERATIONS 7
 //increase this number for a better GI
 #define IndirectSamples 1.
 //increase to remove more noise, but might make the result blurrier
@@ -1360,27 +1432,33 @@ vec2 pos2uv(Camera cam, vec3 pos) {
 float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor) {
     diffuseColor = vec3(1);
     emissionColor = vec3(0);
-    float Scale = 2.25;
-    float Radius = 0.25;
-    float time = 15.;
-    mat3 Rotation = rotationMatrix(vec3(time, time * 0.7, time * 0.4) * 0.2);
-    Scale += sin(time * 0.5) * 0.25;
-    Radius += cos(time) * 0.25;
- vec4 scalevec = vec4(Scale, Scale, Scale, abs(Scale)) / Radius;
- float C1 = abs(Scale - 1.);
- float C2 = pow(abs(Scale), float(1 - /*iterations*/7));
- vec4 p = vec4(position.xyz * Rotation, 1);
- vec4 p0 = p;
- for (int i = 0; i < 7; i++) {
-     p.xyz = clamp(p.xyz, -1., 1.) * 2. - p.xyz;
-     p.xyzw *= clamp(max(Radius/dot(p.xyz, p.xyz), Radius), 0., 1.);
+    mat3 rotation = rotationMatrix(vec3(15., 10.5, 6.) * sdfRotationFactor);
+    vec4 p0 = vec4(position.xyz * rotation, 1);
+ vec4 p = p0;
+    for (int i = 0; i < SDF_ITERATIONS; i++) {
+        // This performs limited domain repetition of an SDF (that is, a finite
+        // number repetitions, not infinite repetitions), but it’s missing a
+        // `round` call:
+        //    - https://iquilezles.org/articles/sdfrepetition/#:~:text=repeated_ONLY_SYMMETRIC_SDFS
+        //    - https://www.shadertoy.com/view/3syGzz
+        // It’s not clear what effect this has.
+        p.xyz = p.xyz - spacing * clamp(p.xyz, -repetition, repetition);
+        p.xyz = -p.xyz;
+        p /= max(min(lengthSq(p.xyz), repetition), sdfRadius);
+        p *= sdfScale;
         if (i < 3)
-            p.xyz *= Rotation;
-     p.xyzw = p * scalevec + p0;
- }
-    /*diffuseColor = fract(p0.x)<.1 ? vec3(.2) : vec3(1.);
-    emissionColor = fract(p0.x)<.1 ? (normalize(p.xyz)*.5+.5)*10. : vec3(0.);*/
- return (length(p.xyz) - C1) / p.w - C2;
+            p.xyz *= rotation;
+        p += p0;
+    }
+    p.xyz /= p.w;
+    if (fract(p0.x) < 0.1) {
+        diffuseColor = mix(diffuseColor, vec3(0.2), colorMix);
+        emissionColor = mix(emissionColor, uncenter(normalize(p.xyz)) * 10., colorMix);;
+    }
+    return sphereSDF(
+        p.xyz,
+        abs(sdfScale - 1.) / p.w + pow(sdfScale, float(1 - SDF_ITERATIONS))
+    );
 }
 Material raymarchMap(vec3 pos)
 {
