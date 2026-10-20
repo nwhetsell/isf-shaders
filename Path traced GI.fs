@@ -105,22 +105,19 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_SATURATE 
-#define saturate(V) clamp(V, 0.0, 1.0)
 
 /*
 contributors: Narkowicz 2015
 description: ACES Filmic Tone Mapping Curve. https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 use: <vec3|vec4> tonemapACES(<vec3|vec4> x)
 */
-#define FNC_TONEMAPACES 
 vec3 tonemapACES(vec3 v) {
     const float a = 2.51;
     const float b = 0.03;
     const float c = 2.43;
     const float d = 0.59;
     const float e = 0.14;
-    return saturate((v*(a*v+b))/(v*(c*v+d)+e));
+    return clamp((v*(a*v+b))/(v*(c*v+d)+e), 0.0, 1.0);
 }
 vec4 tonemapACES(in vec4 v) {
     return vec4(tonemapACES(v.rgb), v.a);
@@ -138,8 +135,6 @@ examples:
 license:
     - MIT License (MIT) Copyright 2014, David Hoskins
 */
-#define RANDOM_SCALE vec4(443.897, 441.423, .0973, .1099)
-#define FNC_RANDOM 
 float random(in float x) {
     return fract(sin(x) * 43758.5453);
 }
@@ -154,52 +149,52 @@ float random(in vec4 pos) {
     return fract(sin(dot_product) * 43758.5453);
 }
 vec2 random2(float p) {
-    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    vec3 p3 = fract(vec3(p) * vec4(443.897, 441.423, .0973, .1099).xyz);
     p3 += dot(p3, p3.yzx + 19.19);
     return fract((p3.xx + p3.yz) * p3.zy);
 }
 vec2 random2(vec2 p) {
-    vec3 p3 = fract(p.xyx * RANDOM_SCALE.xyz);
+    vec3 p3 = fract(p.xyx * vec4(443.897, 441.423, .0973, .1099).xyz);
     p3 += dot(p3, p3.yzx + 19.19);
     return fract((p3.xx + p3.yz) * p3.zy);
 }
 vec2 random2(vec3 p3) {
-    p3 = fract(p3 * RANDOM_SCALE.xyz);
+    p3 = fract(p3 * vec4(443.897, 441.423, .0973, .1099).xyz);
     p3 += dot(p3, p3.yzx + 19.19);
     return fract((p3.xx + p3.yz) * p3.zy);
 }
 vec3 random3(float p) {
-    vec3 p3 = fract(vec3(p) * RANDOM_SCALE.xyz);
+    vec3 p3 = fract(vec3(p) * vec4(443.897, 441.423, .0973, .1099).xyz);
     p3 += dot(p3, p3.yzx + 19.19);
     return fract((p3.xxy + p3.yzz) * p3.zyx);
 }
 vec3 random3(vec2 p) {
-    vec3 p3 = fract(vec3(p.xyx) * RANDOM_SCALE.xyz);
+    vec3 p3 = fract(vec3(p.xyx) * vec4(443.897, 441.423, .0973, .1099).xyz);
     p3 += dot(p3, p3.yxz + 19.19);
     return fract((p3.xxy + p3.yzz) * p3.zyx);
 }
 vec3 random3(vec3 p) {
-    p = fract(p * RANDOM_SCALE.xyz);
+    p = fract(p * vec4(443.897, 441.423, .0973, .1099).xyz);
     p += dot(p, p.yxz + 19.19);
     return fract((p.xxy + p.yzz) * p.zyx);
 }
 vec4 random4(float p) {
-    vec4 p4 = fract(p * RANDOM_SCALE);
+    vec4 p4 = fract(p * vec4(443.897, 441.423, .0973, .1099));
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 vec4 random4(vec2 p) {
-    vec4 p4 = fract(p.xyxy * RANDOM_SCALE);
+    vec4 p4 = fract(p.xyxy * vec4(443.897, 441.423, .0973, .1099));
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 vec4 random4(vec3 p) {
-    vec4 p4 = fract(p.xyzx * RANDOM_SCALE);
+    vec4 p4 = fract(p.xyzx * vec4(443.897, 441.423, .0973, .1099));
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 vec4 random4(vec4 p4) {
-    p4 = fract(p4 * RANDOM_SCALE);
+    p4 = fract(p4 * vec4(443.897, 441.423, .0973, .1099));
     p4 += dot(p4, p4.wzxy + 19.19);
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
@@ -210,44 +205,22 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define EIGHTH_PI 0.39269908169
-#define QTR_PI 0.78539816339
-#define HALF_PI 1.5707963267948966192313216916398
-#define PI 3.1415926535897932384626433832795
-#define TWO_PI 6.2831853071795864769252867665590
-#define TAU 6.2831853071795864769252867665590
-#define INV_PI 0.31830988618379067153776752674503
-#define INV_SQRT_TAU 0.39894228040143267793994605993439
-#define SQRT_HALF_PI 1.25331413732
-#define PHI 1.618033988749894848204586834
-#define EPSILON 0.0000001
-#define GOLDEN_RATIO 1.6180339887
-#define GOLDEN_RATIO_CONJUGATE 0.61803398875
-#define GOLDEN_ANGLE 2.39996323
-#define DEG2RAD (PI / 180.0)
-#define RAD2DEG (180.0 / PI)
 
 // Henyey-Greenstein phase function factor [-1, 1]
 // represents the average cosine of the scattered directions
 // 0 is isotropic scattering
 // > 1 is forward scattering, < 1 is backwards
-#define HENYEYGREENSTEIN_SCATTERING 0.76
-#define FNC_HENYEYGREENSTEIN 
 float henyeyGreenstein(const in float mu) {
-    return max(0.0, (1.0 - HENYEYGREENSTEIN_SCATTERING*HENYEYGREENSTEIN_SCATTERING) / ((4. + PI) * pow(1.0 + HENYEYGREENSTEIN_SCATTERING*HENYEYGREENSTEIN_SCATTERING - 2.0 * HENYEYGREENSTEIN_SCATTERING * mu, 1.5)));
+    return max(0.0, (1.0 - 0.76*0.76) / ((4. + 3.1415926535897932384626433832795) * pow(1.0 + 0.76*0.76 - 2.0 * 0.76 * mu, 1.5)));
 }
 float henyeyGreenstein(float mu, float g) {
     float gg = g * g;
-    return (1.0 / (4.0 * PI)) * ((1.0 - gg) / pow(1.0 + gg - 2.0 * g * mu, 1.5));
+    return (1.0 / (4.0 * 3.1415926535897932384626433832795)) * ((1.0 - gg) / pow(1.0 + gg - 2.0 * g * mu, 1.5));
 }
 float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
     return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
 }
-
-#define RAYMARCH_SAMPLES 128
 float directLightMinDist(in vec3 ro, in vec3 rd);
-#define RAYMARCH_MIN_DIST directLightMinDist(ro, rd)
-#define RAYMARCH_MIN_HIT_DIST 0.015
 /*
 contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
@@ -256,13 +229,11 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define GAMMA 2.2
-#define FNC_GAMMA2LINEAR 
 float gamma2linear(const in float v) {
-    return pow(v, GAMMA);
+    return pow(v, 2.2);
 }
 vec3 gamma2linear(const in vec3 v) {
-    return pow(v, vec3(GAMMA));
+    return pow(v, vec3(2.2));
 }
 vec4 gamma2linear(const in vec4 v) {
     return vec4(gamma2linear(v.rgb), v.a);
@@ -274,8 +245,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define SAMPLER_FNC(TEX,UV) texture(TEX, UV)
-#define SAMPLER_TYPE sampler2D
 
 /*
 contributors: Patricio Gonzalez Vivo
@@ -287,7 +256,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_ALBEDO 
 vec4 materialAlbedo() {
     vec4 albedo = vec4(0.5, 0.5, 0.5, 1.0);
     return albedo;
@@ -311,7 +279,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_SPECULAR 
 vec3 materialSpecular() {
     vec3 spec = vec3(0.04);
     return spec;
@@ -342,7 +309,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_EMISSIVE 
 vec3 materialEmissive() {
     vec3 emission = vec3(0.0);
     return emission;
@@ -365,7 +331,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_OCCLUSION 
 float materialOcclusion() {
     float occlusion = 1.0;
     return occlusion;
@@ -389,7 +354,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_NORMAL 
 vec3 materialNormal() {
     vec3 normal = vec3(0.0, 0.0, 1.0);
     return normal;
@@ -413,19 +377,17 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define TOMETALLIC_MIN_REFLECTANCE 0.04
-#define FNC_TOMETALLIC 
 float toMetallic(const in vec3 diffuse, const in vec3 specular, const in float maxSpecular) {
     float perceivedDiffuse = sqrt(0.299 * diffuse.r * diffuse.r + 0.587 * diffuse.g * diffuse.g + 0.114 * diffuse.b * diffuse.b);
     float perceivedSpecular = sqrt(0.299 * specular.r * specular.r + 0.587 * specular.g * specular.g + 0.114 * specular.b * specular.b);
-    if (perceivedSpecular < TOMETALLIC_MIN_REFLECTANCE) {
+    if (perceivedSpecular < 0.04) {
         return 0.0;
     }
-    float a = TOMETALLIC_MIN_REFLECTANCE;
-    float b = perceivedDiffuse * (1.0 - maxSpecular) / (1.0 - TOMETALLIC_MIN_REFLECTANCE) + perceivedSpecular - 2.0 * TOMETALLIC_MIN_REFLECTANCE;
-    float c = TOMETALLIC_MIN_REFLECTANCE - perceivedSpecular;
+    float a = 0.04;
+    float b = perceivedDiffuse * (1.0 - maxSpecular) / (1.0 - 0.04) + perceivedSpecular - 2.0 * 0.04;
+    float c = 0.04 - perceivedSpecular;
     float D = max(b * b - 4.0 * a * c, 0.0);
-    return saturate((-b + sqrt(D)) / (2.0 * a));
+    return clamp((-b + sqrt(D)) / (2.0 * a), 0.0, 1.0);
 }
 float toMetallic(const in vec3 diffuse, const in vec3 specular) {
     float maxSpecula = max(max(specular.r, specular.g), specular.b);
@@ -494,7 +456,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_METALLIC 
 float materialMetallic() {
     float metallic = 0.0;
     vec3 diffuse = materialAlbedo().rgb;
@@ -520,7 +481,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_ROUGHNESS 
 float materialRoughness() {
     float roughness = 0.05;
     return roughness;
@@ -534,7 +494,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_TOSHININESS 
 float toShininess(const in float roughness, const in float metallic) {
     float s = .95 - roughness * 0.5;
     s *= s;
@@ -550,7 +509,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_MATERIAL_SHININESS 
 float materialShininess() {
     float shininess = 15.0;
     return shininess;
@@ -571,9 +529,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define RENDER_RAYMARCHING 
-#define SHADING_MODEL_CLEAR_COAT 
-#define STR_MATERIAL 
 struct Material {
     vec4 albedo;
     vec3 emissive;
@@ -594,7 +549,6 @@ contributors: Shadi El Hajj
 description: Medium Structure
 license: MIT License (MIT) Copyright (c) 2024 Shadi EL Hajj
 */
-#define STR_MEDIUM 
 struct Medium {
     vec3 scattering;
     vec3 absorption;
@@ -608,11 +562,8 @@ use: <vec4> raymarchMap( in <vec3> pos )
 examples:
     - /shaders/lighting_raymarching.frag
 */
-#define RAYMARCH_MAP_FNC raymarchMap
-#define RAYMARCH_VOLUME_MAP_FNC raymarchVolumeMap
-#define FNC_RAYMARCH_MAP 
-Material RAYMARCH_MAP_FNC( in vec3 pos );
-Medium RAYMARCH_VOLUME_MAP_FNC( in vec3 pos );
+Material raymarchMap( in vec3 pos );
+Medium raymarchVolumeMap( in vec3 pos );
 /*
 contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
@@ -1061,8 +1012,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define RENDER_RAYMARCHING 
-#define SHADING_MODEL_CLEAR_COAT 
 /*
 contributors: Patricio Gonzalez Vivo
 description: Refractive index of different materials based on https://en.wikipedia.org/wiki/Refractive_index
@@ -1070,19 +1019,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define IOR_AIR 1.000293
-#define IOR_ICE 1.31
-#define IOR_WATER 1.333
-#define IOR_WATER_RGB vec3(1.337, 1.333, 1.331)
-#define IOR_GLYCERING 1.473
-#define IOR_OIL 1.515
-#define IOR_OIL_RGB vec3(1.530, 1.520, 1.516)
-#define IOR_GLASS 1.5168
-#define IOR_GLASS_RGB vec3(1.524, 1.517, 1.515)
-#define IOR_GLASS_FLINT 1.69
-#define IOR_GLASS_FLINT_RGB vec3(1.639, 1.627, 1.622)
-#define IOR_SAPPHIRE 1.77
-#define IOR_DIAMONG 2.42
 /*
 contributors: Patricio Gonzalez Vivo
 description: It defines the default sampler type and function for the shader based on the version of GLSL.
@@ -1111,14 +1047,11 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define SURFACE_POSITION vec3(0.0, 0.0, 0.0)
-#define RAYMARCH_MAX_DIST 20.0
-#define FNC_MATERIAL_NEW 
 void materialNew(out Material _mat) {
     // Surface data
-    _mat.position = (SURFACE_POSITION).xyz;
+    _mat.position = (vec3(0.0, 0.0, 0.0)).xyz;
     _mat.normal = materialNormal();
-    _mat.sdf = RAYMARCH_MAX_DIST;
+    _mat.sdf = 20.0;
     _mat.valid = true;
     // PBR Properties
     _mat.albedo = materialAlbedo();
@@ -1126,7 +1059,7 @@ void materialNew(out Material _mat) {
     _mat.roughness = materialRoughness();
     _mat.metallic = materialMetallic();
     _mat.reflectance = 0.5;
-    _mat.ior = vec3(IOR_GLASS_RGB); // Index of Refraction
+    _mat.ior = vec3(vec3(1.524, 1.517, 1.515)); // Index of Refraction
     _mat.ambientOcclusion = materialOcclusion();
     _mat.clearCoat = 0.0;
     _mat.clearCoatRoughness = 0.01;
@@ -1156,30 +1089,9 @@ contributors:  Inigo Quiles
 description: Cast a ray
 use: <float> castRay( in <vec3> pos, in <vec3> nor ) 
 */
-#define FNC_RAYMARCH_CAST 
-Material raymarchCast( in vec3 ro, in vec3 rd ) {
-    float tmin = RAYMARCH_MIN_DIST;
-    float tmax = RAYMARCH_MAX_DIST;
-    float t = tmin;
-    Material m = materialNew();
-    for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
-        Material res = RAYMARCH_MAP_FNC(ro + rd * t);
-        float dist = res.sdf;
-        if (dist < RAYMARCH_MIN_HIT_DIST)
-            break;
-        if (t > tmax) {
-            m.valid = false;
-            break;
-        }
-        m = res;
-        t += res.sdf;
-    }
-    m.sdf = t;
-    return m;
-}
 float directLightMinDist(in vec3 ro, in vec3 rd) {
-    float t = RAYMARCH_MAP_FNC(ro).sdf;
-    return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
+    float t = raymarchMap(ro).sdf;
+    return t + raymarchMap(ro + rd * t).sdf;
 }
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1414,8 +1326,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define RENDER_RAYMARCHING 
-#define SHADING_MODEL_CLEAR_COAT 
 /*
 contributors:  Inigo Quiles
 description: Map of SDF functions to be declare
@@ -1431,24 +1341,22 @@ use: <float> raymarchNormal( in <vec3> pos )
 examples:
     - /shaders/lighting_raymarching.frag
 */
-#define RAYMARCH_NORMAL_OFFSET 0.0001
-#define FNC_RAYMARCH_NORMAL 
 vec3 raymarchNormal(vec3 pos, vec2 pixel) {
    vec2 offset = vec2(1.0, -1.0) * pixel;
-   return normalize( offset.xyy * RAYMARCH_MAP_FNC( pos + offset.xyy ).sdf +
-                     offset.yyx * RAYMARCH_MAP_FNC( pos + offset.yyx ).sdf +
-                     offset.yxy * RAYMARCH_MAP_FNC( pos + offset.yxy ).sdf +
-                     offset.xxx * RAYMARCH_MAP_FNC( pos + offset.xxx ).sdf );
+   return normalize( offset.xyy * raymarchMap( pos + offset.xyy ).sdf +
+                     offset.yyx * raymarchMap( pos + offset.yyx ).sdf +
+                     offset.yxy * raymarchMap( pos + offset.yxy ).sdf +
+                     offset.xxx * raymarchMap( pos + offset.xxx ).sdf );
 }
 vec3 raymarchNormal(vec3 pos, float e) {
    vec2 offset = vec2(1.0, -1.0) * e;
-   return normalize( offset.xyy * RAYMARCH_MAP_FNC( pos + offset.xyy ).sdf +
-                     offset.yyx * RAYMARCH_MAP_FNC( pos + offset.yyx ).sdf +
-                     offset.yxy * RAYMARCH_MAP_FNC( pos + offset.yxy ).sdf +
-                     offset.xxx * RAYMARCH_MAP_FNC( pos + offset.xxx ).sdf );
+   return normalize( offset.xyy * raymarchMap( pos + offset.xyy ).sdf +
+                     offset.yyx * raymarchMap( pos + offset.yyx ).sdf +
+                     offset.yxy * raymarchMap( pos + offset.yxy ).sdf +
+                     offset.xxx * raymarchMap( pos + offset.xxx ).sdf );
 }
 vec3 raymarchNormal( in vec3 pos ) {
-   return raymarchNormal(pos, RAYMARCH_NORMAL_OFFSET);
+   return raymarchNormal(pos, 0.0001);
 }
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1471,7 +1379,6 @@ description: Return a Hammersley point
 use: hammersley(uint index)
 license: CC BY 3.0 Copyright (c) 2012 Holger Dammertz
 */
-#define FNC_HAMMERSLEY 
 vec2 hammersley(uint index, int numSamples) {
     const float tof = 0.5 / float(0x80000000U);
     uint bits = index;
@@ -1483,7 +1390,7 @@ vec2 hammersley(uint index, int numSamples) {
     return vec2(float(index) / float(numSamples), float(bits) * tof);
 }
 vec3 hemisphereCosSample(vec2 u) {
-    float phi = 2.0 * PI * u.x;
+    float phi = 2.0 * 3.1415926535897932384626433832795 * u.x;
     float cosTheta2 = 1.0 - u.y;
     float cosTheta = sqrt(cosTheta2);
     float sinTheta = sqrt(1.0 - cosTheta2);
@@ -1499,7 +1406,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_INSIDE 
 bool inside(float _x, float _min, float _max) {
     return !(_x < _min || _x > _max);
 }
@@ -1523,7 +1429,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_LENGTHSQ 
 float lengthSq(in vec2 v) { return dot(v, v); }
 float lengthSq(in vec3 v) { return dot(v, v); }
 float lengthSq(in vec4 v) { return dot(v, v); }
@@ -1535,7 +1440,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_ROTATE3DX 
 mat3 rotate3dX(const in float r){
     float c = cos(r);
     float s = sin(r);
@@ -1551,7 +1455,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_ROTATE3DY 
 mat3 rotate3dY(const in float r){
     float c = cos(r);
     float s = sin(r);
@@ -1567,7 +1470,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_ROTATE3DZ 
 mat3 rotate3dZ(const in float r){
     float c = cos(r);
     float s = sin(r);
@@ -1583,7 +1485,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_SUM 
 float sum( float v ) { return v; }
 float sum( vec2 v ) { return v.x+v.y; }
 float sum( vec3 v ) { return v.x+v.y+v.z; }
@@ -1593,7 +1494,6 @@ contributors:  Inigo Quiles
 description: generate the SDF of a sphere
 use: <float> sphereSDF( in <vec3> pos[], in <float> size] ) 
 */
-#define FNC_SPHERESDF 
 float sphereSDF(vec3 p) { return length(p); }
 float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
 /*
@@ -1606,7 +1506,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_ASPECT 
 vec2 aspect(vec2 st, vec2 s) {
     st.x = st.x * (s.x / s.y);
     return st;
@@ -1622,7 +1521,6 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_CENTER 
 float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
@@ -1636,17 +1534,13 @@ license:
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
     - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
 */
-#define FNC_UNCENTER 
 float uncenter(float v) { return v * 0.5 + 0.5; }
 vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
 vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
 // https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
-#define FLT_MAX 3.402823466e+38
-#define SQRT1_2 0.7071067811865475244008443621048
 
 // #define STRICT_RANDOM
 // #define ISF_EDITOR_WEBSITE
-#define RAND 
 // Linear congruential generator for random numbers
 // (https://en.wikipedia.org/wiki/Linear_congruential_generator).
 int seed = 1;
@@ -1687,26 +1581,9 @@ int hash(int n)
     n = (n << 13) ^ n;
     return n * (n * n * 15731 + 789221) + 1376312589;
 }
-#define SDF_ITERATIONS 7
 //increase this number for a better GI
-#define IndirectSamples 1.
 //increase to remove more noise, but might make the result blurrier
-#define SamplesLimit 150
 //GI bounces
-#define Bounces 1
-#define PixelAcceptance 1.5
-#define PixelCheckDistance .5
-#define MaxStepsDirect 128
-#define MaxStepsIndirect 32
-#define MaxShadowSteps 32
-#define FogSteps 8
-#define MaxDist 4.
-#define MinDist .015
-#define DoFClamping .3
-#define DoFSamples 128
-#define Density vec3(.0025, .0045, .006)
-#define Anisotropy .4
-#define FogRange 13.
 vec3 LightDir = normalize(vec3(.0, .0, -1));
 vec3 LightColor = vec3(1.) * 6.;
 float LightRadius = .02;
@@ -1733,7 +1610,7 @@ Material raymarchMap(in vec3 pos) {
     mat3 rotation = rotationMatrix(vec3(15., 10.5, 6.) * sdfRotationFactor);
     vec4 p0 = vec4(pos.xyz * rotation, 1);
     vec4 p = p0;
-    for (int i = 0; i < SDF_ITERATIONS; i++) {
+    for (int i = 0; i < 7; i++) {
         // This performs limited domain repetition of an SDF (that is, a finite
         // number repetitions, not infinite repetitions), but it’s missing a
         // `round` call:
@@ -1758,13 +1635,14 @@ Material raymarchMap(in vec3 pos) {
     }
     mat.sdf = sphereSDF(
         p.xyz,
-        abs(sdfScale - 1.) / p.w + pow(sdfScale, float(1 - SDF_ITERATIONS))
+        abs(sdfScale - 1.) / p.w + pow(sdfScale, float(1 - 7))
     );
     return mat;
 }
 float henyeyGreenstein(vec3 dirI, vec3 dirO) {
- return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
+ return 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dirI, dirO), .4);
 }
+Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); float dist = res.sdf; if (dist < 0.015) break; if (t > tmax) { m.valid = false; break; } m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 directLight(vec3 pos, vec3 normal) {
     //return vec3(0.);
     float dotLight = -dot(normal, LightDir);
@@ -1772,11 +1650,11 @@ vec3 directLight(vec3 pos, vec3 normal) {
         return vec3(0);
     vec3 pos0 = pos;
     float minAngle = LightRadius;
-    for (int i = 0; i < MaxShadowSteps; i++) {
+    for (int i = 0; i < 32; i++) {
         float dist = raymarchMap(pos).sdf;
-        if (dist > MaxDist)
+        if (dist > 4.)
             break;
-        if (dist < MinDist)
+        if (dist < .015)
             return vec3(0);
         pos -= LightDir * dist * 2.5; // goes 2.5 times faster since we don't need details
         minAngle = min(asin(dist / length(pos - pos0)), minAngle);
@@ -1792,35 +1670,22 @@ vec3 getCosineWeightedSample(vec3 dir) {
     vec3 weight = hemisphereCosSample(vec2(frand(), frand()));
     return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
-vec3 background(vec3 dir) {
-    return LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
-}
 vec3 directBackground(vec3 dir) {
-    return LightColor * Density * 1.;
+    return LightColor * vec3(.0025, .0045, .006) * 1.;
 }
-bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
-    for (int i = 0; i < MaxStepsIndirect; i++) {
-        float dist = raymarchMap(pos).sdf;
-        if (dist > MaxDist)
-            break;
-        if (dist < MinDist) {
-            normal = raymarchNormal(pos);
-            pos -= (2. * MinDist - dist) * dir;
-            return true;
-        }
-        pos += dir * dist;
-    }
-    return false;
-}
+Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); float dist = res.sdf; if (dist < 0.015) break; if (t > tmax) { m.valid = false; break; } m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos.xyz);
     vec3 abso = vec3(1);
     vec3 light = vec3(0);
-    for (int i = 0; i < Bounces; i++) {
+    for (int i = 0; i < 1; i++) {
         vec3 dir = getCosineWeightedSample(normal);
-        if (!traceC(pos, dir, normal))
-            return light + abso * background(dir);
-        Material res = raymarchMap(pos);
+        Material res = raymarchCastIndirect(pos, dir);
+        if (!res.valid) {
+            light += abso * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-LightDir, dir);
+            break;
+        }
+        normal = raymarchNormal(pos + dir * res.sdf);
         light += abso * (res.emissive + res.albedo.rgb * directLight(pos, normal));
         abso *= res.albedo.rgb;
     }
@@ -1834,10 +1699,10 @@ vec4 previousSample(vec4 data) {
     vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), data.xyz);
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
     vec2 minFragCoord;
-    float minDist = FLT_MAX;
+    float minDist = 3.402823466e+38;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
-        vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
+        vec2 fragCoord = previousFragCoord + .5 * vec2(x, y);
         if (inside(fragCoord, vec2(0), RENDERSIZE)) {
             vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
             float dist = length(prevData - data);
@@ -1848,7 +1713,7 @@ vec4 previousSample(vec4 data) {
         }
     }
     Camera cam = getCam(TIME);
-    if (minDist < PixelAcceptance * length(data.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
+    if (minDist < 1.5 * length(data.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
     return vec4(0);
 }
@@ -1875,10 +1740,10 @@ void main()
         Camera cam = getCam(TIME);
         vec3 rayOrigin = cam.pos;
         vec3 rayDirection = uv2dir(cam, uv);
-        Material res = raymarchCast(rayOrigin, rayDirection);
+        Material res = raymarchCastDirect(rayOrigin, rayDirection);
         if (res.valid) {
             for (int i = 0; i < 3; i++) {
-                res.sdf -= 2. * RAYMARCH_MIN_HIT_DIST - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
+                res.sdf -= 2. * 0.015 - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;
             }
             gl_FragColor = vec4(rayOrigin + rayDirection * res.sdf, 1);
         } else {
@@ -1892,14 +1757,14 @@ void main()
         bool valid = data.w > 0.;
         if (valid) {
             vec3 iLight = vec3(0);
-            for (float i = 0; i < IndirectSamples; i++) {
-                iLight += sampleIndirectLight(data.xyz) / IndirectSamples;
+            for (float i = 0; i < 1.; i++) {
+                iLight += sampleIndirectLight(data.xyz) / 1.;
             }
             gl_FragColor = previousSample(data);
-            if (gl_FragColor.a <= float(SamplesLimit))
-                gl_FragColor.a += IndirectSamples;
+            if (gl_FragColor.a <= float(150))
+                gl_FragColor.a += 1.;
             iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / IndirectSamples));
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / 1.));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);
@@ -1921,11 +1786,11 @@ void main()
             finalPos = cam.pos + dir * 100.;
         }
         vec3 volCol = vec3(0.), volAbs = vec3(1.), pos = cam.pos;
-        float stepDist = (tx.a == 0. ? FogRange : min(FogRange, col.a))/float(FogSteps);
-        vec3 stepAbs = exp(-Density*stepDist);
+        float stepDist = (tx.a == 0. ? 13. : min(13., col.a))/float(8);
+        vec3 stepAbs = exp(-vec3(.0025, .0045, .006)*stepDist);
         vec3 stepCol = (vec3(1.) - stepAbs) * henyeyGreenstein(-LightDir, dir);
         pos += stepDist * dir * random(gl_FragCoord.xy/vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
-        for(int i = 0; i < FogSteps; i++){
+        for(int i = 0; i < 8; i++){
             volAbs *= stepAbs;
             volCol += stepCol*volAbs*directLight(pos, -LightDir);
             pos += dir * stepDist;
@@ -1937,13 +1802,13 @@ void main()
     {
         vec4 col = vec4(0.);
         Camera cam = getCam(TIME);
-        float frd = RENDERSIZE.y*cam.aperture*DoFClamping;
+        float frd = RENDERSIZE.y*cam.aperture*.3;
         int rd = int(ceil(frd - .5));
         for(int y = -rd; y <= rd; y++){
             int ln = int(ceil(sqrt(frd*frd-float(y*y)) - .5));
             for(int x = -ln; x <= ln; x++){
                 vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE-1.)));
-                float dof = min(abs(p.a-cam.focalDistance)/p.a, DoFClamping) * RENDERSIZE.y*cam.aperture;
+                float dof = min(abs(p.a-cam.focalDistance)/p.a, .3) * RENDERSIZE.y*cam.aperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + .5, 0.0, 1.0) / (dof*dof+.5);
                 col += p;

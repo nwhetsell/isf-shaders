@@ -246,6 +246,8 @@ float henyeyGreenstein(vec3 dirI, vec3 dirO) {
 	return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
 }
 
+DEFINE_RAYMARCH_CAST(Direct, directLightMinDist(ro, rd), 128)
+
 vec3 directLight(vec3 pos, vec3 normal) {
     //return vec3(0.);
     float dotLight = -dot(normal, LightDir);
@@ -276,29 +278,11 @@ vec3 getCosineWeightedSample(vec3 dir) {
     return weight.x * o1 + weight.y * o2 + weight.z * dir;
 }
 
-
-vec3 background(vec3 dir) {
-    return LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
-}
-
 vec3 directBackground(vec3 dir) {
     return LightColor * Density * 1.;
 }
 
-bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
-    for (int i = 0; i < MaxStepsIndirect; i++) {
-        float dist = raymarchMap(pos).sdf;
-        if (dist > MaxDist)
-            break;
-        if (dist < MinDist) {
-            normal = raymarchNormal(pos);
-            pos -= (2. * MinDist - dist) * dir;
-            return true;
-        }
-        pos += dir * dist;
-    }
-    return false;
-}
+DEFINE_RAYMARCH_CAST(Indirect, 0., MaxStepsIndirect)
 
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos.xyz);
@@ -307,9 +291,12 @@ vec3 sampleIndirectLight(vec3 pos) {
     vec3 light = vec3(0);
     for (int i = 0; i < Bounces; i++) {
         vec3 dir = getCosineWeightedSample(normal);
-        if (!traceC(pos, dir, normal))
-            return light + abso * background(dir);
-        Material res = raymarchMap(pos);
+        Material res = raymarchCastIndirect(pos, dir);
+        if (!res.valid) {
+            light += abso * LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
+            break;
+        }
+        normal = raymarchNormal(pos + dir * res.sdf);
         light += abso * (res.emissive + res.albedo.rgb * directLight(pos, normal));
         abso *= res.albedo.rgb;
     }
@@ -381,7 +368,7 @@ void main()
         vec3 rayOrigin = cam.pos;
         vec3 rayDirection = uv2dir(cam, uv);
 
-        Material res = raymarchCast(rayOrigin, rayDirection);
+        Material res = raymarchCastDirect(rayOrigin, rayDirection);
         if (res.valid) {
             for (int i = 0; i < 3; i++) {
                 res.sdf -= 2. * RAYMARCH_MIN_HIT_DIST - raymarchMap(rayOrigin + rayDirection * res.sdf).sdf;

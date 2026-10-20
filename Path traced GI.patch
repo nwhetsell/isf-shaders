@@ -1,39 +1,65 @@
 diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
-index bfe1629d..532e0fab 100644
+index bfe1629d..9f453007 100644
 --- a/lighting/raymarch/cast.glsl
 +++ b/lighting/raymarch/cast.glsl
-@@ -32,7 +32,6 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
-    
-     float t = tmin;
-     Material m = materialNew();
--    m.valid = false;
-     for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
-         Material res = RAYMARCH_MAP_FNC(ro + rd * t);
- #ifdef RAYMARCH_ABS_DIST
-@@ -40,17 +39,17 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
- #else
-         float dist = res.sdf;
- #endif
--        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
-+        if (dist < RAYMARCH_MIN_HIT_DIST)
-             break;
-+        if (t > tmax) {
-+            m.valid = false;
-+            break;
-+        }
-+
-         m = res;
-         t += res.sdf;
-     }
+@@ -26,33 +26,29 @@ use: <float> castRay( in <vec3> pos, in <vec3> nor )
+ #ifndef FNC_RAYMARCH_CAST
+ #define FNC_RAYMARCH_CAST
  
+-Material raymarchCast( in vec3 ro, in vec3 rd ) {
+-    float tmin = RAYMARCH_MIN_DIST;
+-    float tmax = RAYMARCH_MAX_DIST;
+-   
+-    float t = tmin;
+-    Material m = materialNew();
+-    m.valid = false;
+-    for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
+-        Material res = RAYMARCH_MAP_FNC(ro + rd * t);
+-#ifdef RAYMARCH_ABS_DIST
+-        float dist = abs(res.sdf);
+-#else
+-        float dist = res.sdf;
+-#endif
+-        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
+-            break;
+-        m = res;
+-        t += res.sdf;
+-    }
+-
 -    #if defined(RAYMARCH_BACKGROUND) || defined(RAYMARCH_FLOOR)
 -    if ( t > tmax )
 -        m.valid = false;
 -    #endif
 -
-     m.sdf = t;
-     return m;
+-    m.sdf = t;
+-    return m;
++#define DEFINE_RAYMARCH_CAST(SUFFIX, RAYMARCH_MIN_DIST_ARG, RAYMARCH_SAMPLES_ARG) \
++Material raymarchCast ## SUFFIX( in vec3 ro, in vec3 rd ) { \
++    float tmin = RAYMARCH_MIN_DIST_ARG;                     \
++    float tmax = RAYMARCH_MAX_DIST;                         \
++                                                            \
++    float t = tmin;                                         \
++    Material m = materialNew();                             \
++    for (int i = 0; i < RAYMARCH_SAMPLES_ARG; i++) {        \
++        Material res = RAYMARCH_MAP_FNC(ro + rd * t);       \
++        float dist = res.sdf;                               \
++        if (dist < RAYMARCH_MIN_HIT_DIST)                   \
++            break;                                          \
++        if (t > tmax) {                                     \
++            m.valid = false;                                \
++            break;                                          \
++        }                                                   \
++                                                            \
++        m = res;                                            \
++        t += res.sdf;                                       \
++    }                                                       \
++                                                            \
++    m.sdf = t;                                              \
++    return m;                                               \
  }
+ 
+ #endif
+\ No newline at end of file
 diff --git a/math/inverse.glsl b/math/inverse.glsl
 index be7a4020..a14008f5 100644
 --- a/math/inverse.glsl
