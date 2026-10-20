@@ -1430,8 +1430,6 @@ vec2 pos2uv(Camera cam, vec3 pos) {
     return dir.xy * cam.focalLength / dir.z;
 }
 float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor) {
-    diffuseColor = vec3(1);
-    emissionColor = vec3(0);
     mat3 rotation = rotationMatrix(vec3(15., 10.5, 6.) * sdfRotationFactor);
     vec4 p0 = vec4(position.xyz * rotation, 1);
  vec4 p = p0;
@@ -1451,6 +1449,8 @@ float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor) {
         p += p0;
     }
     p.xyz /= p.w;
+    diffuseColor = vec3(1);
+    emissionColor = vec3(0);
     if (fract(p0.x) < 0.1) {
         diffuseColor = mix(diffuseColor, vec3(0.2), colorMix);
         emissionColor = mix(emissionColor, uncenter(normalize(p.xyz)) * 10., colorMix);
