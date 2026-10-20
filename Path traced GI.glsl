@@ -127,6 +127,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
+#include "lygia/space/tbn.glsl"
 #include "lygia/space/uncenter.glsl"
 #include "lygia-additions/const.glsl"
 
@@ -267,17 +268,6 @@ vec3 directLight(vec3 pos, vec3 normal) {
     return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
 }
 
-vec3 ortho(vec3 v) {
-  return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0)  : vec3(0, -v.z, v.y);
-}
-
-vec3 getCosineWeightedSample(vec3 dir) {
-    vec3 o1 = normalize(ortho(dir));
-    vec3 o2 = normalize(cross(dir, o1));
-    vec3 weight = hemisphereCosSample(vec2(frand(), frand()));
-    return weight.x * o1 + weight.y * o2 + weight.z * dir;
-}
-
 vec3 directBackground(vec3 dir) {
     return LightColor * Density * 1.;
 }
@@ -285,21 +275,23 @@ vec3 directBackground(vec3 dir) {
 DEFINE_RAYMARCH_CAST(Indirect, 0., MaxStepsIndirect)
 
 vec3 sampleIndirectLight(vec3 pos) {
-    vec3 normal = raymarchNormal(pos.xyz);
-
-    vec3 abso = vec3(1);
+    vec3 normal = raymarchNormal(pos);
     vec3 light = vec3(0);
+    vec3 absorption = vec3(1);
+
     for (int i = 0; i < Bounces; i++) {
-        vec3 dir = getCosineWeightedSample(normal);
+        vec3 dir = tbn(normal, vec3(0, 0, 1)) * hemisphereCosSample(vec2(frand(), frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += abso * LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
+            light += absorption * LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
             break;
         }
+
         normal = raymarchNormal(pos + dir * res.sdf);
-        light += abso * (res.emissive + res.albedo.rgb * directLight(pos, normal));
-        abso *= res.albedo.rgb;
+        light += absorption * (res.emissive + res.albedo.rgb * directLight(pos, normal));
+        absorption *= res.albedo.rgb;
     }
+
     return light;
 }
 

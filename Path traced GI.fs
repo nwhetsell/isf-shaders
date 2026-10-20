@@ -1525,6 +1525,20 @@ float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
 /*
+contributors:  Shadi El Hajj
+description: Tangent-Bitangent-Normal Matrix
+use: mat3 tbn(vec3 t, vec3 b, vec3 n)
+license: MIT License (MIT) Copyright (c) 2024 Shadi El Hajj
+*/
+mat3 tbn(vec3 t, vec3 b, vec3 n) {
+    return mat3(t, b, n);
+}
+mat3 tbn(vec3 n, vec3 up) {
+    vec3 t = normalize(cross(up, n));
+    vec3 b = cross(n, t);
+    return tbn(t, b, n);
+}
+/*
 contributors: Patricio Gonzalez Vivo
 description: 'Moves the center from 0.0 to 0.5'
 use: <float|vec2|vec3> uncenter(<float|vec2|vec3> st)
@@ -1661,33 +1675,24 @@ vec3 directLight(vec3 pos, vec3 normal) {
     }
     return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
 }
-vec3 ortho(vec3 v) {
-  return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0) : vec3(0, -v.z, v.y);
-}
-vec3 getCosineWeightedSample(vec3 dir) {
-    vec3 o1 = normalize(ortho(dir));
-    vec3 o2 = normalize(cross(dir, o1));
-    vec3 weight = hemisphereCosSample(vec2(frand(), frand()));
-    return weight.x * o1 + weight.y * o2 + weight.z * dir;
-}
 vec3 directBackground(vec3 dir) {
     return LightColor * vec3(.0025, .0045, .006) * 1.;
 }
 Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); float dist = res.sdf; if (dist < 0.015) break; if (t > tmax) { m.valid = false; break; } m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
-    vec3 normal = raymarchNormal(pos.xyz);
-    vec3 abso = vec3(1);
+    vec3 normal = raymarchNormal(pos);
     vec3 light = vec3(0);
+    vec3 absorption = vec3(1);
     for (int i = 0; i < 1; i++) {
-        vec3 dir = getCosineWeightedSample(normal);
+        vec3 dir = tbn(normal, vec3(0, 0, 1)) * hemisphereCosSample(vec2(frand(), frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += abso * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-LightDir, dir);
+            light += absorption * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-LightDir, dir);
             break;
         }
         normal = raymarchNormal(pos + dir * res.sdf);
-        light += abso * (res.emissive + res.albedo.rgb * directLight(pos, normal));
-        abso *= res.albedo.rgb;
+        light += absorption * (res.emissive + res.albedo.rgb * directLight(pos, normal));
+        absorption *= res.albedo.rgb;
     }
     return light;
 }
