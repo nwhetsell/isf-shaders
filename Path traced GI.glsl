@@ -112,6 +112,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
     return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
 }
 
+#include "lygia/lighting/raymarch/normal.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
 #ifdef ISF_EDITOR_WEBSITE
@@ -248,13 +249,6 @@ Material raymarchMap(vec3 pos)
     return mat;
 }
 
-vec3 normalEstimation(vec3 pos) {
-  vec2 k = vec2(MinDist, 0);
-  return normalize(vec3(raymarchMap(pos + k.xyy).sdf - raymarchMap(pos - k.xyy).sdf,
-	  					raymarchMap(pos + k.yxy).sdf - raymarchMap(pos - k.yxy).sdf,
-  						raymarchMap(pos + k.yyx).sdf - raymarchMap(pos - k.yyx).sdf));
-}
-
 float henyeyGreenstein(vec3 dirI, vec3 dirO) {
 	return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
 }
@@ -304,7 +298,7 @@ bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
         if (dist > MaxDist)
             break;
         if (dist < MinDist) {
-            normal = normalEstimation(pos);
+            normal = raymarchNormal(pos);
             pos -= (2. * MinDist - dist) * dir;
             return true;
         }
@@ -314,7 +308,7 @@ bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
 }
 
 vec3 sampleIndirectLight(vec3 pos) {
-    vec3 normal = normalEstimation(pos.xyz);
+    vec3 normal = raymarchNormal(pos.xyz);
 
     vec3 dir;
     vec3 abso = vec3(1);
@@ -460,7 +454,7 @@ void main()
         if(tx.a != 0.) {
             vec3 dc, ec;
             sdf(finalPos, dc, ec);
-            col.rgb = ec + dc * (col.rgb + directLight(finalPos, normalEstimation(finalPos)));
+            col.rgb = ec + dc * (col.rgb + directLight(finalPos, raymarchNormal(finalPos)));
         } else {
             finalPos = cam.pos + dir * 100.;
         }
