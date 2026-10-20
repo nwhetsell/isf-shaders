@@ -1616,7 +1616,6 @@ void main()
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
         seed = int(sum(gl_FragCoord.xy) + FRAMEINDEX);
-        Camera cam = getCam(TIME);
         vec4 data = IMG_THIS_PIXEL(bufferB);
         bool valid = data.w > 0.;
         if (valid) {
@@ -1631,7 +1630,7 @@ void main()
             gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / IndirectSamples));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
+            gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D

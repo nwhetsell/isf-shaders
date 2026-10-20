@@ -424,8 +424,6 @@ void main()
         seed = sum(gl_FragCoord.xy * vec2(0.256435865, 0.316548465)) + sin(TIME) * 16886.3158915;
 #endif
 
-        Camera cam = getCam(TIME);
-
         vec4 data = IMG_THIS_PIXEL(bufferB);
         bool valid = data.w > 0.;
         if (valid) {
@@ -447,7 +445,7 @@ void main()
             #endif
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(cam, uv)), 1);
+            gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
