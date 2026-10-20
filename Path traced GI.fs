@@ -1850,7 +1850,7 @@ vec4 previousSample(vec4 data) {
         if (inside(fragCoord, vec2(0), RENDERSIZE)) {
             vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
             float dist = length(prevData - data);
-            if (dist < minDist){
+            if (dist < minDist) {
                 minFragCoord = fragCoord;
                 minDist = dist;
             }
