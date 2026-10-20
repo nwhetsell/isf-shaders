@@ -243,6 +243,7 @@ float henyeyGreenstein(float mu, float g) {
 float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
     return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
 }
+
 #define RAYMARCH_SAMPLES 128
 float directLightMinDist(in vec3 ro, in vec3 rd);
 #define RAYMARCH_MIN_DIST directLightMinDist(ro, rd)
@@ -1176,6 +1177,10 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
     m.sdf = t;
     return m;
 }
+float directLightMinDist(in vec3 ro, in vec3 rd) {
+    float t = RAYMARCH_MAP_FNC(ro).sdf;
+    return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
+}
 /*
 contributors: Patricio Gonzalez Vivo
 description: some useful math constants
@@ -1494,14 +1499,6 @@ vec3 directLight(vec3 pos, vec3 normal) {
         minAngle = min(asin(dist / length(pos - pos0)), minAngle);
     }
     return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
-}
-float directLightMinDist(in vec3 ro, in vec3 rd)
-{
-    float t = 0.;
-    for (int i = 0; i < 2; i++) {
-        t += raymarchMap(ro + rd * t).sdf;
-    }
-    return t;
 }
 vec3 ortho(vec3 v) {
   return abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0) : vec3(0, -v.z, v.y);

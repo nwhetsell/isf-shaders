@@ -101,11 +101,17 @@
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
+
 #define RAYMARCH_SAMPLES 128
 float directLightMinDist(in vec3 ro, in vec3 rd);
 #define RAYMARCH_MIN_DIST directLightMinDist(ro, rd)
 #define RAYMARCH_MIN_HIT_DIST 0.015
 #include "lygia/lighting/raymarch/cast.glsl"
+float directLightMinDist(in vec3 ro, in vec3 rd) {
+    float t = RAYMARCH_MAP_FNC(ro).sdf;
+    return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
+}
+
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
 #ifdef ISF_EDITOR_WEBSITE
@@ -270,15 +276,6 @@ vec3 directLight(vec3 pos, vec3 normal) {
         minAngle = min(asin(dist / length(pos - pos0)), minAngle);
     }
     return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
-}
-
-float directLightMinDist(in vec3 ro, in vec3 rd)
-{
-    float t = 0.;
-    for (int i = 0; i < 2; i++) {
-        t += raymarchMap(ro + rd * t).sdf;
-    }
-    return t;
 }
 
 vec3 ortho(vec3 v) {
