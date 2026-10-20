@@ -203,11 +203,11 @@ vec2 pos2uv(Camera cam, vec3 pos) {
 }
 
 
-float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor) {
+Material raymarchMap(in vec3 pos) {
     mat3 rotation = rotationMatrix(vec3(15., 10.5, 6.) * sdfRotationFactor);
 
-    vec4 p0 = vec4(position.xyz * rotation, 1);
-	vec4 p = p0;
+    vec4 p0 = vec4(pos.xyz * rotation, 1);
+    vec4 p = p0;
     for (int i = 0; i < SDF_ITERATIONS; i++) {
         // This performs limited domain repetition of an SDF (that is, a finite
         // number repetitions, not infinite repetitions), but it’s missing a
@@ -228,25 +228,17 @@ float sdf(vec3 position, out vec3 diffuseColor, out vec3 emissionColor) {
     }
     p.xyz /= p.w;
 
-    diffuseColor = vec3(1);
-    emissionColor = vec3(0);
+    Material mat = materialNew();
+    mat.albedo = vec4(1);
+    mat.emissive = vec3(0);
     if (fract(p0.x) < 0.1) {
-        diffuseColor = mix(diffuseColor, vec3(0.2), colorMix);
-        emissionColor = mix(emissionColor, uncenter(normalize(p.xyz)) * 10., colorMix);
+        mat.albedo.rgb = mix(mat.albedo.rgb, vec3(0.2), colorMix);
+        mat.emissive = mix(mat.emissive, uncenter(normalize(p.xyz)) * 10., colorMix);
     }
-
-    return sphereSDF(
+    mat.sdf = sphereSDF(
         p.xyz,
         abs(sdfScale - 1.) / p.w + pow(sdfScale, float(1 - SDF_ITERATIONS))
     );
-}
-
-Material raymarchMap(vec3 pos)
-{
-    Material mat = materialNew();
-    mat.position = pos;
-    vec3 dc, ec;
-    mat.sdf = sdf(pos, dc, ec);
     return mat;
 }
 
@@ -311,18 +303,15 @@ bool traceC(inout vec3 pos, in vec3 dir, out vec3 normal) {
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos.xyz);
 
-    vec3 dir;
     vec3 abso = vec3(1);
     vec3 light = vec3(0);
-    vec3 dc;
-    vec3 ec;
     for (int i = 0; i < Bounces; i++) {
-        dir = getCosineWeightedSample(normal);
+        vec3 dir = getCosineWeightedSample(normal);
         if (!traceC(pos, dir, normal))
             return light + abso * background(dir);
-        sdf(pos, dc, ec);
-        light += abso * (ec + dc * directLight(pos, normal));
-        abso *= dc;
+        Material res = raymarchMap(pos);
+        light += abso * (res.emissive + res.albedo.rgb * directLight(pos, normal));
+        abso *= res.albedo.rgb;
     }
     return light;
 }
@@ -447,9 +436,8 @@ void main()
         vec3 dir = uv2dir(cam, uv);
 
         if(tx.a != 0.) {
-            vec3 dc, ec;
-            sdf(finalPos, dc, ec);
-            col.rgb = ec + dc * (col.rgb + directLight(finalPos, raymarchNormal(finalPos)));
+            Material res = raymarchMap(finalPos);
+            col.rgb = res.emissive + res.albedo.rgb * (col.rgb + directLight(finalPos, raymarchNormal(finalPos)));
         } else {
             finalPos = cam.pos + dir * 100.;
         }
