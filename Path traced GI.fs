@@ -1491,6 +1491,32 @@ vec3 hemisphereCosSample(vec2 u) {
 }
 /*
 contributors: Patricio Gonzalez Vivo
+description: does the position lie within the triangle
+use:
+    - bool inside(<float|vec2|vec3> value, <float|vec2|vec3> min, <float|vec2|vec3> max)
+    - bool inside(<vec2|vec3> value, <vec4|AABB> aabb)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+#define FNC_INSIDE 
+bool inside(float _x, float _min, float _max) {
+    return !(_x < _min || _x > _max);
+}
+bool inside(vec2 _v, vec2 _min, vec2 _max) {
+    return !(_v.x < _min.x || _v.x > _max.x ||
+             _v.y < _min.y || _v.y > _max.y);
+}
+bool inside(vec3 _v, vec3 _min, vec3 _max) {
+    return !(_v.x < _min.x || _v.x > _max.x ||
+             _v.y < _min.y || _v.y > _max.y ||
+             _v.z < _min.z || _v.z > _max.z);
+}
+bool inside(vec2 _v, vec4 _aabb) {
+    return inside(_v, _aabb.xy, _aabb.zw);
+}
+/*
+contributors: Patricio Gonzalez Vivo
 description: Squared length
 use: <vec4|vec3|vec2> lengthSq(<vec4|vec3|vec2> v)
 license:
@@ -1810,12 +1836,21 @@ vec3 sampleIndirectLight(vec3 pos) {
     return light;
 }
 float distancePixel(vec2 fragCoord, vec4 data) {
-    if (min(RENDERSIZE, fragCoord) != fragCoord &&
-        max(vec2(0.), fragCoord) != fragCoord) {
-        return MaxDist;
+    if (inside(fragCoord, vec2(0), RENDERSIZE)) {
+        vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
+        return length(prevData - data);
     }
-    vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
-    return length(prevData - data);
+    return MaxDist;
+    // if (min(RENDERSIZE - fragCoord, 0.) != 0. &&
+    //     max(vec2(0.),   fragCoord) != fragCoord) {
+    //     return MaxDist;
+    // }
+    // if (min(RENDERSIZE, fragCoord) != fragCoord &&
+    //     max(vec2(0.),   fragCoord) != fragCoord) {
+    //     return MaxDist;
+    // }
+    // vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
+    // return length(prevData - data);
 }
 vec2 unaspect(vec2 st, vec2 s) {
     st.x = st.x * (s.y / s.x);

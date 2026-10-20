@@ -115,6 +115,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
 #include "lygia/lighting/raymarch/normal.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
+#include "lygia/math/inside.glsl"
 #ifdef ISF_EDITOR_WEBSITE
 #include "lygia/math/inverse.glsl"
 #endif
@@ -327,12 +328,11 @@ vec3 sampleIndirectLight(vec3 pos) {
 }
 
 float distancePixel(vec2 fragCoord, vec4 data) {
-    if (min(RENDERSIZE, fragCoord) != fragCoord &&
-        max(vec2(0.),   fragCoord) != fragCoord) {
-        return MaxDist;
+    if (inside(fragCoord, vec2(0), RENDERSIZE)) {
+        vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
+        return length(prevData - data);
     }
-    vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
-    return length(prevData - data);
+    return MaxDist;
 }
 
 vec2 unaspect(vec2 st, vec2 s) {
