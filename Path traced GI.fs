@@ -1835,23 +1835,6 @@ vec3 sampleIndirectLight(vec3 pos) {
     }
     return light;
 }
-float distancePixel(vec2 fragCoord, vec4 data) {
-    if (inside(fragCoord, vec2(0), RENDERSIZE)) {
-        vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
-        return length(prevData - data);
-    }
-    return MaxDist;
-    // if (min(RENDERSIZE - fragCoord, 0.) != 0. &&
-    //     max(vec2(0.),   fragCoord) != fragCoord) {
-    //     return MaxDist;
-    // }
-    // if (min(RENDERSIZE, fragCoord) != fragCoord &&
-    //     max(vec2(0.),   fragCoord) != fragCoord) {
-    //     return MaxDist;
-    // }
-    // vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
-    // return length(prevData - data);
-}
 vec2 unaspect(vec2 st, vec2 s) {
     st.x = st.x * (s.y / s.x);
     return st;
@@ -1864,10 +1847,13 @@ vec4 previousSample(vec4 data) {
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
-        float dist = distancePixel(fragCoord, data);
-        if (dist < minDist){
-            minFragCoord = fragCoord;
-            minDist = dist;
+        if (inside(fragCoord, vec2(0), RENDERSIZE)) {
+            vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
+            float dist = length(prevData - data);
+            if (dist < minDist){
+                minFragCoord = fragCoord;
+                minDist = dist;
+            }
         }
     }
     Camera cam = getCam(TIME);
