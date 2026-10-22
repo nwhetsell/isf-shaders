@@ -1769,15 +1769,15 @@ void main()
         vec4 data = IMG_THIS_PIXEL(bufferB);
         bool valid = data.w > 0.;
         if (valid) {
-            vec3 iLight = vec3(0);
+            vec3 indirectLight = vec3(0);
             for (float i = 0; i < 1.; i++) {
-                iLight += sampleIndirectLight(data.xyz) / 1.;
+                indirectLight += sampleIndirectLight(data.xyz) / 1.;
             }
             gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(150))
                 gl_FragColor.a += 1.;
-            iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / 1.));
+            indirectLight = clamp(indirectLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / 1.));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);

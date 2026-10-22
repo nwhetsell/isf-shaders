@@ -385,22 +385,16 @@ void main()
         vec4 data = IMG_THIS_PIXEL(bufferB);
         bool valid = data.w > 0.;
         if (valid) {
-            #if 0
-            gl_FragColor = previousSample(data);
-            gl_FragColor.rgb = gl_FragColor.a == 0. ? vec3(1, 0, 0) : vec3(0, 1, 0);
-            gl_FragColor.a = 1.;
-            #else
-            vec3 iLight = vec3(0);
+            vec3 indirectLight = vec3(0);
             for (float i = 0; i < IndirectSamples; i++) {
-                iLight += sampleIndirectLight(data.xyz) / IndirectSamples;
+                indirectLight += sampleIndirectLight(data.xyz) / IndirectSamples;
             }
 
             gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(SamplesLimit))
                 gl_FragColor.a += IndirectSamples;
-            iLight = clamp(iLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, iLight, 1. / (gl_FragColor.a / IndirectSamples));
-            #endif
+            indirectLight = clamp(indirectLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / IndirectSamples));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);
