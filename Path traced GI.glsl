@@ -101,17 +101,8 @@
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
-
-#define RAYMARCH_SAMPLES 128
-float directLightMinDist(in vec3 ro, in vec3 rd);
-#define RAYMARCH_MIN_DIST directLightMinDist(ro, rd)
 #define RAYMARCH_MIN_HIT_DIST 0.015
 #include "lygia/lighting/raymarch/cast.glsl"
-float directLightMinDist(in vec3 ro, in vec3 rd) {
-    float t = RAYMARCH_MAP_FNC(ro).sdf;
-    return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
-}
-
 #include "lygia/lighting/raymarch/normal.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
@@ -245,6 +236,11 @@ Material raymarchMap(in vec3 pos) {
 
 float henyeyGreenstein(vec3 dirI, vec3 dirO) {
 	return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
+}
+
+float directLightMinDist(in vec3 ro, in vec3 rd) {
+    float t = RAYMARCH_MAP_FNC(ro).sdf;
+    return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
 }
 
 DEFINE_RAYMARCH_CAST(Direct, directLightMinDist(ro, rd), 128)

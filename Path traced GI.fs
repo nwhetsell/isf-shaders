@@ -220,7 +220,7 @@ float henyeyGreenstein(float mu, float g) {
 float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
     return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
 }
-float directLightMinDist(in vec3 ro, in vec3 rd);
+
 /*
 contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
@@ -1089,10 +1089,6 @@ contributors:  Inigo Quiles
 description: Cast a ray
 use: <float> castRay( in <vec3> pos, in <vec3> nor ) 
 */
-float directLightMinDist(in vec3 ro, in vec3 rd) {
-    float t = raymarchMap(ro).sdf;
-    return t + raymarchMap(ro + rd * t).sdf;
-}
 /*
 contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
@@ -1655,6 +1651,10 @@ Material raymarchMap(in vec3 pos) {
 }
 float henyeyGreenstein(vec3 dirI, vec3 dirO) {
  return 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dirI, dirO), .4);
+}
+float directLightMinDist(in vec3 ro, in vec3 rd) {
+    float t = raymarchMap(ro).sdf;
+    return t + raymarchMap(ro + rd * t).sdf;
 }
 Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); float dist = res.sdf; if (dist < 0.015) break; if (t > tmax) { m.valid = false; break; } m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 directLight(vec3 pos, vec3 normal) {
