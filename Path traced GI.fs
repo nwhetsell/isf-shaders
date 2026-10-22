@@ -1789,26 +1789,29 @@ void main()
         vec4 col = IMG_THIS_PIXEL(bufferC);
         vec4 tx = IMG_THIS_PIXEL(bufferB);
         vec3 finalPos = tx.rgb;
-        col.a = length(cam.pos-finalPos);
+        col.a = length(cam.pos - finalPos);
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = uv2dir(cam, uv);
-        if(tx.a != 0.) {
+        if (tx.a != 0.) {
             Material res = raymarchMap(finalPos);
             col.rgb = res.emissive + res.albedo.rgb * (col.rgb + directLight(finalPos, raymarchNormal(finalPos)));
         } else {
             finalPos = cam.pos + dir * 100.;
         }
-        vec3 volCol = vec3(0.), volAbs = vec3(1.), pos = cam.pos;
-        float stepDist = (tx.a == 0. ? 13. : min(13., col.a))/float(8);
-        vec3 stepAbs = exp(-vec3(.0025, .0045, .006)*stepDist);
-        vec3 stepCol = (vec3(1.) - stepAbs) * henyeyGreenstein(-LightDir, dir);
-        pos += stepDist * dir * random(gl_FragCoord.xy/vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
-        for(int i = 0; i < 8; i++){
+        vec3 volCol = vec3(0);
+        vec3 volAbs = vec3(1);
+        vec3 pos = cam.pos;
+        float stepDist = (tx.a == 0.) ? 13. : min(13., col.a);
+        stepDist /= float(8);
+        vec3 stepAbs = exp(-vec3(.0025, .0045, .006) * stepDist);
+        vec3 stepCol = (vec3(1) - stepAbs) * henyeyGreenstein(-LightDir, dir);
+        pos += stepDist * dir * random(gl_FragCoord.xy / vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
+        for (int i = 0; i < 8; i++) {
             volAbs *= stepAbs;
-            volCol += stepCol*volAbs*directLight(pos, -LightDir);
+            volCol += stepCol * volAbs * directLight(pos, -LightDir);
             pos += dir * stepDist;
         }
-        col.rgb = col.rgb*volAbs + volCol;
+        col.rgb = col.rgb * volAbs + volCol;
         gl_FragColor = col;
     }
     else // Shadertoy Image
