@@ -58,6 +58,14 @@
             "MAX": 1
         },
         {
+            "NAME": "colorBandSize",
+            "LABEL": "Color band size",
+            "TYPE": "float",
+            "DEFAULT": 0.1,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -1618,8 +1626,8 @@ vec2 pos2uv(Camera cam, vec3 pos) {
 }
 Material raymarchMap(in vec3 pos) {
     mat3 rotation = rotationMatrix(vec3(15., 10.5, 6.) * sdfRotationFactor);
-    vec4 p0 = vec4(pos.xyz * rotation, 1);
-    vec4 p = p0;
+    vec4 initialPosition = vec4(pos.xyz * rotation, 1);
+    vec4 p = initialPosition;
     for (int i = 0; i < 7; i++) {
         // This performs limited domain repetition of an SDF (that is, a finite
         // number repetitions, not infinite repetitions), but it’s missing a
@@ -1633,13 +1641,13 @@ Material raymarchMap(in vec3 pos) {
         p *= sdfScale;
         if (i < 3)
             p.xyz *= rotation;
-        p += p0;
+        p += initialPosition;
     }
     p.xyz /= p.w;
     Material mat = materialNew();
     mat.albedo = vec4(1);
     mat.emissive = vec3(0);
-    if (fract(p0.x) < 0.1) {
+    if (fract(initialPosition.x) < colorBandSize) {
         mat.albedo.rgb = mix(mat.albedo.rgb, vec3(0.2), colorMix);
         mat.emissive = mix(mat.emissive, uncenter(normalize(p.xyz)) * 10., colorMix);
     }
