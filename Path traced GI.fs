@@ -1099,6 +1099,202 @@ use: <float> castRay( in <vec3> pos, in <vec3> nor )
 */
 /*
 contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+/*
+contributors: Patricio Gonzalez Vivo
+description: some useful math constants
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+
+/*
+contributors: Holger Dammertz
+description: Return a Hammersley point
+use: hammersley(uint index)
+license: CC BY 3.0 Copyright (c) 2012 Holger Dammertz
+*/
+vec2 hammersley(uint index, int numSamples) {
+    const float tof = 0.5 / float(0x80000000U);
+    uint bits = index;
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return vec2(float(index) / float(numSamples), float(bits) * tof);
+}
+vec3 hemisphereCosSample(vec2 u) {
+    float phi = 2.0 * 3.1415926535897932384626433832795 * u.x;
+    float cosTheta2 = 1.0 - u.y;
+    float cosTheta = sqrt(cosTheta2);
+    float sinTheta = sqrt(1.0 - cosTheta2);
+    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: does the position lie within the triangle
+use:
+    - bool inside(<float|vec2|vec3> value, <float|vec2|vec3> min, <float|vec2|vec3> max)
+    - bool inside(<vec2|vec3> value, <vec4|AABB> aabb)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+bool inside(float _x, float _min, float _max) {
+    return !(_x < _min || _x > _max);
+}
+bool inside(vec2 _v, vec2 _min, vec2 _max) {
+    return !(_v.x < _min.x || _v.x > _max.x ||
+             _v.y < _min.y || _v.y > _max.y);
+}
+bool inside(vec3 _v, vec3 _min, vec3 _max) {
+    return !(_v.x < _min.x || _v.x > _max.x ||
+             _v.y < _min.y || _v.y > _max.y ||
+             _v.z < _min.z || _v.z > _max.z);
+}
+bool inside(vec2 _v, vec4 _aabb) {
+    return inside(_v, _aabb.xy, _aabb.zw);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: Squared length
+use: <vec4|vec3|vec2> lengthSq(<vec4|vec3|vec2> v)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+float lengthSq(in vec2 v) { return dot(v, v); }
+float lengthSq(in vec3 v) { return dot(v, v); }
+float lengthSq(in vec4 v) { return dot(v, v); }
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dX(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+mat3 rotate3dX(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(1.0,0.0,0.0),
+                vec3(0.0,c,s),
+                vec3(0.0,-s,c));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dY(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+mat3 rotate3dY(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(c,0.,-s),
+                vec3(0.,1.,0.),
+                vec3(s,0.,c));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: returns a 3x3 rotation matrix
+use: <mat3> rotate3dZ(<float> radians)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+mat3 rotate3dZ(const in float r){
+    float c = cos(r);
+    float s = sin(r);
+    return mat3(vec3(c,s,0.),
+                vec3(-s,c,0.),
+                vec3(0.,0.,1.));
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: Sum elements of a vector
+use: <float> sum(<vec2|vec3|vec4> value)
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+float sum( float v ) { return v; }
+float sum( vec2 v ) { return v.x+v.y; }
+float sum( vec3 v ) { return v.x+v.y+v.z; }
+float sum( vec4 v ) { return v.x+v.y+v.z+v.w; }
+/*
+contributors:  Inigo Quiles
+description: generate the SDF of a sphere
+use: <float> sphereSDF( in <vec3> pos[], in <float> size] ) 
+*/
+float sphereSDF(vec3 p) { return length(p); }
+float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Fix the aspect ratio of a space keeping things squared for you.'
+use: <vec2> aspect(<vec2> st, <vec2> st_size)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+vec2 aspect(vec2 st, vec2 s) {
+    st.x = st.x * (s.x / s.y);
+    return st;
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
+    \ from 0.5 to 0.0. \n"
+use: <float|vec2|vec3> center(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+float center(float x) { return x * 2.0 - 1.0; }
+vec2 center(vec2 v) { return v * 2.0 - 1.0; }
+vec3 center(vec3 v) { return v * 2.0 - 1.0; }
+/*
+contributors:  Shadi El Hajj
+description: Tangent-Bitangent-Normal Matrix
+use: mat3 tbn(vec3 t, vec3 b, vec3 n)
+license: MIT License (MIT) Copyright (c) 2024 Shadi El Hajj
+*/
+mat3 tbn(vec3 t, vec3 b, vec3 n) {
+    return mat3(t, b, n);
+}
+mat3 tbn(vec3 n, vec3 up) {
+    vec3 t = normalize(cross(up, n));
+    vec3 b = cross(n, t);
+    return tbn(t, b, n);
+}
+/*
+contributors: Patricio Gonzalez Vivo
+description: 'Moves the center from 0.0 to 0.5'
+use: <float|vec2|vec3> uncenter(<float|vec2|vec3> st)
+examples:
+    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
+license:
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
+    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
+*/
+float uncenter(float v) { return v * 0.5 + 0.5; }
+vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
+vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
+// https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
+
+// #define STRICT_NORMAL
+/*
+contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
 use: gamma2linear(<float|vec3|vec4> color)
 license:
@@ -1362,201 +1558,6 @@ vec3 raymarchNormal(vec3 pos, float e) {
 vec3 raymarchNormal( in vec3 pos ) {
    return raymarchNormal(pos, 0.0001);
 }
-/*
-contributors: Patricio Gonzalez Vivo
-description: some useful math constants
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-/*
-contributors: Patricio Gonzalez Vivo
-description: some useful math constants
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-
-/*
-contributors: Holger Dammertz
-description: Return a Hammersley point
-use: hammersley(uint index)
-license: CC BY 3.0 Copyright (c) 2012 Holger Dammertz
-*/
-vec2 hammersley(uint index, int numSamples) {
-    const float tof = 0.5 / float(0x80000000U);
-    uint bits = index;
-    bits = (bits << 16u) | (bits >> 16u);
-    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return vec2(float(index) / float(numSamples), float(bits) * tof);
-}
-vec3 hemisphereCosSample(vec2 u) {
-    float phi = 2.0 * 3.1415926535897932384626433832795 * u.x;
-    float cosTheta2 = 1.0 - u.y;
-    float cosTheta = sqrt(cosTheta2);
-    float sinTheta = sqrt(1.0 - cosTheta2);
-    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: does the position lie within the triangle
-use:
-    - bool inside(<float|vec2|vec3> value, <float|vec2|vec3> min, <float|vec2|vec3> max)
-    - bool inside(<vec2|vec3> value, <vec4|AABB> aabb)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-bool inside(float _x, float _min, float _max) {
-    return !(_x < _min || _x > _max);
-}
-bool inside(vec2 _v, vec2 _min, vec2 _max) {
-    return !(_v.x < _min.x || _v.x > _max.x ||
-             _v.y < _min.y || _v.y > _max.y);
-}
-bool inside(vec3 _v, vec3 _min, vec3 _max) {
-    return !(_v.x < _min.x || _v.x > _max.x ||
-             _v.y < _min.y || _v.y > _max.y ||
-             _v.z < _min.z || _v.z > _max.z);
-}
-bool inside(vec2 _v, vec4 _aabb) {
-    return inside(_v, _aabb.xy, _aabb.zw);
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: Squared length
-use: <vec4|vec3|vec2> lengthSq(<vec4|vec3|vec2> v)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-float lengthSq(in vec2 v) { return dot(v, v); }
-float lengthSq(in vec3 v) { return dot(v, v); }
-float lengthSq(in vec4 v) { return dot(v, v); }
-/*
-contributors: Patricio Gonzalez Vivo
-description: returns a 3x3 rotation matrix
-use: <mat3> rotate3dX(<float> radians)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-mat3 rotate3dX(const in float r){
-    float c = cos(r);
-    float s = sin(r);
-    return mat3(vec3(1.0,0.0,0.0),
-                vec3(0.0,c,s),
-                vec3(0.0,-s,c));
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: returns a 3x3 rotation matrix
-use: <mat3> rotate3dY(<float> radians)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-mat3 rotate3dY(const in float r){
-    float c = cos(r);
-    float s = sin(r);
-    return mat3(vec3(c,0.,-s),
-                vec3(0.,1.,0.),
-                vec3(s,0.,c));
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: returns a 3x3 rotation matrix
-use: <mat3> rotate3dZ(<float> radians)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-mat3 rotate3dZ(const in float r){
-    float c = cos(r);
-    float s = sin(r);
-    return mat3(vec3(c,s,0.),
-                vec3(-s,c,0.),
-                vec3(0.,0.,1.));
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: Sum elements of a vector
-use: <float> sum(<vec2|vec3|vec4> value)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-float sum( float v ) { return v; }
-float sum( vec2 v ) { return v.x+v.y; }
-float sum( vec3 v ) { return v.x+v.y+v.z; }
-float sum( vec4 v ) { return v.x+v.y+v.z+v.w; }
-/*
-contributors:  Inigo Quiles
-description: generate the SDF of a sphere
-use: <float> sphereSDF( in <vec3> pos[], in <float> size] ) 
-*/
-float sphereSDF(vec3 p) { return length(p); }
-float sphereSDF(vec3 p, float s) { return sphereSDF(p) - s; }
-/*
-contributors: Patricio Gonzalez Vivo
-description: 'Fix the aspect ratio of a space keeping things squared for you.'
-use: <vec2> aspect(<vec2> st, <vec2> st_size)
-examples:
-    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-vec2 aspect(vec2 st, vec2 s) {
-    st.x = st.x * (s.x / s.y);
-    return st;
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: "It center the coordinates from 0 to 1 to -1 to 1\nSo the center goes\
-    \ from 0.5 to 0.0. \n"
-use: <float|vec2|vec3> center(<float|vec2|vec3> st)
-examples:
-    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-float center(float x) { return x * 2.0 - 1.0; }
-vec2 center(vec2 v) { return v * 2.0 - 1.0; }
-vec3 center(vec3 v) { return v * 2.0 - 1.0; }
-/*
-contributors:  Shadi El Hajj
-description: Tangent-Bitangent-Normal Matrix
-use: mat3 tbn(vec3 t, vec3 b, vec3 n)
-license: MIT License (MIT) Copyright (c) 2024 Shadi El Hajj
-*/
-mat3 tbn(vec3 t, vec3 b, vec3 n) {
-    return mat3(t, b, n);
-}
-mat3 tbn(vec3 n, vec3 up) {
-    vec3 t = normalize(cross(up, n));
-    vec3 b = cross(n, t);
-    return tbn(t, b, n);
-}
-/*
-contributors: Patricio Gonzalez Vivo
-description: 'Moves the center from 0.0 to 0.5'
-use: <float|vec2|vec3> uncenter(<float|vec2|vec3> st)
-examples:
-    - https://raw.githubusercontent.com/patriciogonzalezvivo/lygia_examples/main/draw_shapes.frag
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-float uncenter(float v) { return v * 0.5 + 0.5; }
-vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
-vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
-// https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
-
 // #define STRICT_RANDOM
 // #define ISF_EDITOR_WEBSITE
 // Linear congruential generator for random numbers
@@ -1664,7 +1665,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
     float t = raymarchMap(ro).sdf;
     return t + raymarchMap(ro + rd * t).sdf;
 }
-Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); float dist = res.sdf; if (dist < 0.015) break; if (t > tmax) { m.valid = false; break; } m = res; t += res.sdf; } m.sdf = t; return m; }
+Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 directLight(vec3 pos, vec3 normal) {
     //return vec3(0.);
     float dotLight = -dot(normal, LightDir);
@@ -1686,19 +1687,22 @@ vec3 directLight(vec3 pos, vec3 normal) {
 vec3 directBackground(vec3 dir) {
     return LightColor * vec3(.0025, .0045, .006) * 1.;
 }
-Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); float dist = res.sdf; if (dist < 0.015) break; if (t > tmax) { m.valid = false; break; } m = res; t += res.sdf; } m.sdf = t; return m; }
+Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos);
     vec3 light = vec3(0);
     vec3 absorption = vec3(1);
     for (int i = 0; i < 1; i++) {
-        vec3 dir = tbn(normal, vec3(0, 0, 1)) * hemisphereCosSample(vec2(frand(), frand()));
+        vec3 up = abs(normal.x) > abs(normal.z) ? vec3(0, 0, 1) : vec3(1, 0, 0);
+        vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
             light += absorption * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-LightDir, dir);
             break;
         }
-        normal = raymarchNormal(pos + dir * res.sdf);
+        pos += dir * res.sdf;
+        normal = raymarchNormal(pos);
+        pos -= (2. * 0.015 - raymarchMap(pos).sdf) * dir;
         light += absorption * (res.emissive + res.albedo.rgb * directLight(pos, normal));
         absorption *= res.albedo.rgb;
     }

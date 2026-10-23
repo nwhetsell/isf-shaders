@@ -111,7 +111,6 @@
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
 #define RAYMARCH_MIN_HIT_DIST 0.015
 #include "lygia/lighting/raymarch/cast.glsl"
-#include "lygia/lighting/raymarch/normal.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
 #include "lygia/math/inside.glsl"
@@ -129,6 +128,20 @@
 #include "lygia/space/tbn.glsl"
 #include "lygia/space/uncenter.glsl"
 #include "lygia-additions/const.glsl"
+
+// #define STRICT_NORMAL
+#ifndef STRICT_NORMAL
+#include "lygia/lighting/raymarch/normal.glsl"
+#else
+vec3 raymarchNormal(vec3 pos) {
+    vec2 offset = vec2(RAYMARCH_MIN_HIT_DIST, 0);
+    return normalize(vec3(
+        raymarchMap(pos + offset.xyy).sdf - raymarchMap(pos - offset.xyy).sdf,
+        raymarchMap(pos + offset.yxy).sdf - raymarchMap(pos - offset.yxy).sdf,
+        raymarchMap(pos + offset.yyx).sdf - raymarchMap(pos - offset.yyx).sdf
+    ));
+}
+#endif
 
 // #define STRICT_RANDOM
 #ifndef STRICT_RANDOM
@@ -284,14 +297,18 @@ vec3 sampleIndirectLight(vec3 pos) {
     vec3 absorption = vec3(1);
 
     for (int i = 0; i < Bounces; i++) {
-        vec3 dir = tbn(normal, vec3(0, 0, 1)) * hemisphereCosSample(vec2(frand(), frand()));
+        vec3 up = abs(normal.x) > abs(normal.z) ? vec3(0, 0, 1) : vec3(1, 0, 0);
+        vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
             light += absorption * LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
             break;
         }
 
-        normal = raymarchNormal(pos + dir * res.sdf);
+        pos += dir * res.sdf;
+        normal = raymarchNormal(pos);
+        pos -= (2. * RAYMARCH_MIN_HIT_DIST - raymarchMap(pos).sdf) * dir;
+
         light += absorption * (res.emissive + res.albedo.rgb * directLight(pos, normal));
         absorption *= res.albedo.rgb;
     }
