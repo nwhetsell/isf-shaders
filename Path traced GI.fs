@@ -1137,31 +1137,6 @@ vec3 hemisphereCosSample(vec2 u) {
 }
 /*
 contributors: Patricio Gonzalez Vivo
-description: does the position lie within the triangle
-use:
-    - bool inside(<float|vec2|vec3> value, <float|vec2|vec3> min, <float|vec2|vec3> max)
-    - bool inside(<vec2|vec3> value, <vec4|AABB> aabb)
-license:
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Prosperity License - https://prosperitylicense.com/versions/3.0.0
-    - Copyright (c) 2021 Patricio Gonzalez Vivo under Patron License - https://lygia.xyz/license
-*/
-bool inside(float _x, float _min, float _max) {
-    return !(_x < _min || _x > _max);
-}
-bool inside(vec2 _v, vec2 _min, vec2 _max) {
-    return !(_v.x < _min.x || _v.x > _max.x ||
-             _v.y < _min.y || _v.y > _max.y);
-}
-bool inside(vec3 _v, vec3 _min, vec3 _max) {
-    return !(_v.x < _min.x || _v.x > _max.x ||
-             _v.y < _min.y || _v.y > _max.y ||
-             _v.z < _min.z || _v.z > _max.z);
-}
-bool inside(vec2 _v, vec4 _aabb) {
-    return inside(_v, _aabb.xy, _aabb.zw);
-}
-/*
-contributors: Patricio Gonzalez Vivo
 description: Squared length
 use: <vec4|vec3|vec2> lengthSq(<vec4|vec3|vec2> v)
 license:
@@ -1290,7 +1265,6 @@ license:
 float uncenter(float v) { return v * 0.5 + 0.5; }
 vec2 uncenter(vec2 v) { return v * 0.5 + 0.5; }
 vec3 uncenter(vec3 v) { return v * 0.5 + 0.5; }
-// https://en.wikipedia.org/wiki/Single-precision_floating-point_format#Notable_single-precision_cases
 
 // #define STRICT_NORMAL
 /*
@@ -1716,11 +1690,16 @@ vec4 previousSample(vec4 data) {
     vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), data.xyz);
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
     vec2 minFragCoord;
-    float minDist = 3.402823466e+38;
+    float minDist = 4.;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + .5 * vec2(x, y);
-        if (inside(fragCoord, vec2(0), RENDERSIZE)) {
+        // LYGIA’s `inside` function (lygia/math/inside.glsl) tests whether a
+        // point is completely inside a range. This is testing wether a point
+        // is *not* completely *outside* a range (so the point can be partially
+        // inside the range).
+        if (!(fragCoord.x < 0. && fragCoord.x > RENDERSIZE.x &&
+              fragCoord.y < 0. && fragCoord.y > RENDERSIZE.y)) {
             vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
             float dist = length(prevData - data);
             if (dist < minDist) {

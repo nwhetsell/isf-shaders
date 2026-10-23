@@ -113,7 +113,6 @@
 #include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/math/const.glsl"
 #include "lygia/math/hammersley.glsl"
-#include "lygia/math/inside.glsl"
 #ifdef ISF_EDITOR_WEBSITE
 #include "lygia/math/inverse.glsl"
 #endif
@@ -127,7 +126,6 @@
 #include "lygia/space/center.glsl"
 #include "lygia/space/tbn.glsl"
 #include "lygia/space/uncenter.glsl"
-#include "lygia-additions/const.glsl"
 
 // #define STRICT_NORMAL
 #ifndef STRICT_NORMAL
@@ -326,11 +324,16 @@ vec4 previousSample(vec4 data) {
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
 
     vec2 minFragCoord;
-    float minDist = FLT_MAX;
+    float minDist = MaxDist;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
-        if (inside(fragCoord, vec2(0), RENDERSIZE)) {
+        // LYGIA’s `inside` function (lygia/math/inside.glsl) tests whether a
+        // point is completely inside a range. This is testing wether a point
+        // is *not* completely *outside* a range (so the point can be partially
+        // inside the range).
+        if (!(fragCoord.x < 0. && fragCoord.x > RENDERSIZE.x &&
+              fragCoord.y < 0. && fragCoord.y > RENDERSIZE.y)) {
             vec4 prevData = IMG_NORM_PIXEL(bufferA, fragCoord / RENDERSIZE);
             float dist = length(prevData - data);
             if (dist < minDist) {
