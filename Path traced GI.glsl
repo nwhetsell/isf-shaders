@@ -167,7 +167,6 @@ float frand(void) {
 #define PixelAcceptance 1.5
 #define PixelCheckDistance .5
 
-
 #define MaxStepsDirect 128
 #define MaxStepsIndirect 32
 #define MaxShadowSteps 32
@@ -175,6 +174,10 @@ float frand(void) {
 
 #define MaxDist 4.
 #define MinDist .015
+
+#define RAYMARCH_SOFTSHADOW_ITERATIONS MaxShadowSteps
+#define RAYMARCH_SHADOW_MIN_DIST 0.
+#define RAYMARCH_SHADOW_MAX_DIST MaxDist
 
 #define DoFClamping .3
 #define DoFSamples 128
@@ -264,23 +267,33 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
 
 DEFINE_RAYMARCH_CAST(Direct, directLightMinDist(ro, rd), 128)
 
-vec3 directLight(vec3 pos, vec3 normal) {
-    //return vec3(0.);
-    float dotLight = -dot(normal, LightDir);
-    if (dotLight < 0.)
-        return vec3(0);
-    vec3 pos0 = pos;
-    float minAngle = LightRadius;
-    for (int i = 0; i < MaxShadowSteps; i++) {
-        float dist = raymarchMap(pos).sdf;
-        if (dist > MaxDist)
+float raymarchShadow(vec3 ro, vec3 rd) {
+    const float mint = RAYMARCH_SHADOW_MIN_DIST;
+    const float maxt = RAYMARCH_SHADOW_MAX_DIST;
+
+    float res = 1.0;
+    float t = mint;
+    for (int i = 0; i < RAYMARCH_SOFTSHADOW_ITERATIONS; i++) {
+        float h = RAYMARCH_MAP_FNC(ro + t * rd).sdf;
+        if (h < RAYMARCH_MIN_HIT_DIST) {
+            res = 0.;
             break;
-        if (dist < MinDist)
-            return vec3(0);
-        pos -= LightDir * dist * 2.5; // goes 2.5 times faster since we don't need details
-        minAngle = min(asin(dist / length(pos - pos0)), minAngle);
+        }
+        if (t > maxt)
+            break;
+        res = min(res, asin(h / length(rd * t)));
+
+        t -= h * 2.5; // Go 2.5 times faster since we don’t need details.
     }
-    return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
+    return res;
+}
+
+vec3 directLight(vec3 pos, vec3 normal) {
+    float light = -dot(normal, LightDir);
+    if (light < 0.)
+        return vec3(0);
+    float shadow = raymarchShadow(pos, LightDir);
+    return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
 
 vec3 directBackground(vec3 dir) {

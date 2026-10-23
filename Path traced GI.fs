@@ -1640,23 +1640,30 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
     return t + raymarchMap(ro + rd * t).sdf;
 }
 Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
-vec3 directLight(vec3 pos, vec3 normal) {
-    //return vec3(0.);
-    float dotLight = -dot(normal, LightDir);
-    if (dotLight < 0.)
-        return vec3(0);
-    vec3 pos0 = pos;
-    float minAngle = LightRadius;
+float raymarchShadow(vec3 ro, vec3 rd) {
+    const float mint = 0.;
+    const float maxt = 4.;
+    float res = 1.0;
+    float t = mint;
     for (int i = 0; i < 32; i++) {
-        float dist = raymarchMap(pos).sdf;
-        if (dist > 4.)
+        float h = raymarchMap(ro + t * rd).sdf;
+        if (h < 0.015) {
+            res = 0.;
             break;
-        if (dist < .015)
-            return vec3(0);
-        pos -= LightDir * dist * 2.5; // goes 2.5 times faster since we don't need details
-        minAngle = min(asin(dist / length(pos - pos0)), minAngle);
+        }
+        if (t > maxt)
+            break;
+        res = min(res, asin(h / length(rd * t)));
+        t -= h * 2.5; // Go 2.5 times faster since we don’t need details.
     }
-    return LightColor * dotLight * clamp(minAngle / LightRadius, 0., 1.);
+    return res;
+}
+vec3 directLight(vec3 pos, vec3 normal) {
+    float light = -dot(normal, LightDir);
+    if (light < 0.)
+        return vec3(0);
+    float shadow = raymarchShadow(pos, LightDir);
+    return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
 vec3 directBackground(vec3 dir) {
     return LightColor * vec3(.0025, .0045, .006) * 1.;
