@@ -93,7 +93,7 @@
             "TYPE": "float",
             "DEFAULT": 0.02,
             "MIN": 0,
-            "MAX": 10
+            "MAX": 1
         },
         {
             "NAME": "lightDistance",
@@ -118,6 +118,20 @@
             "DEFAULT": 0,
             "MIN": 0,
             "MAX": 360
+        },
+        {
+            "NAME": "fogRange",
+            "LABEL": "Fog range",
+            "TYPE": "float",
+            "DEFAULT": 13,
+            "MIN": 0,
+            "MAX": 20
+        },
+        {
+            "NAME": "fogDensity",
+            "LABEL": "Fog density",
+            "TYPE": "color",
+            "DEFAULT": [0.0025, 0.0045, 0.006, 1]
         },
         {
             "NAME": "depthOfFieldMinimum",
@@ -1777,7 +1791,7 @@ vec3 sampleIndirectLight(vec3 pos) {
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += absorption * lightColor.rgb * lightGain * vec3(.0025, .0045, .006) * 8. * 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dir, -lightDirection), anisotropy);
+            light += absorption * lightColor.rgb * lightGain * fogDensity.rgb * 8. * 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dir, -lightDirection), anisotropy);
             break;
         }
         pos += dir * res.sdf;
@@ -1871,7 +1885,7 @@ void main()
             indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1);
             gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / gl_FragColor.a);
         } else {
-            gl_FragColor = vec4(lightColor.rgb * lightGain * vec3(.0025, .0045, .006), 1);
+            gl_FragColor = vec4(lightColor.rgb * lightGain * fogDensity.rgb, 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
@@ -1885,14 +1899,14 @@ void main()
         if (valid) {
             Material res = raymarchMap(data.xyz);
             color.rgb = res.emissive + res.albedo.rgb * (color.rgb + directLight(data.xyz, raymarchNormal(data.xyz)));
-            fogStepDistance = min(13., color.a);
+            fogStepDistance = min(fogRange, color.a);
         } else {
-            fogStepDistance = 13.;
+            fogStepDistance = fogRange;
         }
         fogStepDistance /= float(8);
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = camera_uv2dir(camera, uv);
-        vec3 fogStepAbsorption = exp(-vec3(.0025, .0045, .006) * fogStepDistance);
+        vec3 fogStepAbsorption = exp(-fogDensity.rgb * fogStepDistance);
         vec3 fogStepColor = (1. - fogStepAbsorption) * 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dir, -lightDirection), anisotropy);
         vec3 volumeAbsorption = vec3(1);
         vec3 volumeColor = vec3(0);
