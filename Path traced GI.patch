@@ -1,0 +1,92 @@
+diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
+index bfe1629d..2100e9bb 100644
+--- a/lighting/raymarch/cast.glsl
++++ b/lighting/raymarch/cast.glsl
+@@ -7,14 +7,6 @@ description: Cast a ray
+ use: <float> castRay( in <vec3> pos, in <vec3> nor ) 
+ */
+ 
+-#ifndef RAYMARCH_SAMPLES
+-#define RAYMARCH_SAMPLES 256
+-#endif
+-
+-#ifndef RAYMARCH_MIN_DIST
+-#define RAYMARCH_MIN_DIST 0.1
+-#endif
+-
+ #ifndef RAYMARCH_MAX_DIST
+ #define RAYMARCH_MAX_DIST 20.0
+ #endif
+@@ -26,33 +18,31 @@ use: <float> castRay( in <vec3> pos, in <vec3> nor )
+ #ifndef FNC_RAYMARCH_CAST
+ #define FNC_RAYMARCH_CAST
+ 
+-Material raymarchCast( in vec3 ro, in vec3 rd ) {
+-    float tmin = RAYMARCH_MIN_DIST;
+-    float tmax = RAYMARCH_MAX_DIST;
+-   
+-    float t = tmin;
+-    Material m = materialNew();
+-    m.valid = false;
+-    for (int i = 0; i < RAYMARCH_SAMPLES; i++) {
+-        Material res = RAYMARCH_MAP_FNC(ro + rd * t);
+-#ifdef RAYMARCH_ABS_DIST
+-        float dist = abs(res.sdf);
+-#else
+-        float dist = res.sdf;
+-#endif
+-        if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
+-            break;
+-        m = res;
+-        t += res.sdf;
+-    }
+-
+-    #if defined(RAYMARCH_BACKGROUND) || defined(RAYMARCH_FLOOR)
+-    if ( t > tmax )
+-        m.valid = false;
+-    #endif
+-
+-    m.sdf = t;
+-    return m;
++#define DEFINE_RAYMARCH_CAST(SUFFIX, RAYMARCH_MIN_DIST_ARG, RAYMARCH_SAMPLES_ARG) \
++Material raymarchCast ## SUFFIX( in vec3 ro, in vec3 rd ) { \
++    float tmin = RAYMARCH_MIN_DIST_ARG;                     \
++    float tmax = RAYMARCH_MAX_DIST;                         \
++                                                            \
++    float t = tmin;                                         \
++    Material m = materialNew();                             \
++    m.valid = false;                                        \
++    for (int i = 0; i < RAYMARCH_SAMPLES_ARG; i++) {        \
++        Material res = RAYMARCH_MAP_FNC(ro + rd * t);       \
++        res.valid = false;                                  \
++        float dist = res.sdf;                               \
++        if (dist < RAYMARCH_MIN_HIT_DIST) {                 \
++            m.valid = true;                                 \
++            break;                                          \
++        }                                                   \
++        if (t > tmax)                                       \
++            break;                                          \
++                                                            \
++        m = res;                                            \
++        t += res.sdf;                                       \
++    }                                                       \
++                                                            \
++    m.sdf = t;                                              \
++    return m;                                               \
+ }
+ 
+ #endif
+\ No newline at end of file
+diff --git a/math/inverse.glsl b/math/inverse.glsl
+index be7a4020..a14008f5 100644
+--- a/math/inverse.glsl
++++ b/math/inverse.glsl
+@@ -7,7 +7,7 @@ use: <float|mat2|mat3|mat4> inverse(in <float|mat2|mat3|mat4> m)
+ #ifndef FNC_INVERSE
+ #define FNC_INVERSE
+ 
+-#if (__VERSION__ < 140)
++#ifdef ISF_EDITOR_WEBSITE
+ 
+ float inverse(float m) { return 1.0 / m; }
+ 

@@ -295,6 +295,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     </td>
   </tr>
   <tr>
+    <td><a href="Path%20traced%20GI.glsl">Path traced GI</a></td>
+    <td><a href="https://github.com/loicvdb">loicvdb</a></td>
+    <td>n/a</td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/Wt3XRX">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6ad3bbe7ab6d8e001a432b7f">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Path traced GI” shader" src="https://github.com/user-attachments/assets/5a233e4a-72d9-467b-a82f-ae83e76225ae"/>
+    </td>
+  </tr>
+  <tr>
     <td><a href="Physarum%20Polycephalum%20Simulation.glsl">Physarum Polycephalum Simulation</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>
