@@ -120,6 +120,14 @@
             "MAX": 360
         },
         {
+            "NAME": "depthOfFieldMinimum",
+            "LABEL": "Depth of field minimum",
+            "TYPE": "float",
+            "DEFAULT": 0.3,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -1886,21 +1894,22 @@ void main()
     {
         vec4 color = vec4(0);
         FocusedCamera camera = cameraAtTime(TIME);
-        float frd = RENDERSIZE.y*camera.aperture*.3;
-        int rd = int(ceil(frd - .5));
-        for(int y = -rd; y <= rd; y++){
-            int ln = int(ceil(sqrt(frd*frd-float(y*y)) - .5));
-            for(int x = -ln; x <= ln; x++){
-                vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE-1.)));
-                float dof = min(abs(p.a-camera.focalDistance)/p.a, .3) * RENDERSIZE.y*camera.aperture;
+        float scaledAperture = RENDERSIZE.y * camera.aperture;
+        float rd = scaledAperture * depthOfFieldMinimum;
+        int ird = int(ceil(rd - 0.5));
+        for (int y = -ird; y <= ird; y++) {
+            int ln = int(ceil(sqrt(rd*rd - float(y*y)) - 0.5));
+            for (int x = -ln; x <= ln; x++) {
+                vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE - 1.)));
+                float dof = min(abs(p.a - camera.focalDistance) / p.a, depthOfFieldMinimum) * scaledAperture;
                 p.a = 1.;
-                p *= clamp((dof - length(vec2(x, y))) + .5, 0.0, 1.0) / (dof*dof+.5);
+                p *= clamp((dof - length(vec2(x, y))) + 0.5, 0., 1.) / (dof*dof + 0.5);
                 color += p;
             }
         }
         color /= color.a;
         if (enableBloom)
-            color.rgb += bloom(.07 * RENDERSIZE.y, .0, gl_FragCoord.xy) * .06;
+            color.rgb += bloom(0.07 * RENDERSIZE.y, 0., gl_FragCoord.xy) * 0.06;
         gl_FragColor = vec4(tonemapACES(color.rgb), 1);
     }
 }
