@@ -74,6 +74,20 @@
             "MAX": 1
         },
         {
+            "NAME": "lightColor",
+            "LABEL": "Light color",
+            "TYPE": "color",
+            "DEFAULT": [1, 1, 1, 1]
+        },
+        {
+            "NAME": "lightGain",
+            "LABEL": "Light gain",
+            "TYPE": "float",
+            "DEFAULT": 6,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
             "NAME": "lightRadius",
             "LABEL": "Light radius",
             "TYPE": "float",
@@ -227,7 +241,6 @@ float frand(void) {
 
 
 vec3 lightDirection;
-vec3 LightColor = vec3(1.) * 6.;
 
 
 struct FocusedCamera {
@@ -342,7 +355,7 @@ vec3 directLight(vec3 pos, vec3 normal) {
     if (light < 0.)
         return vec3(0);
     float shadow = raymarchShadow(pos, lightDirection);
-    return LightColor * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
+    return lightColor.rgb * lightGain * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
 }
 
 DEFINE_RAYMARCH_CAST(Indirect, 0., 32)
@@ -357,7 +370,7 @@ vec3 sampleIndirectLight(vec3 pos) {
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += absorption * LightColor * Density * 8. * henyeyGreenstein(-lightDirection, dir);
+            light += absorption * lightColor.rgb * lightGain * Density * 8. * henyeyGreenstein(-lightDirection, dir);
             break;
         }
 
@@ -477,7 +490,7 @@ void main()
             gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / IndirectSamples));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(LightColor * Density, 1);
+            gl_FragColor = vec4(lightColor.rgb * lightGain * Density, 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D

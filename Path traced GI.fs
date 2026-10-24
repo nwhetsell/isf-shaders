@@ -74,6 +74,20 @@
             "MAX": 1
         },
         {
+            "NAME": "lightColor",
+            "LABEL": "Light color",
+            "TYPE": "color",
+            "DEFAULT": [1, 1, 1, 1]
+        },
+        {
+            "NAME": "lightGain",
+            "LABEL": "Light gain",
+            "TYPE": "float",
+            "DEFAULT": 6,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
             "NAME": "lightRadius",
             "LABEL": "Light radius",
             "TYPE": "float",
@@ -1638,7 +1652,6 @@ int hash(int n)
 //increase to remove more noise, but might make the result blurrier
 //GI bounces
 vec3 lightDirection;
-vec3 LightColor = vec3(1.) * 6.;
 struct FocusedCamera {
     vec3 pos;
     vec3 rot;
@@ -1732,7 +1745,7 @@ vec3 directLight(vec3 pos, vec3 normal) {
     if (light < 0.)
         return vec3(0);
     float shadow = raymarchShadow(pos, lightDirection);
-    return LightColor * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
+    return lightColor.rgb * lightGain * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
 }
 Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
@@ -1744,7 +1757,7 @@ vec3 sampleIndirectLight(vec3 pos) {
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += absorption * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-lightDirection, dir);
+            light += absorption * lightColor.rgb * lightGain * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-lightDirection, dir);
             break;
         }
         pos += dir * res.sdf;
@@ -1838,7 +1851,7 @@ void main()
             gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / 1.));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(LightColor * vec3(.0025, .0045, .006), 1);
+            gl_FragColor = vec4(lightColor.rgb * lightGain * vec3(.0025, .0045, .006), 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
@@ -1881,7 +1894,7 @@ void main()
         for(int y = -rd; y <= rd; y++){
             int ln = int(ceil(sqrt(frd*frd-float(y*y)) - .5));
             for(int x = -ln; x <= ln; x++){
-                vec4 p = texelFetch(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE-1.)), 0);
+                vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE-1.)));
                 float dof = min(abs(p.a-camera.focalDistance)/p.a, .3) * RENDERSIZE.y*camera.aperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + .5, 0.0, 1.0) / (dof*dof+.5);
