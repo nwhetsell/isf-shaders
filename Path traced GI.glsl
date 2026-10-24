@@ -229,36 +229,48 @@ float frand(void) {
 vec3 lightDirection;
 vec3 LightColor = vec3(1.) * 6.;
 
-struct Camera {
-    vec3 pos, rot;
-    float focalLength, focalDistance, aperture;
+
+struct FocusedCamera {
+    vec3 pos;
+    vec3 rot;
+
+    mat3 rotationMatrix;
+
+    float focalLength;
+    float focalDistance;
+    float aperture;
 };
 
-
-mat3 rotationMatrix(vec3 rotEuler) {
-    return rotate3dZ(-rotEuler.z) * rotate3dX(-rotEuler.x) * rotate3dY(rotEuler.y);
+void cameraSetRotation(inout FocusedCamera camera, vec3 rot) {
+    camera.rot = rot;
+    camera.rotationMatrix = rotate3dZ(rot.z) * rotate3dX(rot.x) * rotate3dY(rot.y);
 }
 
-Camera getCam(float time) {
-    //time = 0.;
-    vec3 rot = vec3(cos(time * 0.4) / 6., 1. + time * 0.2 + sin(time * 0.2) / 4., 0.5);
-    return Camera(vec3(0, 0, -10) * rotationMatrix(rot), rot, 1., 7.5, 0.025);
+FocusedCamera cameraAtTime(float time) {
+    FocusedCamera camera;
+    cameraSetRotation(camera, vec3(-cos(time * 0.4) / 6., 1. + time * 0.2 + sin(time * 0.2) / 4., -0.5));
+    camera.pos = vec3(0, 0, -10) * camera.rotationMatrix;
+    camera.focalLength = 1.;
+    camera.focalDistance = 7.5;
+    camera.aperture = 0.025;
+    return camera;
 }
 
-vec3 uv2dir(Camera cam, vec2 uv) {
-    return normalize(vec3(uv, cam.focalLength)) * rotationMatrix(cam.rot);
+vec3 camera_uv2dir(FocusedCamera camera, vec2 uv) {
+    return normalize(vec3(uv, camera.focalLength)) * camera.rotationMatrix;
 }
 
-vec2 pos2uv(Camera cam, vec3 pos) {
-    vec3 dir = normalize(pos - cam.pos) * inverse(rotationMatrix(cam.rot));
-    return dir.xy * cam.focalLength / dir.z;
+vec2 camera_pos2uv(FocusedCamera camera, vec3 pos) {
+    vec3 dir = normalize(pos - camera.pos) * inverse(camera.rotationMatrix);
+    return dir.xy * camera.focalLength / dir.z;
 }
 
 
 Material raymarchMap(in vec3 pos) {
-    mat3 rotation = rotationMatrix(vec3(15., 10.5, 6.) * sdfRotationFactor);
+    vec3 rotationAngles = vec3(-15., 10.5, -6.) * sdfRotationFactor;
+    mat3 rotationMatrix = rotate3dZ(rotationAngles.z) * rotate3dX(rotationAngles.x) * rotate3dY(rotationAngles.y);
 
-    vec4 initialPosition = vec4(pos.xyz * rotation, 1);
+    vec4 initialPosition = vec4(pos.xyz * rotationMatrix, 1);
     vec4 p = initialPosition;
     for (int i = 0; i < SDF_ITERATIONS; i++) {
         // This performs limited domain repetition of an SDF (that is, a finite
@@ -274,7 +286,7 @@ Material raymarchMap(in vec3 pos) {
         p *= sdfScale;
 
         if (i < 3)
-            p.xyz *= rotation;
+            p.xyz *= rotationMatrix;
 
         p += initialPosition;
     }
@@ -302,7 +314,6 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
     float t = RAYMARCH_MAP_FNC(ro).sdf;
     return t + RAYMARCH_MAP_FNC(ro + rd * t).sdf;
 }
-
 DEFINE_RAYMARCH_CAST(Direct, directLightMinDist(ro, rd), 128)
 
 float raymarchShadow(vec3 ro, vec3 rd) {
@@ -342,7 +353,7 @@ vec3 sampleIndirectLight(vec3 pos) {
     vec3 absorption = vec3(1);
 
     for (int i = 0; i < Bounces; i++) {
-        vec3 up = abs(normal.x) > abs(normal.z) ? vec3(0, 0, 1) : vec3(1, 0, 0);
+        vec3 up = (abs(normal.x) > abs(normal.z)) ? vec3(0, 0, 1) : vec3(1, 0, 0);
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
@@ -367,7 +378,7 @@ vec2 unaspect(vec2 st, vec2 s) {
 }
 
 vec4 previousSample(vec4 data) {
-    vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), data.xyz);
+    vec2 previous_uv = camera_pos2uv(cameraAtTime(TIME - TIMEDELTA), data.xyz);
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
 
     vec2 minFragCoord;
@@ -390,8 +401,8 @@ vec4 previousSample(vec4 data) {
         }
    	}
 
-    Camera cam = getCam(TIME);
-    if (minDist < PixelAcceptance * length(data.xyz - cam.pos) / cam.focalLength / RENDERSIZE.y)
+    FocusedCamera camera = cameraAtTime(TIME);
+    if (minDist < PixelAcceptance / RENDERSIZE.y * length(data.xyz - camera.pos) / camera.focalLength)
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
 
     return vec4(0);
@@ -428,10 +439,9 @@ void main()
     {
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
 
-        Camera cam = getCam(TIME);
-
-        vec3 rayOrigin = cam.pos;
-        vec3 rayDirection = uv2dir(cam, uv);
+        FocusedCamera camera = cameraAtTime(TIME);
+        vec3 rayOrigin = camera.pos;
+        vec3 rayDirection = camera_uv2dir(camera, uv);
 
         Material res = raymarchCastDirect(rayOrigin, rayDirection);
         if (res.valid) {
@@ -472,26 +482,26 @@ void main()
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
     {
-        Camera cam = getCam(TIME);
+        FocusedCamera camera = cameraAtTime(TIME);
 
         vec4 col = IMG_THIS_PIXEL(bufferC);
         vec4 tx = IMG_THIS_PIXEL(bufferB);
         vec3 finalPos = tx.rgb;
-        col.a = length(cam.pos - finalPos);
+        col.a = length(camera.pos - finalPos);
 
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-        vec3 dir = uv2dir(cam, uv);
+        vec3 dir = camera_uv2dir(camera, uv);
 
         if (tx.a != 0.) {
             Material res = raymarchMap(finalPos);
             col.rgb = res.emissive + res.albedo.rgb * (col.rgb + directLight(finalPos, raymarchNormal(finalPos)));
         } else {
-            finalPos = cam.pos + dir * 100.;
+            finalPos = camera.pos + dir * 100.;
         }
 
         vec3 volCol = vec3(0);
         vec3 volAbs = vec3(1);
-        vec3 pos = cam.pos;
+        vec3 pos = camera.pos;
         float stepDist = (tx.a == 0.) ? FogRange : min(FogRange, col.a);
         stepDist /= float(FogSteps);
         vec3 stepAbs = exp(-Density * stepDist);
@@ -512,14 +522,14 @@ void main()
         vec4 col = vec4(0.);
 
 #ifndef ISF_EDITOR_WEBSITE
-        Camera cam = getCam(TIME);
-        float frd = RENDERSIZE.y*cam.aperture*DoFClamping;
+        FocusedCamera camera = cameraAtTime(TIME);
+        float frd = RENDERSIZE.y*camera.aperture*DoFClamping;
         int rd = int(ceil(frd - .5));
         for(int y = -rd; y <= rd; y++){
             int ln = int(ceil(sqrt(frd*frd-float(y*y)) - .5));
             for(int x = -ln; x <= ln; x++){
                 vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE-1.)));
-                float dof = min(abs(p.a-cam.focalDistance)/p.a, DoFClamping) * RENDERSIZE.y*cam.aperture;
+                float dof = min(abs(p.a-camera.focalDistance)/p.a, DoFClamping) * RENDERSIZE.y*camera.aperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + .5, 0.0, 1.0) / (dof*dof+.5);
                 col += p;
