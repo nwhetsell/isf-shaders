@@ -128,6 +128,22 @@
             "MAX": 1
         },
         {
+            "NAME": "previousPixelDistance",
+            "LABEL": "Previous pixel distance",
+            "TYPE": "float",
+            "DEFAULT": 0.5,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "previousPixelAcceptance",
+            "LABEL": "Previous pixel acceptance",
+            "TYPE": "float",
+            "DEFAULT": 1.5,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -1658,7 +1674,6 @@ int hash(int n)
 }
 // Increase for better global illumination
 // Increase to blur noise
-//GI bounces
 struct FocusedCamera {
     vec3 pos;
     vec3 rot;
@@ -1784,7 +1799,7 @@ vec4 previousSample(vec4 data) {
     float minDist = 20.0;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
-        vec2 fragCoord = previousFragCoord + .5 * vec2(x, y);
+        vec2 fragCoord = previousFragCoord + previousPixelDistance * vec2(x, y);
         // LYGIA’s `inside` function (lygia/math/inside.glsl) tests whether a
         // point is completely inside a range. This is testing whether a point
         // is *not* completely *outside* a range (so the point can be partially
@@ -1800,7 +1815,7 @@ vec4 previousSample(vec4 data) {
         }
     }
     FocusedCamera camera = cameraAtTime(TIME);
-    if (minDist < 1.5 / RENDERSIZE.y * length(data.xyz - camera.pos) / camera.focalLength)
+    if (minDist < previousPixelAcceptance / RENDERSIZE.y * length(data.xyz - camera.pos) / camera.focalLength)
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
     return vec4(0);
 }

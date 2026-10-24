@@ -128,6 +128,22 @@
             "MAX": 1
         },
         {
+            "NAME": "previousPixelDistance",
+            "LABEL": "Previous pixel distance",
+            "TYPE": "float",
+            "DEFAULT": 0.5,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "previousPixelAcceptance",
+            "LABEL": "Previous pixel acceptance",
+            "TYPE": "float",
+            "DEFAULT": 1.5,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -223,23 +239,18 @@ float frand(void) {
 
 #define SDF_ITERATIONS 7
 
+#define GLOBAL_ILLUMINATION_MAX_BOUNCES 1
+
 // Increase for better global illumination
 #define GLOBAL_ILLUMINATION_SAMPLES 1.
 // Increase to blur noise
 #define GLOBAL_ILLUMINATION_SAMPLES_MAX 150.
 
-//GI bounces
-#define Bounces 1
-
-
-#define PixelAcceptance 1.5
-#define PixelCheckDistance .5
-
-#define FogSteps 8
-
 #define RAYMARCH_SOFTSHADOW_ITERATIONS 32
 #define RAYMARCH_SHADOW_MIN_DIST 0.
 #define RAYMARCH_SHADOW_MAX_DIST RAYMARCH_MAX_DIST
+
+#define FOG_STEP_COUNT 8
 
 #define Density vec3(.0025, .0045, .006)
 #define FogRange 13.
@@ -364,7 +375,7 @@ vec3 sampleIndirectLight(vec3 pos) {
     vec3 light = vec3(0);
     vec3 absorption = vec3(1);
 
-    for (int i = 0; i < Bounces; i++) {
+    for (int i = 0; i < GLOBAL_ILLUMINATION_MAX_BOUNCES; i++) {
         vec3 up = (abs(normal.x) > abs(normal.z)) ? vec3(0, 0, 1) : vec3(1, 0, 0);
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
@@ -397,7 +408,7 @@ vec4 previousSample(vec4 data) {
     float minDist = RAYMARCH_MAX_DIST;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
-        vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
+        vec2 fragCoord = previousFragCoord + previousPixelDistance * vec2(x, y);
         // LYGIA’s `inside` function (lygia/math/inside.glsl) tests whether a
         // point is completely inside a range. This is testing whether a point
         // is *not* completely *outside* a range (so the point can be partially
@@ -414,7 +425,7 @@ vec4 previousSample(vec4 data) {
    	}
 
     FocusedCamera camera = cameraAtTime(TIME);
-    if (minDist < PixelAcceptance / RENDERSIZE.y * length(data.xyz - camera.pos) / camera.focalLength)
+    if (minDist < previousPixelAcceptance / RENDERSIZE.y * length(data.xyz - camera.pos) / camera.focalLength)
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
 
     return vec4(0);
@@ -514,7 +525,7 @@ void main()
         } else {
             fogStepDistance = FogRange;
         }
-        fogStepDistance /= float(FogSteps);
+        fogStepDistance /= float(FOG_STEP_COUNT);
 
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = camera_uv2dir(camera, uv);
@@ -525,7 +536,7 @@ void main()
         vec3 volumeAbsorption = vec3(1);
         vec3 volumeColor = vec3(0);
         float t = fogStepDistance * random(gl_FragCoord.xy /  1024.);
-        for (int i = 0; i < FogSteps; i++) {
+        for (int i = 0; i < FOG_STEP_COUNT; i++) {
             volumeAbsorption *= fogStepAbsorption;
             volumeColor += fogStepColor * volumeAbsorption * directLight(camera.pos + dir * t, -lightDirection);
             t += fogStepDistance;
