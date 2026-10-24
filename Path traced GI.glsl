@@ -66,7 +66,23 @@
             "MAX": 1
         },
         {
+            "NAME": "anisotropy",
+            "LABEL": "Anisotropy",
+            "TYPE": "float",
+            "DEFAULT": 0.4,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
             "NAME": "lightRadius",
+            "LABEL": "Light radius",
+            "TYPE": "float",
+            "DEFAULT": 0.02,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "lightDistance",
             "LABEL": "Light distance",
             "TYPE": "float",
             "DEFAULT": 1,
@@ -128,9 +144,9 @@
 //    sdfRadius = 0.25 + cos(15.) * 0.25
 //    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
 // The default light parameters are:
-//   lightRadius = length(vec3(0, 0, -1))
-//               = 1
-//   lightPhi = acos(-1 / lightRadius) = 180°
+//   lightDistance = length(vec3(0, 0, -1))
+//                 = 1
+//   lightPhi = acos(-1 / lightDistance) = 180°
 //   lightTheta = atan(0 / 0) … arbitrarily choose 0°
 
 // #define ISF_EDITOR_WEBSITE
@@ -207,13 +223,11 @@ float frand(void) {
 #define DoFSamples 128
 
 #define Density vec3(.0025, .0045, .006)
-#define Anisotropy .4
 #define FogRange 13.
 
 
 vec3 lightDirection;
 vec3 LightColor = vec3(1.) * 6.;
-float LightRadius = .02;
 
 struct Camera {
     vec3 pos, rot;
@@ -281,7 +295,7 @@ Material raymarchMap(in vec3 pos) {
 }
 
 float henyeyGreenstein(vec3 dirI, vec3 dirO) {
-	return PI*PI * henyeyGreenstein(dot(dirI, dirO), Anisotropy);
+	return PI*PI * henyeyGreenstein(dot(dirI, dirO), anisotropy);
 }
 
 float directLightMinDist(in vec3 ro, in vec3 rd) {
@@ -317,7 +331,7 @@ vec3 directLight(vec3 pos, vec3 normal) {
     if (light < 0.)
         return vec3(0);
     float shadow = raymarchShadow(pos, lightDirection);
-    return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
+    return LightColor * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
 }
 
 DEFINE_RAYMARCH_CAST(Indirect, 0., 32)
@@ -404,7 +418,7 @@ vec3 bloom(float scale, float threshold, vec2 fragCoord){
 
 void main()
 {
-    lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
+    lightDirection = normalize(polar2cart(lightDistance, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
 
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {

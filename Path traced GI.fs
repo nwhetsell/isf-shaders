@@ -66,7 +66,23 @@
             "MAX": 1
         },
         {
+            "NAME": "anisotropy",
+            "LABEL": "Anisotropy",
+            "TYPE": "float",
+            "DEFAULT": 0.4,
+            "MIN": 0,
+            "MAX": 1
+        },
+        {
             "NAME": "lightRadius",
+            "LABEL": "Light radius",
+            "TYPE": "float",
+            "DEFAULT": 0.02,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "lightDistance",
             "LABEL": "Light distance",
             "TYPE": "float",
             "DEFAULT": 1,
@@ -127,9 +143,9 @@
 //    sdfRadius = 0.25 + cos(15.) * 0.25
 //    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
 // The default light parameters are:
-//   lightRadius = length(vec3(0, 0, -1))
-//               = 1
-//   lightPhi = acos(-1 / lightRadius) = 180°
+//   lightDistance = length(vec3(0, 0, -1))
+//                 = 1
+//   lightPhi = acos(-1 / lightDistance) = 180°
 //   lightTheta = atan(0 / 0) … arbitrarily choose 0°
 // #define ISF_EDITOR_WEBSITE
 /*
@@ -1623,7 +1639,6 @@ int hash(int n)
 //GI bounces
 vec3 lightDirection;
 vec3 LightColor = vec3(1.) * 6.;
-float LightRadius = .02;
 struct Camera {
     vec3 pos, rot;
     float focalLength, focalDistance, aperture;
@@ -1677,7 +1692,7 @@ Material raymarchMap(in vec3 pos) {
     return mat;
 }
 float henyeyGreenstein(vec3 dirI, vec3 dirO) {
- return 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dirI, dirO), .4);
+ return 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dirI, dirO), anisotropy);
 }
 float directLightMinDist(in vec3 ro, in vec3 rd) {
     float t = raymarchMap(ro).sdf;
@@ -1707,7 +1722,7 @@ vec3 directLight(vec3 pos, vec3 normal) {
     if (light < 0.)
         return vec3(0);
     float shadow = raymarchShadow(pos, lightDirection);
-    return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
+    return LightColor * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
 }
 Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
@@ -1774,7 +1789,7 @@ vec3 bloom(float scale, float threshold, vec2 fragCoord){
 }
 void main()
 {
-    lightDirection = normalize(polar2cart(lightRadius, lightPhi * (3.1415926535897932384626433832795 / 180.0), lightTheta * (3.1415926535897932384626433832795 / 180.0)));
+    lightDirection = normalize(polar2cart(lightDistance, lightPhi * (3.1415926535897932384626433832795 / 180.0), lightTheta * (3.1415926535897932384626433832795 / 180.0)));
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         gl_FragColor = IMG_THIS_PIXEL(bufferB);
