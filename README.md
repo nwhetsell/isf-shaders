@@ -301,11 +301,11 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <td>
       <ul>
         <li><a href="https://www.shadertoy.com/view/Wt3XRX">Shadertoy</a></li>
-        <li><a href="https://editor.isf.video/shaders/">ISF</a></li>
+        <li><a href="https://editor.isf.video/shaders/6ad3bbe7ab6d8e001a432b7f">ISF</a></li>
       </ul>
     </td>
     <td>
-      <img width="197" alt="Screenshot of “Path traced GI” shader" src="https://github.com/user-attachments/assets/"/>
+      <img width="197" alt="Screenshot of “Path traced GI” shader" src="https://github.com/user-attachments/assets/5a233e4a-72d9-467b-a82f-ae83e76225ae"/>
     </td>
   </tr>
   <tr>
