@@ -192,6 +192,7 @@
 #include "lygia/lighting/raymarch/normal.glsl"
 #else
 vec3 raymarchNormal(vec3 pos) {
+    // https://iquilezles.org/articles/normalsSDF/
     vec2 offset = vec2(RAYMARCH_MIN_HIT_DIST, 0);
     return normalize(vec3(
         raymarchMap(pos + offset.xyy).sdf - raymarchMap(pos - offset.xyy).sdf,
@@ -497,42 +498,45 @@ void main()
     {
         FocusedCamera camera = cameraAtTime(TIME);
 
-        vec4 col = IMG_THIS_PIXEL(bufferC);
-        vec4 tx = IMG_THIS_PIXEL(bufferB);
-        vec3 finalPos = tx.rgb;
-        col.a = length(camera.pos - finalPos);
+        vec4 data = IMG_THIS_PIXEL(bufferB);
+        vec4 color = IMG_THIS_PIXEL(bufferC);
+
+        color.a = length(camera.pos - data.xyz);
+
+        float fogStepDistance;
+        bool valid = data.w > 0.;
+        if (valid) {
+            Material res = raymarchMap(data.xyz);
+            color.rgb = res.emissive + res.albedo.rgb * (color.rgb + directLight(data.xyz, raymarchNormal(data.xyz)));
+
+            fogStepDistance = min(FogRange, color.a);
+        } else {
+            fogStepDistance = FogRange;
+        }
+        fogStepDistance /= float(FogSteps);
 
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = camera_uv2dir(camera, uv);
 
-        if (tx.a != 0.) {
-            Material res = raymarchMap(finalPos);
-            col.rgb = res.emissive + res.albedo.rgb * (col.rgb + directLight(finalPos, raymarchNormal(finalPos)));
-        } else {
-            finalPos = camera.pos + dir * 100.;
-        }
+        vec3 fogStepAbsorption = exp(-Density * fogStepDistance);
+        vec3 fogStepColor = (1. - fogStepAbsorption) * henyeyGreenstein(-lightDirection, dir);
 
-        vec3 volCol = vec3(0);
-        vec3 volAbs = vec3(1);
-        vec3 pos = camera.pos;
-        float stepDist = (tx.a == 0.) ? FogRange : min(FogRange, col.a);
-        stepDist /= float(FogSteps);
-        vec3 stepAbs = exp(-Density * stepDist);
-        vec3 stepCol = (vec3(1) - stepAbs) * henyeyGreenstein(-lightDirection, dir);
-        pos += stepDist * dir * random(gl_FragCoord.xy / vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
+        vec3 volumeAbsorption = vec3(1);
+        vec3 volumeColor = vec3(0);
+        float t = fogStepDistance * random(gl_FragCoord.xy /  1024.);
         for (int i = 0; i < FogSteps; i++) {
-            volAbs *= stepAbs;
-            volCol += stepCol * volAbs * directLight(pos, -lightDirection);
-            pos += dir * stepDist;
+            volumeAbsorption *= fogStepAbsorption;
+            volumeColor += fogStepColor * volumeAbsorption * directLight(camera.pos + dir * t, -lightDirection);
+            t += fogStepDistance;
         }
 
-        col.rgb = col.rgb * volAbs + volCol;
+        color.rgb = color.rgb * volumeAbsorption + volumeColor;
 
-        gl_FragColor = col;
+        gl_FragColor = color;
     }
     else // Shadertoy Image
     {
-        vec4 col = vec4(0.);
+        vec4 color = vec4(0);
 
 #ifndef ISF_EDITOR_WEBSITE
         FocusedCamera camera = cameraAtTime(TIME);
@@ -545,16 +549,16 @@ void main()
                 float dof = min(abs(p.a-camera.focalDistance)/p.a, DoFClamping) * RENDERSIZE.y*camera.aperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + .5, 0.0, 1.0) / (dof*dof+.5);
-                col += p;
+                color += p;
            	}
         }
 
-        col /= col.a;
+        color /= color.a;
 
         if (enableBloom)
-            col.rgb += bloom(.07 * RENDERSIZE.y, .0, gl_FragCoord.xy) * .06;
+            color.rgb += bloom(.07 * RENDERSIZE.y, .0, gl_FragCoord.xy) * .06;
 #endif
 
-        gl_FragColor = vec4(tonemapACES(col.rgb), 1);
+        gl_FragColor = vec4(tonemapACES(color.rgb), 1);
     }
 }
