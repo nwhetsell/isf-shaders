@@ -1820,7 +1820,7 @@ void main()
             for (float i = 0; i < 1.; i++) {
                 indirectLight += sampleIndirectLight(data.xyz);
             }
-            indirectLight / 1.;
+            indirectLight /= 1.;
             gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(150))
                 gl_FragColor.a += 1.;

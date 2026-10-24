@@ -458,7 +458,7 @@ void main()
             for (float i = 0; i < IndirectSamples; i++) {
                 indirectLight += sampleIndirectLight(data.xyz);
             }
-            indirectLight / IndirectSamples;
+            indirectLight /= IndirectSamples;
 
             gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(SamplesLimit))
