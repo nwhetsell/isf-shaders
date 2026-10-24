@@ -296,10 +296,6 @@ vec3 directLight(vec3 pos, vec3 normal) {
     return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
 
-vec3 directBackground(vec3 dir) {
-    return LightColor * Density * 1.;
-}
-
 DEFINE_RAYMARCH_CAST(Indirect, 0., MaxStepsIndirect)
 
 vec3 sampleIndirectLight(vec3 pos) {
@@ -420,17 +416,18 @@ void main()
         if (valid) {
             vec3 indirectLight = vec3(0);
             for (float i = 0; i < IndirectSamples; i++) {
-                indirectLight += sampleIndirectLight(data.xyz) / IndirectSamples;
+                indirectLight += sampleIndirectLight(data.xyz);
             }
+            indirectLight / IndirectSamples;
 
             gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(SamplesLimit))
                 gl_FragColor.a += IndirectSamples;
-            indirectLight = clamp(indirectLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
+            indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1); // Clamp global illumination for low sample count.
             gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / IndirectSamples));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);
+            gl_FragColor = vec4(LightColor * Density, 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D

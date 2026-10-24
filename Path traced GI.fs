@@ -1665,9 +1665,6 @@ vec3 directLight(vec3 pos, vec3 normal) {
     float shadow = raymarchShadow(pos, LightDir);
     return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
-vec3 directBackground(vec3 dir) {
-    return LightColor * vec3(.0025, .0045, .006) * 1.;
-}
 Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos);
@@ -1761,16 +1758,17 @@ void main()
         if (valid) {
             vec3 indirectLight = vec3(0);
             for (float i = 0; i < 1.; i++) {
-                indirectLight += sampleIndirectLight(data.xyz) / 1.;
+                indirectLight += sampleIndirectLight(data.xyz);
             }
+            indirectLight / 1.;
             gl_FragColor = previousSample(data);
             if (gl_FragColor.a <= float(150))
                 gl_FragColor.a += 1.;
-            indirectLight = clamp(indirectLight, 0., gl_FragColor.a / 10.); // clamp gi for low sample count
+            indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1); // Clamp global illumination for low sample count.
             gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / 1.));
         } else {
             vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-            gl_FragColor = vec4(directBackground(uv2dir(getCam(TIME), uv)), 1);
+            gl_FragColor = vec4(LightColor * vec3(.0025, .0045, .006), 1);
         }
     }
     else if (PASSINDEX == 3) // Shadertoy Buffer D
