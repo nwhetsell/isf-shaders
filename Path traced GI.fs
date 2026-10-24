@@ -1648,10 +1648,9 @@ int hash(int n)
     n = (n << 13) ^ n;
     return n * (n * n * 15731 + 789221) + 1376312589;
 }
-// Increase this for better global illumination.
-//increase to remove more noise, but might make the result blurrier
+// Increase for better global illumination
+// Increase to blur noise
 //GI bounces
-vec3 lightDirection;
 struct FocusedCamera {
     vec3 pos;
     vec3 rot;
@@ -1740,6 +1739,7 @@ float raymarchShadow(vec3 ro, vec3 rd) {
     }
     return res;
 }
+vec3 lightDirection;
 vec3 directLight(vec3 pos, vec3 normal) {
     float light = -dot(normal, lightDirection);
     if (light < 0.)
@@ -1781,7 +1781,7 @@ vec4 previousSample(vec4 data) {
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + .5 * vec2(x, y);
         // LYGIA’s `inside` function (lygia/math/inside.glsl) tests whether a
-        // point is completely inside a range. This is testing wether a point
+        // point is completely inside a range. This is testing whether a point
         // is *not* completely *outside* a range (so the point can be partially
         // inside the range).
         if (!(fragCoord.x < 0. && fragCoord.x > RENDERSIZE.x &&
@@ -1845,12 +1845,12 @@ void main()
             }
             indirectLight /= 1.;
             gl_FragColor = previousSample(data);
-            if (gl_FragColor.a <= float(150))
+            if (gl_FragColor.a <= 150.)
                 gl_FragColor.a += 1.;
-            indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1); // Clamp global illumination for low sample count.
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / 1.));
+            // Clamp global illumination for low sample count.
+            indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1);
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / gl_FragColor.a);
         } else {
-            vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             gl_FragColor = vec4(lightColor.rgb * lightGain * vec3(.0025, .0045, .006), 1);
         }
     }

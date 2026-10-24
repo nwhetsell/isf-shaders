@@ -214,11 +214,10 @@ float frand(void) {
 
 #define SDF_ITERATIONS 7
 
-// Increase this for better global illumination.
-#define IndirectSamples 1.
-
-//increase to remove more noise, but might make the result blurrier
-#define SamplesLimit 150
+// Increase for better global illumination
+#define GLOBAL_ILLUMINATION_SAMPLES 1.
+// Increase to blur noise
+#define GLOBAL_ILLUMINATION_SAMPLES_MAX 150.
 
 //GI bounces
 #define Bounces 1
@@ -238,9 +237,6 @@ float frand(void) {
 
 #define Density vec3(.0025, .0045, .006)
 #define FogRange 13.
-
-
-vec3 lightDirection;
 
 
 struct FocusedCamera {
@@ -350,6 +346,7 @@ float raymarchShadow(vec3 ro, vec3 rd) {
     return res;
 }
 
+vec3 lightDirection;
 vec3 directLight(vec3 pos, vec3 normal) {
     float light = -dot(normal, lightDirection);
     if (light < 0.)
@@ -400,7 +397,7 @@ vec4 previousSample(vec4 data) {
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);
         // LYGIA’s `inside` function (lygia/math/inside.glsl) tests whether a
-        // point is completely inside a range. This is testing wether a point
+        // point is completely inside a range. This is testing whether a point
         // is *not* completely *outside* a range (so the point can be partially
         // inside the range).
         if (!(fragCoord.x < 0. && fragCoord.x > RENDERSIZE.x &&
@@ -478,18 +475,21 @@ void main()
         bool valid = data.w > 0.;
         if (valid) {
             vec3 indirectLight = vec3(0);
-            for (float i = 0; i < IndirectSamples; i++) {
+            for (float i = 0; i < GLOBAL_ILLUMINATION_SAMPLES; i++) {
                 indirectLight += sampleIndirectLight(data.xyz);
             }
-            indirectLight /= IndirectSamples;
+            indirectLight /= GLOBAL_ILLUMINATION_SAMPLES;
 
             gl_FragColor = previousSample(data);
-            if (gl_FragColor.a <= float(SamplesLimit))
-                gl_FragColor.a += IndirectSamples;
-            indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1); // Clamp global illumination for low sample count.
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, 1. / (gl_FragColor.a / IndirectSamples));
+
+            if (gl_FragColor.a <= GLOBAL_ILLUMINATION_SAMPLES_MAX)
+                gl_FragColor.a += GLOBAL_ILLUMINATION_SAMPLES;
+
+            // Clamp global illumination for low sample count.
+            indirectLight = clamp(indirectLight, 0., gl_FragColor.a * 0.1);
+
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, indirectLight, GLOBAL_ILLUMINATION_SAMPLES / gl_FragColor.a);
         } else {
-            vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
             gl_FragColor = vec4(lightColor.rgb * lightGain * Density, 1);
         }
     }
