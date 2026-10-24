@@ -10,6 +10,30 @@
             "TYPE": "image"
         },
         {
+            "NAME": "cameraRotationSpeed",
+            "LABEL": "Camera rotation speed",
+            "TYPE": "float",
+            "DEFAULT": 0.2,
+            "MIN": -1,
+            "MAX": 1
+        },
+        {
+            "NAME": "cameraZ",
+            "LABEL": "Camera z-coordinate",
+            "TYPE": "float",
+            "DEFAULT": -10,
+            "MAX": 20,
+            "MIN": -20
+        },
+        {
+            "NAME": "cameraFocalDistance",
+            "LABEL": "Camera focal distance",
+            "TYPE": "float",
+            "DEFAULT": 7.5,
+            "MAX": 80,
+            "MIN": 0
+        },
+        {
             "NAME": "sdfScale",
             "LABEL": "Scale",
             "TYPE": "float",
@@ -50,7 +74,13 @@
             "MAX": 10
         },
         {
-            "NAME": "colorMix",
+            "NAME": "objectColor",
+            "LABEL": "Object color",
+            "TYPE": "color",
+            "DEFAULT": [1, 1, 1, 1]
+        },
+        {
+            "NAME": "colorBandMix",
             "LABEL": "Color mix",
             "TYPE": "float",
             "DEFAULT": 0,
@@ -62,14 +92,6 @@
             "LABEL": "Color band size",
             "TYPE": "float",
             "DEFAULT": 0.1,
-            "MIN": 0,
-            "MAX": 1
-        },
-        {
-            "NAME": "anisotropy",
-            "LABEL": "Anisotropy",
-            "TYPE": "float",
-            "DEFAULT": 0.4,
             "MIN": 0,
             "MAX": 1
         },
@@ -118,6 +140,14 @@
             "DEFAULT": 0,
             "MIN": 0,
             "MAX": 360
+        },
+        {
+            "NAME": "anisotropy",
+            "LABEL": "Anisotropy",
+            "TYPE": "float",
+            "DEFAULT": 0.4,
+            "MIN": 0,
+            "MAX": 1
         },
         {
             "NAME": "fogRange",
@@ -319,7 +349,6 @@ float henyeyGreenstein(float mu, float g) {
 float henyeyGreenstein(float mu, float g, float dual_lobe_weight) {
     return mix(henyeyGreenstein( mu, -g), henyeyGreenstein(mu, g), dual_lobe_weight);
 }
-
 /*
 contributors: Patricio Gonzalez Vivo
 description: Convert from gamma to linear color space.
@@ -1150,7 +1179,7 @@ void materialNew(out Material _mat) {
     // Surface data
     _mat.position = (vec3(0.0, 0.0, 0.0)).xyz;
     _mat.normal = materialNormal();
-    _mat.sdf = 20.0;
+    _mat.sdf = 80.0;
     _mat.valid = true;
     // PBR Properties
     _mat.albedo = materialAlbedo();
@@ -1695,11 +1724,12 @@ void cameraSetRotation(inout FocusedCamera camera, vec3 rot) {
     camera.rotationMatrix = rotate3dZ(rot.z) * rotate3dX(rot.x) * rotate3dY(rot.y);
 }
 FocusedCamera cameraAtTime(float time) {
+    float phase = time * cameraRotationSpeed;
     FocusedCamera camera;
-    cameraSetRotation(camera, vec3(-cos(time * 0.4) / 6., 1. + time * 0.2 + sin(time * 0.2) / 4., -0.5));
-    camera.pos = vec3(0, 0, -10) * camera.rotationMatrix;
+    cameraSetRotation(camera, vec3(-cos(phase * 2.) / 6., 1. + phase + sin(phase) / 4., -0.5));
+    camera.pos = vec3(0, 0, cameraZ) * camera.rotationMatrix;
     camera.focalLength = 1.;
-    camera.focalDistance = 7.5;
+    camera.focalDistance = cameraFocalDistance;
     camera.aperture = 0.025;
     return camera;
 }
@@ -1732,11 +1762,11 @@ Material raymarchMap(in vec3 pos) {
     }
     p.xyz /= p.w;
     Material mat = materialNew();
-    mat.albedo = vec4(1);
+    mat.albedo = objectColor;
     mat.emissive = vec3(0);
     if (fract(initialPosition.x) < colorBandSize) {
-        mat.albedo.rgb = mix(mat.albedo.rgb, vec3(0.2), colorMix);
-        mat.emissive = mix(mat.emissive, uncenter(normalize(p.xyz)) * 10., colorMix);
+        mat.albedo.rgb = mix(mat.albedo.rgb, vec3(0.2), colorBandMix);
+        mat.emissive = mix(mat.emissive, uncenter(normalize(p.xyz)) * 10., colorBandMix);
     }
     mat.sdf = sphereSDF(
         p.xyz,
@@ -1748,10 +1778,10 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
     float t = raymarchMap(ro).sdf;
     return t + raymarchMap(ro + rd * t).sdf;
 }
-Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
+Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 80.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 float raymarchShadow(vec3 ro, vec3 rd) {
     const float mint = 0.;
-    const float maxt = 20.0;
+    const float maxt = 80.0;
     float res = 1.0;
     float t = mint;
     for (int i = 0; i < 32; i++) {
@@ -1775,7 +1805,7 @@ vec3 directLight(vec3 pos, vec3 normal) {
     float shadow = raymarchShadow(pos, lightDirection);
     return lightColor.rgb * lightGain * light * clamp(min(shadow, lightRadius) / lightRadius, 0., 1.);
 }
-Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
+Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 80.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos);
     vec3 light = vec3(0);
@@ -1804,7 +1834,7 @@ vec4 previousSample(vec4 data) {
     vec2 previous_uv = camera_pos2uv(cameraAtTime(TIME - TIMEDELTA), data.xyz);
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
     vec2 minFragCoord;
-    float minDist = 20.0;
+    float minDist = 80.0;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + previousPixelDistance * vec2(x, y);

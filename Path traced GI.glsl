@@ -10,6 +10,30 @@
             "TYPE": "image"
         },
         {
+            "NAME": "cameraRotationSpeed",
+            "LABEL": "Camera rotation speed",
+            "TYPE": "float",
+            "DEFAULT": 0.2,
+            "MIN": -1,
+            "MAX": 1
+        },
+        {
+            "NAME": "cameraZ",
+            "LABEL": "Camera z-coordinate",
+            "TYPE": "float",
+            "DEFAULT": -10,
+            "MAX": 20,
+            "MIN": -20
+        },
+        {
+            "NAME": "cameraFocalDistance",
+            "LABEL": "Camera focal distance",
+            "TYPE": "float",
+            "DEFAULT": 7.5,
+            "MAX": 80,
+            "MIN": 0
+        },
+        {
             "NAME": "sdfScale",
             "LABEL": "Scale",
             "TYPE": "float",
@@ -50,7 +74,13 @@
             "MAX": 10
         },
         {
-            "NAME": "colorMix",
+            "NAME": "objectColor",
+            "LABEL": "Object color",
+            "TYPE": "color",
+            "DEFAULT": [1, 1, 1, 1]
+        },
+        {
+            "NAME": "colorBandMix",
             "LABEL": "Color mix",
             "TYPE": "float",
             "DEFAULT": 0,
@@ -62,14 +92,6 @@
             "LABEL": "Color band size",
             "TYPE": "float",
             "DEFAULT": 0.1,
-            "MIN": 0,
-            "MAX": 1
-        },
-        {
-            "NAME": "anisotropy",
-            "LABEL": "Anisotropy",
-            "TYPE": "float",
-            "DEFAULT": 0.4,
             "MIN": 0,
             "MAX": 1
         },
@@ -118,6 +140,14 @@
             "DEFAULT": 0,
             "MIN": 0,
             "MAX": 360
+        },
+        {
+            "NAME": "anisotropy",
+            "LABEL": "Anisotropy",
+            "TYPE": "float",
+            "DEFAULT": 0.4,
+            "MIN": 0,
+            "MAX": 1
         },
         {
             "NAME": "fogRange",
@@ -200,6 +230,7 @@
 #include "lygia/color/tonemap/aces.glsl"
 #include "lygia/generative/random.glsl"
 #include "lygia/lighting/common/henyeyGreenstein.glsl"
+#define RAYMARCH_MAX_DIST 80.0
 #define RAYMARCH_MIN_HIT_DIST 0.015
 #include "lygia/lighting/raymarch/cast.glsl"
 #include "lygia/math/const.glsl"
@@ -279,11 +310,13 @@ void cameraSetRotation(inout FocusedCamera camera, vec3 rot) {
 }
 
 FocusedCamera cameraAtTime(float time) {
+    float phase = time * cameraRotationSpeed;
+
     FocusedCamera camera;
-    cameraSetRotation(camera, vec3(-cos(time * 0.4) / 6., 1. + time * 0.2 + sin(time * 0.2) / 4., -0.5));
-    camera.pos = vec3(0, 0, -10) * camera.rotationMatrix;
+    cameraSetRotation(camera, vec3(-cos(phase * 2.) / 6., 1. + phase + sin(phase) / 4., -0.5));
+    camera.pos = vec3(0, 0, cameraZ) * camera.rotationMatrix;
     camera.focalLength = 1.;
-    camera.focalDistance = 7.5;
+    camera.focalDistance = cameraFocalDistance;
     camera.aperture = 0.025;
     return camera;
 }
@@ -325,11 +358,11 @@ Material raymarchMap(in vec3 pos) {
     p.xyz /= p.w;
 
     Material mat = materialNew();
-    mat.albedo = vec4(1);
+    mat.albedo = objectColor;
     mat.emissive = vec3(0);
     if (fract(initialPosition.x) < colorBandSize) {
-        mat.albedo.rgb = mix(mat.albedo.rgb, vec3(0.2), colorMix);
-        mat.emissive = mix(mat.emissive, uncenter(normalize(p.xyz)) * 10., colorMix);
+        mat.albedo.rgb = mix(mat.albedo.rgb, vec3(0.2), colorBandMix);
+        mat.emissive = mix(mat.emissive, uncenter(normalize(p.xyz)) * 10., colorBandMix);
     }
     mat.sdf = sphereSDF(
         p.xyz,
