@@ -1713,9 +1713,6 @@ Material raymarchMap(in vec3 pos) {
     );
     return mat;
 }
-float henyeyGreenstein(vec3 dirI, vec3 dirO) {
- return 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dirI, dirO), anisotropy);
-}
 float directLightMinDist(in vec3 ro, in vec3 rd) {
     float t = raymarchMap(ro).sdf;
     return t + raymarchMap(ro + rd * t).sdf;
@@ -1757,7 +1754,7 @@ vec3 sampleIndirectLight(vec3 pos) {
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += absorption * lightColor.rgb * lightGain * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-lightDirection, dir);
+            light += absorption * lightColor.rgb * lightGain * vec3(.0025, .0045, .006) * 8. * 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dir, -lightDirection), anisotropy);
             break;
         }
         pos += dir * res.sdf;
@@ -1873,7 +1870,7 @@ void main()
         vec2 uv = 0.5 * aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
         vec3 dir = camera_uv2dir(camera, uv);
         vec3 fogStepAbsorption = exp(-vec3(.0025, .0045, .006) * fogStepDistance);
-        vec3 fogStepColor = (1. - fogStepAbsorption) * henyeyGreenstein(-lightDirection, dir);
+        vec3 fogStepColor = (1. - fogStepAbsorption) * 3.1415926535897932384626433832795*3.1415926535897932384626433832795 * henyeyGreenstein(dot(dir, -lightDirection), anisotropy);
         vec3 volumeAbsorption = vec3(1);
         vec3 volumeColor = vec3(0);
         float t = fogStepDistance * random(gl_FragCoord.xy / 1024.);
