@@ -156,12 +156,6 @@
             "DEFAULT": 1.5,
             "MIN": 0,
             "MAX": 10
-        },
-        {
-            "NAME": "enableBloom",
-            "LABEL": "Enable bloom",
-            "TYPE": "bool",
-            "DEFAULT": false
         }
     ],
     "ISFVSN": "2",
@@ -1642,7 +1636,7 @@ vec3 raymarchNormal(vec3 pos, float e) {
                      offset.xxx * raymarchMap( pos + offset.xxx ).sdf );
 }
 vec3 raymarchNormal( in vec3 pos ) {
-   return raymarchNormal(pos, 0.0001);
+   return raymarchNormal(pos, 0.015);
 }
 // #define STRICT_RANDOM
 // #define ISF_EDITOR_WEBSITE
@@ -1833,17 +1827,6 @@ vec4 previousSample(vec4 data) {
         return IMG_NORM_PIXEL(bufferC, minFragCoord / RENDERSIZE);
     return vec4(0);
 }
-mat3 gaussianFilter = mat3(41, 26, 7,
-                           26, 16, 4,
-                           7, 4, 1) / 273.;
-vec3 bloom(float scale, float threshold, vec2 fragCoord){
-    float logScale = log2(scale);
-    vec3 bloom = vec3(0);
-    for(int y = -2; y <= 2; y++)
-    for(int x = -2; x <= 2; x++)
-        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord + vec2(x, y) * scale)/RENDERSIZE, logScale).rgb;
-    return max(bloom - vec3(threshold), vec3(0));
-}
 void main()
 {
     lightDirection = normalize(polar2cart(lightDistance, lightPhi * (3.1415926535897932384626433832795 / 180.0), lightTheta * (3.1415926535897932384626433832795 / 180.0)));
@@ -1869,12 +1852,12 @@ void main()
     }
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
-        seed = int(sum(gl_FragCoord.xy) + FRAMEINDEX);
+        seed = int(sum(gl_FragCoord.xy)) + FRAMEINDEX;
         vec4 data = IMG_THIS_PIXEL(bufferB);
         bool valid = data.w > 0.;
         if (valid) {
             vec3 indirectLight = vec3(0);
-            for (float i = 0; i < 1.; i++) {
+            for (float i = 0.; i < 1.; i++) {
                 indirectLight += sampleIndirectLight(data.xyz);
             }
             indirectLight /= 1.;
@@ -1929,7 +1912,7 @@ void main()
         for (int y = -ird; y <= ird; y++) {
             int ln = int(ceil(sqrt(rd*rd - float(y*y)) - 0.5));
             for (int x = -ln; x <= ln; x++) {
-                vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE - 1.)));
+                vec4 p = texelFetch(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE - 1.)), 0);
                 float dof = min(abs(p.a - camera.focalDistance) / p.a, depthOfFieldMinimum) * scaledAperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + 0.5, 0., 1.) / (dof*dof + 0.5);
@@ -1937,8 +1920,6 @@ void main()
             }
         }
         color /= color.a;
-        if (enableBloom)
-            color.rgb += bloom(0.07 * RENDERSIZE.y, 0., gl_FragCoord.xy) * 0.06;
         gl_FragColor = vec4(tonemapACES(color.rgb), 1);
     }
 }

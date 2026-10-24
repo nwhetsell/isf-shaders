@@ -156,12 +156,6 @@
             "DEFAULT": 1.5,
             "MIN": 0,
             "MAX": 10
-        },
-        {
-            "NAME": "enableBloom",
-            "LABEL": "Enable bloom",
-            "TYPE": "bool",
-            "DEFAULT": false
         }
     ],
     "ISFVSN": "2",
@@ -227,6 +221,7 @@
 
 // #define STRICT_NORMAL
 #ifndef STRICT_NORMAL
+#define RAYMARCH_NORMAL_OFFSET RAYMARCH_MIN_HIT_DIST
 #include "lygia/lighting/raymarch/normal.glsl"
 #else
 vec3 raymarchNormal(vec3 pos) {
@@ -442,24 +437,6 @@ vec4 previousSample(vec4 data) {
     return vec4(0);
 }
 
-#ifndef ISF_EDITOR_WEBSITE
-
-mat3 gaussianFilter = mat3(41, 26, 7,
-                           26, 16, 4,
-                           7,  4,  1) / 273.;
-
-vec3 bloom(float scale, float threshold, vec2 fragCoord){
-    float logScale = log2(scale);
-    vec3 bloom = vec3(0);
-    for(int y = -2; y <= 2; y++)
-    for(int x = -2; x <= 2; x++)
-        bloom += gaussianFilter[abs(x)][abs(y)] * textureLod(bufferD, (fragCoord + vec2(x, y) * scale)/RENDERSIZE, logScale).rgb;
-
-    return max(bloom - vec3(threshold), vec3(0));
-}
-
-#endif
-
 
 void main()
 {
@@ -490,7 +467,7 @@ void main()
     else if (PASSINDEX == 2) // Shadertoy Buffer C
     {
 #ifndef STRICT_RANDOM
-        seed = int(sum(gl_FragCoord.xy) + FRAMEINDEX);
+        seed = int(sum(gl_FragCoord.xy)) + FRAMEINDEX;
 #else
         seed = sum(gl_FragCoord.xy * vec2(0.256435865, 0.316548465)) + sin(TIME) * 16886.3158915;
 #endif
@@ -499,7 +476,7 @@ void main()
         bool valid = data.w > 0.;
         if (valid) {
             vec3 indirectLight = vec3(0);
-            for (float i = 0; i < GLOBAL_ILLUMINATION_SAMPLES; i++) {
+            for (float i = 0.; i < GLOBAL_ILLUMINATION_SAMPLES; i++) {
                 indirectLight += sampleIndirectLight(data.xyz);
             }
             indirectLight /= GLOBAL_ILLUMINATION_SAMPLES;
@@ -559,9 +536,9 @@ void main()
     }
     else // Shadertoy Image
     {
+#ifndef ISF_EDITOR_WEBSITE
         vec4 color = vec4(0);
 
-#ifndef ISF_EDITOR_WEBSITE
         FocusedCamera camera = cameraAtTime(TIME);
         float scaledAperture = RENDERSIZE.y * camera.aperture;
         float rd = scaledAperture * depthOfFieldMinimum;
@@ -569,7 +546,7 @@ void main()
         for (int y = -ird; y <= ird; y++) {
             int ln = int(ceil(sqrt(rd*rd - float(y*y)) - 0.5));
             for (int x = -ln; x <= ln; x++) {
-                vec4 p = IMG_PIXEL(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE - 1.)));
+                vec4 p = texelFetch(bufferD, ivec2(clamp(gl_FragCoord.xy + vec2(x, y), vec2(0), RENDERSIZE - 1.)), 0);
                 float dof = min(abs(p.a - camera.focalDistance) / p.a, depthOfFieldMinimum) * scaledAperture;
                 p.a = 1.;
                 p *= clamp((dof - length(vec2(x, y))) + 0.5, 0., 1.) / (dof*dof + 0.5);
@@ -577,9 +554,8 @@ void main()
            	}
         }
         color /= color.a;
-
-        if (enableBloom)
-            color.rgb += bloom(0.07 * RENDERSIZE.y, 0., gl_FragCoord.xy) * 0.06;
+#else
+        vec4 color = IMG_THIS_PIXEL(bufferD);
 #endif
 
         gl_FragColor = vec4(tonemapACES(color.rgb), 1);
