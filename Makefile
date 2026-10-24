@@ -79,7 +79,7 @@ oscilloscope\ analysis\ luminance.fs: oscilloscope\ analysis\ luminance.glsl
 Palettes.fs: Palettes.glsl
 	clang $(clang_options) --output="$@" "$<"
 Path\ traced\ GI.fs: Path\ traced\ GI.glsl
-	cd lygia; git apply ../'Path traced GI.patch';
+	cd lygia; git apply ../'Path traced GI.patch'
 	clang $(clang_options) -fno-directives-only -D__VERSION__=300 --output="$@" "$<"
 	cd lygia; git reset --hard
 Physarum\ Polycephalum\ Simulation.fs: Physarum\ Polycephalum\ Simulation.glsl lygia-additions/const.glsl
