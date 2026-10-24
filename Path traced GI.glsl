@@ -66,6 +66,30 @@
             "MAX": 1
         },
         {
+            "NAME": "lightRadius",
+            "LABEL": "Light distance",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "lightPhi",
+            "LABEL": "Light phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 180,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "lightTheta",
+            "LABEL": "Light theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 0,
+            "MIN": 0,
+            "MAX": 360
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -100,9 +124,14 @@
     ]
 }*/
 
-// The SDF defaults are:
+// The default SDF parameters are:
 //    sdfRadius = 0.25 + cos(15.) * 0.25
 //    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
+// The default light parameters are:
+//   lightRadius = length(vec3(0, 0, -1))
+//               = 1
+//   lightPhi = acos(-1 / lightRadius) = 180°
+//   lightTheta = atan(0 / 0) … arbitrarily choose 0°
 
 // #define ISF_EDITOR_WEBSITE
 
@@ -124,6 +153,7 @@
 #include "lygia/sdf/sphereSDF.glsl"
 #include "lygia/space/aspect.glsl"
 #include "lygia/space/center.glsl"
+#include "lygia/space/polar2cart.glsl"
 #include "lygia/space/tbn.glsl"
 #include "lygia/space/uncenter.glsl"
 
@@ -181,7 +211,7 @@ float frand(void) {
 #define FogRange 13.
 
 
-vec3 LightDir = normalize(vec3(.0, .0, -1));
+vec3 lightDirection;
 vec3 LightColor = vec3(1.) * 6.;
 float LightRadius = .02;
 
@@ -283,10 +313,10 @@ float raymarchShadow(vec3 ro, vec3 rd) {
 }
 
 vec3 directLight(vec3 pos, vec3 normal) {
-    float light = -dot(normal, LightDir);
+    float light = -dot(normal, lightDirection);
     if (light < 0.)
         return vec3(0);
-    float shadow = raymarchShadow(pos, LightDir);
+    float shadow = raymarchShadow(pos, lightDirection);
     return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
 
@@ -302,7 +332,7 @@ vec3 sampleIndirectLight(vec3 pos) {
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += absorption * LightColor * Density * 8. * henyeyGreenstein(-LightDir, dir);
+            light += absorption * LightColor * Density * 8. * henyeyGreenstein(-lightDirection, dir);
             break;
         }
 
@@ -374,6 +404,8 @@ vec3 bloom(float scale, float threshold, vec2 fragCoord){
 
 void main()
 {
+    lightDirection = normalize(polar2cart(lightRadius, lightPhi * DEG2RAD, lightTheta * DEG2RAD));
+
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         gl_FragColor = IMG_THIS_PIXEL(bufferB);
@@ -449,11 +481,11 @@ void main()
         float stepDist = (tx.a == 0.) ? FogRange : min(FogRange, col.a);
         stepDist /= float(FogSteps);
         vec3 stepAbs = exp(-Density * stepDist);
-        vec3 stepCol = (vec3(1) - stepAbs) * henyeyGreenstein(-LightDir, dir);
+        vec3 stepCol = (vec3(1) - stepAbs) * henyeyGreenstein(-lightDirection, dir);
         pos += stepDist * dir * random(gl_FragCoord.xy / vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
         for (int i = 0; i < FogSteps; i++) {
             volAbs *= stepAbs;
-            volCol += stepCol * volAbs * directLight(pos, -LightDir);
+            volCol += stepCol * volAbs * directLight(pos, -lightDirection);
             pos += dir * stepDist;
         }
 

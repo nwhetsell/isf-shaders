@@ -66,6 +66,30 @@
             "MAX": 1
         },
         {
+            "NAME": "lightRadius",
+            "LABEL": "Light distance",
+            "TYPE": "float",
+            "DEFAULT": 1,
+            "MIN": 0,
+            "MAX": 10
+        },
+        {
+            "NAME": "lightPhi",
+            "LABEL": "Light phi (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 180,
+            "MIN": 0,
+            "MAX": 180
+        },
+        {
+            "NAME": "lightTheta",
+            "LABEL": "Light theta (degrees)",
+            "TYPE": "float",
+            "DEFAULT": 0,
+            "MIN": 0,
+            "MAX": 360
+        },
+        {
             "NAME": "enableBloom",
             "LABEL": "Enable bloom",
             "TYPE": "bool",
@@ -99,9 +123,14 @@
         }
     ]
 }*/
-// The SDF defaults are:
+// The default SDF parameters are:
 //    sdfRadius = 0.25 + cos(15.) * 0.25
 //    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
+// The default light parameters are:
+//   lightRadius = length(vec3(0, 0, -1))
+//               = 1
+//   lightPhi = acos(-1 / lightRadius) = 180°
+//   lightTheta = atan(0 / 0) … arbitrarily choose 0°
 // #define ISF_EDITOR_WEBSITE
 /*
 contributors: Patricio Gonzalez Vivo
@@ -1239,6 +1268,21 @@ float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
 /*
+contributors: [Ivan Dianov, Shadi El Hajj]
+description: polar to cartesian conversion.
+use: polar2cart(<vec2> polar)
+*/
+vec2 polar2cart(in vec2 polar) {
+    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
+}
+// https://mathworld.wolfram.com/SphericalCoordinates.html
+vec3 polar2cart( in float r, in float phi, in float theta) {
+    float x = r * cos(theta) * sin(phi);
+    float y = r * sin(theta) * sin(phi);
+    float z = r * cos(phi);
+    return vec3(x, y, z);
+}
+/*
 contributors:  Shadi El Hajj
 description: Tangent-Bitangent-Normal Matrix
 use: mat3 tbn(vec3 t, vec3 b, vec3 n)
@@ -1577,7 +1621,7 @@ int hash(int n)
 // Increase this for better global illumination.
 //increase to remove more noise, but might make the result blurrier
 //GI bounces
-vec3 LightDir = normalize(vec3(.0, .0, -1));
+vec3 lightDirection;
 vec3 LightColor = vec3(1.) * 6.;
 float LightRadius = .02;
 struct Camera {
@@ -1659,10 +1703,10 @@ float raymarchShadow(vec3 ro, vec3 rd) {
     return res;
 }
 vec3 directLight(vec3 pos, vec3 normal) {
-    float light = -dot(normal, LightDir);
+    float light = -dot(normal, lightDirection);
     if (light < 0.)
         return vec3(0);
-    float shadow = raymarchShadow(pos, LightDir);
+    float shadow = raymarchShadow(pos, lightDirection);
     return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
 Material raymarchCastIndirect( in vec3 ro, in vec3 rd ) { float tmin = 0.; float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 32; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
@@ -1675,7 +1719,7 @@ vec3 sampleIndirectLight(vec3 pos) {
         vec3 dir = tbn(normal, up) * hemisphereCosSample(vec2(frand(), 1. - frand()));
         Material res = raymarchCastIndirect(pos, dir);
         if (!res.valid) {
-            light += absorption * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-LightDir, dir);
+            light += absorption * LightColor * vec3(.0025, .0045, .006) * 8. * henyeyGreenstein(-lightDirection, dir);
             break;
         }
         pos += dir * res.sdf;
@@ -1730,6 +1774,7 @@ vec3 bloom(float scale, float threshold, vec2 fragCoord){
 }
 void main()
 {
+    lightDirection = normalize(polar2cart(lightRadius, lightPhi * (3.1415926535897932384626433832795 / 180.0), lightTheta * (3.1415926535897932384626433832795 / 180.0)));
     if (PASSINDEX == 0) // Shadertoy Buffer A
     {
         gl_FragColor = IMG_THIS_PIXEL(bufferB);
@@ -1792,11 +1837,11 @@ void main()
         float stepDist = (tx.a == 0.) ? 13. : min(13., col.a);
         stepDist /= float(8);
         vec3 stepAbs = exp(-vec3(.0025, .0045, .006) * stepDist);
-        vec3 stepCol = (vec3(1) - stepAbs) * henyeyGreenstein(-LightDir, dir);
+        vec3 stepCol = (vec3(1) - stepAbs) * henyeyGreenstein(-lightDirection, dir);
         pos += stepDist * dir * random(gl_FragCoord.xy / vec2(1024)) /*texture(iChannel2, gl_FragCoord.xy/vec2(1024)).a*/;
         for (int i = 0; i < 8; i++) {
             volAbs *= stepAbs;
-            volCol += stepCol * volAbs * directLight(pos, -LightDir);
+            volCol += stepCol * volAbs * directLight(pos, -lightDirection);
             pos += dir * stepDist;
         }
         col.rgb = col.rgb * volAbs + volCol;
