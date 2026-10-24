@@ -100,7 +100,7 @@
     ]
 }*/
 
-// The defaults are:
+// The SDF defaults are:
 //    sdfRadius = 0.25 + cos(15.) * 0.25
 //    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
 
@@ -154,7 +154,7 @@ float frand(void) {
 
 #define SDF_ITERATIONS 7
 
-//increase this number for a better GI
+// Increase this for better global illumination.
 #define IndirectSamples 1.
 
 //increase to remove more noise, but might make the result blurrier
@@ -167,17 +167,11 @@ float frand(void) {
 #define PixelAcceptance 1.5
 #define PixelCheckDistance .5
 
-#define MaxStepsDirect 128
-#define MaxStepsIndirect 32
-#define MaxShadowSteps 32
 #define FogSteps 8
 
-#define MaxDist 4.
-#define MinDist .015
-
-#define RAYMARCH_SOFTSHADOW_ITERATIONS MaxShadowSteps
+#define RAYMARCH_SOFTSHADOW_ITERATIONS 32
 #define RAYMARCH_SHADOW_MIN_DIST 0.
-#define RAYMARCH_SHADOW_MAX_DIST MaxDist
+#define RAYMARCH_SHADOW_MAX_DIST RAYMARCH_MAX_DIST
 
 #define DoFClamping .3
 #define DoFSamples 128
@@ -296,7 +290,7 @@ vec3 directLight(vec3 pos, vec3 normal) {
     return LightColor * light * clamp(min(shadow, LightRadius) / LightRadius, 0., 1.);
 }
 
-DEFINE_RAYMARCH_CAST(Indirect, 0., MaxStepsIndirect)
+DEFINE_RAYMARCH_CAST(Indirect, 0., 32)
 
 vec3 sampleIndirectLight(vec3 pos) {
     vec3 normal = raymarchNormal(pos);
@@ -333,7 +327,7 @@ vec4 previousSample(vec4 data) {
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
 
     vec2 minFragCoord;
-    float minDist = MaxDist;
+    float minDist = RAYMARCH_MAX_DIST;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + PixelCheckDistance * vec2(x, y);

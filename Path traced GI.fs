@@ -99,7 +99,7 @@
         }
     ]
 }*/
-// The defaults are:
+// The SDF defaults are:
 //    sdfRadius = 0.25 + cos(15.) * 0.25
 //    sdfScale = 2.25 + sin(15. * 0.5) * 0.25
 // #define ISF_EDITOR_WEBSITE
@@ -1574,7 +1574,7 @@ int hash(int n)
     n = (n << 13) ^ n;
     return n * (n * n * 15731 + 789221) + 1376312589;
 }
-//increase this number for a better GI
+// Increase this for better global illumination.
 //increase to remove more noise, but might make the result blurrier
 //GI bounces
 vec3 LightDir = normalize(vec3(.0, .0, -1));
@@ -1642,7 +1642,7 @@ float directLightMinDist(in vec3 ro, in vec3 rd) {
 Material raymarchCastDirect( in vec3 ro, in vec3 rd ) { float tmin = directLightMinDist(ro, rd); float tmax = 20.0; float t = tmin; Material m = materialNew(); m.valid = false; for (int i = 0; i < 128; i++) { Material res = raymarchMap(ro + rd * t); res.valid = false; float dist = res.sdf; if (dist < 0.015) { m.valid = true; break; } if (t > tmax) break; m = res; t += res.sdf; } m.sdf = t; return m; }
 float raymarchShadow(vec3 ro, vec3 rd) {
     const float mint = 0.;
-    const float maxt = 4.;
+    const float maxt = 20.0;
     float res = 1.0;
     float t = mint;
     for (int i = 0; i < 32; i++) {
@@ -1694,7 +1694,7 @@ vec4 previousSample(vec4 data) {
     vec2 previous_uv = pos2uv(getCam(TIME - TIMEDELTA), data.xyz);
     vec2 previousFragCoord = uncenter(2. * unaspect(previous_uv, RENDERSIZE)) * RENDERSIZE;
     vec2 minFragCoord;
-    float minDist = 4.;
+    float minDist = 20.0;
     for (int y = -1; y <= 1; y++)
     for (int x = -1; x <= 1; x++) {
         vec2 fragCoord = previousFragCoord + .5 * vec2(x, y);
