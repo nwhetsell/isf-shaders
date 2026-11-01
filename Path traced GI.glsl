@@ -6,10 +6,6 @@
     "DESCRIPTION": "Path tracing with global illumination, converted from <https://www.shadertoy.com/view/Wt3XRX>",
     "INPUTS": [
         {
-            "NAME": "inputImage",
-            "TYPE": "image"
-        },
-        {
             "NAME": "cameraRotationSpeed",
             "LABEL": "Camera rotation speed",
             "TYPE": "float",
