@@ -2,68 +2,67 @@
 
 from pathlib import Path
 
-
 dependencies_by_shader = {
-    'CA Molecular dynamics': 'lygia-additions/gaussian.glsl',
-    'Cell System 2': 'lygia-additions/gaussian.glsl',
-    'Domain-warped FBM noise': 'lygia-additions/gnoise.glsl',
-    'Endless living creature': 'lygia-additions/opRepeat.glsl',
-    'Everflow': 'lygia-additions/gaussian.glsl',
-    'Iterated function system': 'rand/rand.glsl',
-    'Le Vortex': 'lygia-additions/const.glsl lygia-additions/opRepeat.glsl',
-    'Lorenz eystem': 'lygia-additions/const.glsl',
-    'Mountain Structures': 'lygia-additions/bloom.glsl lygia-additions/mengerSpongeSDF.glsl',
-    'Mountains': 'lygia-additions/gnoise.glsl',
-    'Physarum Polycephalum Simulation': 'lygia-additions/const.glsl',
-    'Random slime mold generator.glsl': 'lygia-additions/gaussian.glsl',
-    'Strange Cloud': 'lygia-additions/bloom.glsl'
+    "CA Molecular dynamics": "lygia-additions/gaussian.glsl",
+    "Cell System 2": "lygia-additions/gaussian.glsl",
+    "Domain-warped FBM noise": "lygia-additions/gnoise.glsl",
+    "Endless living creature": "lygia-additions/opRepeat.glsl",
+    "Everflow": "lygia-additions/gaussian.glsl",
+    "Iterated function system": "rand/rand.glsl",
+    "Le Vortex": "lygia-additions/const.glsl lygia-additions/opRepeat.glsl",
+    "Lorenz eystem": "lygia-additions/const.glsl",
+    "Mountain Structures": "lygia-additions/bloom.glsl lygia-additions/mengerSpongeSDF.glsl",
+    "Mountains": "lygia-additions/gnoise.glsl",
+    "Physarum Polycephalum Simulation": "lygia-additions/const.glsl",
+    "Random slime mold generator.glsl": "lygia-additions/gaussian.glsl",
+    "Strange Cloud": "lygia-additions/bloom.glsl",
 }
 
 options_by_shader = {
-    'Endless living creature': '-D__VERSION__=300',
-    'expansive reaction-diffusion': '-fno-directives-only -D__VERSION__=300',
-    'Le Vortex': '-D__VERSION__=300',
-    'Mountain Structures': '-D__VERSION__=300',
-    'Mountains': '-D__VERSION__=300',
-    'Path traced GI': '-fno-directives-only -D__VERSION__=300'
+    "Endless living creature": "-D__VERSION__=300",
+    "expansive reaction-diffusion": "-fno-directives-only -D__VERSION__=300",
+    "Le Vortex": "-D__VERSION__=300",
+    "Mountain Structures": "-D__VERSION__=300",
+    "Mountains": "-D__VERSION__=300",
+    "Path traced GI": "-fno-directives-only -D__VERSION__=300",
 }
 
 shaders = []
 rules = []
 
-for path in sorted(Path('.').glob('*.glsl'), key=lambda path: str(path).lower()):
-    escaped_name = path.stem.replace(' ', r'\ ')
+for path in sorted(Path(".").glob("*.glsl"), key=lambda path: str(path).lower()):
+    escaped_name = path.stem.replace(" ", r"\ ")
 
     shaders.append(escaped_name)
 
-    dependencies = f'{escaped_name}.glsl'
+    dependencies = f"{escaped_name}.glsl"
     if path.stem in dependencies_by_shader:
-        dependencies += f' {dependencies_by_shader[path.stem]}'
+        dependencies += f" {dependencies_by_shader[path.stem]}"
 
-    command = 'clang $(clang_options)'
+    command = "clang $(clang_options)"
     if path.stem in options_by_shader:
-        command += f' {options_by_shader[path.stem]}'
+        command += f" {options_by_shader[path.stem]}"
     command += ' --output="$@" "$<"'
     commands = [command]
-    if path.with_suffix('.patch').exists():
-        patch_name = f'{path.stem}.patch'
-        if ' ' in patch_name:
+    if path.with_suffix(".patch").exists():
+        patch_name = f"{path.stem}.patch"
+        if " " in patch_name:
             patch_name = f"'{patch_name}'"
         commands.insert(0, f"cd lygia; git apply ../{patch_name}")
-        commands.append('cd lygia; git reset --hard')
+        commands.append("cd lygia; git reset --hard")
 
-    rules.append(f'''\
+    rules.append(f"""\
 {escaped_name}.fs: {dependencies}
-{'\n'.join(f'\t{command}' for command in commands)}
-''')
+{"\n".join(f"\t{command}" for command in commands)}
+""")
 
-with open('Makefile', 'w') as f:
-    f.write(f'''\
+with open("Makefile", "w") as f:
+    f.write(f"""\
 shaders = \\
-{' \\\n'.join(f'\t{shader}.fs' for shader in shaders)}
+{" \\\n".join(f"\t{shader}.fs" for shader in shaders)}
 
 all: $(shaders)
 
 clang_options = --preprocess --comments --no-line-commands -fdirectives-only --language=c
 
-{''.join(rules)}''')
+{"".join(rules)}""")
