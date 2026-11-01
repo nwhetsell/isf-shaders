@@ -82,8 +82,8 @@ new_element.tail = '\n  '
 def sort_key(element):
     return element.find('./td/a').text.lower()
 
-index = bisect(html_table.findall('tr'), sort_key(new_element), key=sort_key)
-html_table.insert(index, new_element)
+index = bisect(html_table.findall('tr[td]'), sort_key(new_element), key=sort_key)
+html_table.insert(index + 1, new_element)
 
 with open('README.md', 'r+') as f:
     assert md_table.start_pos is not None
