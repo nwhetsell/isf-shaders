@@ -11,18 +11,18 @@ import marko
 from lxml import etree
 
 parser = argparse.ArgumentParser()
-parser.add_argument('name', type=str, help='shader name')
-parser.add_argument('--author', default='', type=str, help='original author')
-parser.add_argument('--author-url', default='', type=str, help='original author webpage')
-parser.add_argument('--description', default='', type=str, help='brief description')
-parser.add_argument('--converted-from', default='', type=str, help='original URL')
+parser.add_argument("name", type=str, help="shader name")
+parser.add_argument("--author", default="", type=str, help="original author")
+parser.add_argument("--author-url", default="", type=str, help="original author webpage")
+parser.add_argument("--description", default="", type=str, help="brief description")
+parser.add_argument("--converted-from", default="", type=str, help="original URL")
 args = parser.parse_args()
 
-filename = f'{args.name}.glsl'
+filename = f"{args.name}.glsl"
 
 if not Path(filename).exists():
-    with open(filename, 'w') as f:
-        f.write(dedent(f'''\
+    with open(filename, "w") as f:
+        f.write(dedent(f"""\
             /*{{
                 "CATEGORIES": [
                     "Filter",
@@ -51,17 +51,17 @@ if not Path(filename).exists():
             {{
 
             }}
-        '''))
+        """))
 
 md = marko.Markdown()
 
-with open('README.md', 'r') as f:
+with open("README.md", "r") as f:
     doc = md.parse(f.read())
 
 md_table = doc.children[-1]
 assert isinstance(md_table, marko.block.HTMLBlock)
 html_table = etree.fromstring(md.renderer.render(md_table))
-new_element = etree.fromstring(f'''\
+new_element = etree.fromstring(f"""\
   <tr>
     <td><a href="{urllib.parse.quote(filename)}">{args.name}</a></td>
     <td><a href="{args.author_url}">{args.author}</a></td>
@@ -76,19 +76,19 @@ new_element = etree.fromstring(f'''\
       <img width="197" alt="Screenshot of “{args.name}” shader" src="https://github.com/user-attachments/assets/"/>
     </td>
   </tr>
-''')
-new_element.tail = '\n  '
+""")
+new_element.tail = "\n  "
 
 def sort_key(element):
-    return element.find('./td/a').text.lower()
+    return element.find("./td/a").text.lower()
 
-index = bisect(html_table.findall('tr[td]'), sort_key(new_element), key=sort_key)
+index = bisect(html_table.findall("tr[td]"), sort_key(new_element), key=sort_key)
 html_table.insert(index + 1, new_element)
 
-with open('README.md', 'r+') as f:
+with open("README.md", "r+") as f:
     assert md_table.start_pos is not None
-    f.seek(md_table.start_pos + 2) # It’s unclear why adding 2 is necessary.
-    f.write(etree.tostring(html_table, encoding='unicode', pretty_print=True))
+    f.seek(md_table.start_pos + 2)  # It’s unclear why adding 2 is necessary.
+    f.write(etree.tostring(html_table, encoding="unicode", pretty_print=True))
 
-subprocess.run('./make_makefile', check=True)
-subprocess.run('make', check=True)
+subprocess.run("./make_makefile", check=True)
+subprocess.run("make", check=True)
