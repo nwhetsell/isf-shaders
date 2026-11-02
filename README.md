@@ -36,6 +36,20 @@ For screenshots, image sizes and corresponding ImageMagick -crop arguments are:
     <th>Videosync Screenshot</th>
   </tr>
   <tr>
+    <td><a href="Analytic%20Normals%203D.glsl">Analytic Normals 3D</a></td>
+    <td><a href="https://iquilezles.org">Inigo Quilez</a></td>
+    <td><a href="https://spdx.org/licenses/MIT.html">MIT</a></td>
+    <td>
+      <ul>
+        <li><a href="https://www.shadertoy.com/view/XttSz2">Shadertoy</a></li>
+        <li><a href="https://editor.isf.video/shaders/6ae8e6a72b2aaa001990557a">ISF</a></li>
+      </ul>
+    </td>
+    <td>
+      <img width="197" alt="Screenshot of “Analytic Normals 3D” shader" src="https://github.com/user-attachments/assets/3fc0b92c-6954-4f9f-a3cf-929da351a560"/>
+    </td>
+  </tr>
+  <tr>
     <td><a href="CA%20Molecular%20dynamics.glsl">CA Molecular dynamics</a></td>
     <td><a href="https://github.com/MichaelMoroz">Mykhailo Moroz</a></td>
     <td>n/a</td>

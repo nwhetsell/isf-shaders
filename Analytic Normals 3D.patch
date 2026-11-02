@@ -1,0 +1,122 @@
+diff --git a/generative/noised.glsl b/generative/noised.glsl
+index d91e7dce..f01dba9d 100644
+--- a/generative/noised.glsl
++++ b/generative/noised.glsl
+@@ -2,14 +2,18 @@
+ 
+ /*
+ contributors: Inigo Quilez
+-description: Returns 2D/3D value noise in the first channel and in the rest the derivatives. For more details read this nice article http://www.iquilezles.org/www/articles/gradientnoise/gradientnoise.htm
++description: Returns 2D/3D gradient or value noise in the first channel and in the rest the derivatives. For more details, see https://iquilezles.org/articles/morenoise/ and https://iquilezles.org/articles/gradientnoise/
+ use: noised(<vec2|vec3> space)
+ options:
+-    NOISED_QUINTIC_INTERPOLATION: Quintic interpolation on/off. Default is off.
++    NOISED_QUINTIC_INTERPOLATION: Quintic interpolation on/off. Default is on.
+ examples:
+     - /shaders/generative_noised.frag
+ */
+ 
++#ifndef NOISED_RANDOM_FNC
++#define NOISED_RANDOM_FNC srandom
++#endif
++
+ #ifndef NOISED_RANDOM2_FNC
+ #define NOISED_RANDOM2_FNC srandom2
+ #endif
+@@ -18,6 +22,10 @@ examples:
+ #define NOISED_RANDOM3_FNC srandom3
+ #endif
+ 
++#ifndef NOISED_QUINTIC_INTERPOLATION
++#define NOISED_QUINTIC_INTERPOLATION 1
++#endif
++
+ #ifndef FNC_NOISED
+ #define FNC_NOISED
+ 
+@@ -27,9 +35,13 @@ vec3 noised (in vec2 p) {
+     vec2 i = floor( p );
+     vec2 f = fract( p );
+ 
+-    // quintic interpolation
++#if NOISED_QUINTIC_INTERPOLATION
+     vec2 u = f * f * f * (f * (f * 6. - 15.) + 10.);
+     vec2 du = 30. * f * f * (f * (f - 2.) + 1.);
++#else
++    vec2 u = f * f * (3. - 2. * f);
++    vec2 du = 6. * f * (1. - f);
++#endif
+ 
+     vec2 ga = NOISED_RANDOM2_FNC(i + vec2(0., 0.));
+     vec2 gb = NOISED_RANDOM2_FNC(i + vec2(1., 0.));
+@@ -51,9 +63,13 @@ vec4 noised (in vec3 pos) {
+     vec3 p = floor(pos);
+     vec3 w = fract(pos);
+ 
+-    // quintic interpolant
++#if NOISED_QUINTIC_INTERPOLATION
+     vec3 u = w * w * w * ( w * (w * 6. - 15.) + 10. );
+     vec3 du = 30.0 * w * w * ( w * (w - 2.) + 1.);
++#else
++    vec3 u = w * w * (3. - 2. * w);
++    vec3 du = 6. * w * (1. - w);
++#endif
+ 
+     // gradients
+     vec3 ga = NOISED_RANDOM3_FNC(p + vec3(0., 0., 0.));
+@@ -81,4 +97,40 @@ vec4 noised (in vec3 pos) {
+                 du * (vec3(vb,vc,ve) - va + u.yzx*vec3(va-vb-vc+vd,va-vc-ve+vg,va-vb-ve+vf) + u.zxy*vec3(va-vb-ve+vf,va-vb-vc+vd,va-vc-ve+vg) + u.yzx*u.zxy*(-va+vb+vc-vd+ve-vf-vg+vh) ));
+ }
+ 
++// return value noise (in x) and its derivatives (in yzw)
++vec4 vnoised( in vec3 x )
++{
++    vec3 p = floor(x);
++    vec3 w = fract(x);
++
++#if NOISED_QUINTIC_INTERPOLATION
++    vec3 u = w * w * w * ( w * (w * 6. - 15.) + 10. );
++    vec3 du = 30.0 * w * w * ( w * (w - 2.) + 1.);
++#else
++    vec3 u = w * w * (3. - 2. * w);
++    vec3 du = 6. * w * (1. - w);
++#endif
++
++    float a = NOISED_RANDOM_FNC(p + vec3(0., 0., 0.));
++    float b = NOISED_RANDOM_FNC(p + vec3(1., 0., 0.));
++    float c = NOISED_RANDOM_FNC(p + vec3(0., 1., 0.));
++    float d = NOISED_RANDOM_FNC(p + vec3(1., 1., 0.));
++    float e = NOISED_RANDOM_FNC(p + vec3(0., 0., 1.));
++    float f = NOISED_RANDOM_FNC(p + vec3(1., 0., 1.));
++    float g = NOISED_RANDOM_FNC(p + vec3(0., 1., 1.));
++    float h = NOISED_RANDOM_FNC(p + vec3(1., 1., 1.));
++
++    float k0 =   a;
++    float k1 =   b - a;
++    float k2 =   c - a;
++    float k3 =   e - a;
++    float k4 =   a - b - c + d;
++    float k5 =   a - c - e + g;
++    float k6 =   a - b - e + f;
++    float k7 = - a + b + c - d + e - f - g + h;
++
++    return vec4( k0 + k1*u.x + k2*u.y + k3*u.z + k4*u.x*u.y + k5*u.y*u.z + k6*u.z*u.x + k7*u.x*u.y*u.z,
++                 du * (vec3(k1,k2,k3) + u.yzx*vec3(k4,k5,k6) + u.zxy*vec3(k6,k4,k5) + k7*u.yzx*u.zxy ));
++}
++
+ #endif
+diff --git a/lighting/raymarch/cast.glsl b/lighting/raymarch/cast.glsl
+index bfe1629d..bf222f1d 100644
+--- a/lighting/raymarch/cast.glsl
++++ b/lighting/raymarch/cast.glsl
+@@ -40,9 +40,9 @@ Material raymarchCast( in vec3 ro, in vec3 rd ) {
+ #else
+         float dist = res.sdf;
+ #endif
++        m = res;
+         if (dist < RAYMARCH_MIN_HIT_DIST || t > tmax) 
+             break;
+-        m = res;
+         t += res.sdf;
+     }
+ 

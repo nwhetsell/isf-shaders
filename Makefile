@@ -1,4 +1,5 @@
 shaders = \
+	Analytic\ Normals\ 3D.fs \
 	CA\ Molecular\ dynamics.fs \
 	Cell\ system\ 2.fs \
 	circle\ dithering.fs \
@@ -32,6 +33,10 @@ all: $(shaders)
 
 clang_options = --preprocess --comments --no-line-commands -fdirectives-only --language=c
 
+Analytic\ Normals\ 3D.fs: Analytic\ Normals\ 3D.glsl
+	cd lygia; git apply ../'Analytic Normals 3D.patch'
+	clang $(clang_options) -D__VERSION__=300 --output="$@" "$<"
+	cd lygia; git reset --hard
 CA\ Molecular\ dynamics.fs: CA\ Molecular\ dynamics.glsl lygia-additions/gaussian.glsl
 	clang $(clang_options) --output="$@" "$<"
 Cell\ system\ 2.fs: Cell\ system\ 2.glsl
