@@ -6,12 +6,20 @@
     "DESCRIPTION": "Analytical normals of Value Noise, converted from <https://www.shadertoy.com/view/XttSz2>",
     "INPUTS": [
         {
-            "NAME": "rotation",
-            "LABEL": "Rotation (degrees)",
+            "NAME": "initialRotation",
+            "LABEL": "Initial rotation (degrees)",
             "TYPE": "float",
             "DEFAULT": 0,
             "MIN": -180,
             "MAX": 180
+        },
+        {
+            "NAME": "rotationSpeed",
+            "LABEL": "Rotation speed",
+            "TYPE": "float",
+            "DEFAULT": 0.1,
+            "MIN": -10,
+            "MAX": 10
         },
         {
             "NAME": "distance",
@@ -34,10 +42,26 @@
             "DEFAULT": [0.05, 0.2, 0.3, 1]
         },
         {
+            "NAME": "specularAmount",
+            "LABEL": "Specular amount",
+            "TYPE": "float",
+            "DEFAULT": 10,
+            "MIN": 0,
+            "MAX": 100
+        },
+        {
             "NAME": "cubeSize",
             "LABEL": "Cube size",
             "TYPE": "float",
             "DEFAULT": 1.5,
+            "MIN": -10,
+            "MAX": 10
+        },
+        {
+            "NAME": "noiseShift",
+            "LABEL": "Noise shift",
+            "TYPE": "float",
+            "DEFAULT": 0,
             "MIN": -10,
             "MAX": 10
         },
@@ -2083,22 +2107,6 @@ license:
 float center(float x) { return x * 2.0 - 1.0; }
 vec2 center(vec2 v) { return v * 2.0 - 1.0; }
 vec3 center(vec3 v) { return v * 2.0 - 1.0; }
-/*
-contributors: [Ivan Dianov, Shadi El Hajj]
-description: polar to cartesian conversion.
-use: polar2cart(<vec2> polar)
-*/
-#define FNC_POLAR2CART 
-vec2 polar2cart(in vec2 polar) {
-    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
-}
-// https://mathworld.wolfram.com/SphericalCoordinates.html
-vec3 polar2cart( in float r, in float phi, in float theta) {
-    float x = r * cos(theta) * sin(phi);
-    float y = r * sin(theta) * sin(phi);
-    float z = r * cos(phi);
-    return vec3(x, y, z);
-}
 #define LOOK_AT_RIGHT_HANDED 
 /*
 contributors: Patricio Gonzalez Vivo
@@ -2132,6 +2140,22 @@ mat3 lookAt(vec3 eye, vec3 target, float roll) {
 }
 mat3 lookAt(vec3 forward) {
     return lookAt(forward, vec3(0.0, 1.0, 0.0));
+}
+/*
+contributors: [Ivan Dianov, Shadi El Hajj]
+description: polar to cartesian conversion.
+use: polar2cart(<vec2> polar)
+*/
+#define FNC_POLAR2CART 
+vec2 polar2cart(in vec2 polar) {
+    return vec2(cos(polar.x), sin(polar.x)) * polar.y;
+}
+// https://mathworld.wolfram.com/SphericalCoordinates.html
+vec3 polar2cart( in float r, in float phi, in float theta) {
+    float x = r * cos(theta) * sin(phi);
+    float y = r * sin(theta) * sin(phi);
+    float z = r * cos(phi);
+    return vec3(x, y, z);
 }
 /*
 contributors: Patricio Gonzalez Vivo
@@ -2193,7 +2217,7 @@ vec4 boxSDFAndNormal(vec3 p, vec3 b) {
 }
 Material raymarchMap(in vec3 pos)
 {
-    vec4 noiseDist = fbm(pos);
+    vec4 noiseDist = fbm(pos + noiseShift);
     noiseDist.x = (noiseDist.x - noiseOffset) * 0.7;
     noiseDist.yzw = normalize(noiseDist.yzw);
     vec4 boxDist = boxSDFAndNormal(pos, vec3(cubeSize)); // Clip to box
@@ -2205,7 +2229,7 @@ Material raymarchMap(in vec3 pos)
     return mat;
 }
 float raymarchAO(in vec3 pos, in vec3 nor) {
-    float occ = 0.0;
+    float occ = 0.;
     const float samplesFactor = 1.0 / float(RAYMARCH_AO_SAMPLES);
     for (int i = 0; i < RAYMARCH_AO_SAMPLES; i++) {
         float fi = float(i);
@@ -2217,10 +2241,10 @@ float raymarchAO(in vec3 pos, in vec3 nor) {
         //    float sinTheta = sqrt(1.0 - cosTheta2);
         //    vec3 ap = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
         // The original Shadertoy shader effectively computes:
-           float phi = 2.0 * PI * u.x;
-           float cosTheta = 1.0 - u.y;
-           float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-           vec3 ap = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+        //    float phi = 2.0 * PI * u.x;
+        //    float cosTheta = 1.0 - u.y;
+        //    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+        //    vec3 ap = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
         // Note the different definitions of cosTheta. To make LYGIA’s cosTheta
         // the same as the Shadertoy cosTheta, note that:
         //    (1.0 - u.y) * (1.0 - u.y) = 1.0 - 2.*u.y + u.y*u.y
@@ -2233,7 +2257,7 @@ float raymarchAO(in vec3 pos, in vec3 nor) {
         //                // = 1.0 - u.y
         // This does result in some loss of precision, unfortunately.
         u.y = 2. * u.y - u.y*u.y;
-        // vec3 ap = hemisphereCosSample(u);
+        vec3 ap = hemisphereCosSample(u);
         float d = raymarchMap(pos + RAYMARCH_AO_MIN_DIST * nor + RAYMARCH_AO_MAX_DIST * hash(float(i)) * ap * sign(dot(ap, nor))).sdf;
         occ += saturate(d * 3.);
     }
@@ -2243,29 +2267,28 @@ float raymarchAO(in vec3 pos, in vec3 nor) {
 void main()
 {
     vec2 uv = aspect(center(gl_FragCoord.xy / RENDERSIZE), RENDERSIZE);
-    vec3 ro;
-    ro.xz = polar2cart(vec2(rotation * DEG2RAD, 1.));
-    ro.y = 0.8;
-    ro *= distance;
-    vec3 rd = normalize(lookAt(-ro) * vec3(uv, 1.7));
+    vec3 rayOrigin;
+    rayOrigin.xz = polar2cart(vec2(initialRotation * DEG2RAD + rotationSpeed * TIME, 1.));
+    rayOrigin.y = 0.8;
+    rayOrigin *= distance;
+    vec3 rayDirection = normalize(lookAt(-rayOrigin) * vec3(uv, 1.7));
     gl_FragColor = vec4(0);
     // Bounding volume
     AABB box;
     box.min = vec3(-cubeSize);
     box.max = vec3(cubeSize);
-    bounds = intersect(box, ro, rd);
+    bounds = intersect(box, rayOrigin, rayDirection);
     if (bounds.y >= 0.) {
-        Material res = raymarchCast(ro, rd);
+        Material res = raymarchCast(rayOrigin, rayDirection);
         if (res.valid && res.sdf > 0.) {
             vec3 normal = approximateNormals ? raymarchNormal(res.position) : res.normal;
             gl_FragColor = mix(highlightColor, mainColor, uncenter(normal.y));
-            float fro = saturate(dot(-rd, normal));
-            float fre = saturate(1. + dot(rd, normal));
-            gl_FragColor.rgb += 10. * pow(fro, 12.) * (0.04 + 0.96 * pow(fre, 5.));
-            float occ = raymarchAO(res.position, normal);
-            gl_FragColor.rgb *= pow(vec3(occ), vec3(1., 1.1, 1.1));
+            gl_FragColor.rgb += specularAmount *
+                                pow(saturate(dot(-rayDirection, normal)), 12.) *
+                                (0.04 + 0.96 * pow(saturate(1. + dot(rayDirection, normal)), 5.));
+            gl_FragColor.rgb *= pow(vec3(raymarchAO(res.position, normal)), vec3(1., 1.1, 1.1));
+            gl_FragColor.rgb = sqrt(gl_FragColor.rgb);
             gl_FragColor.a = 1.;
         }
     }
-    gl_FragColor.rgb = sqrt(gl_FragColor.rgb);
 }
